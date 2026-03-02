@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 import { CalendarDays, ChartColumnBig, CircleUserRound, Settings, Users } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 
+import { DevMenu } from "@/components/dev/dev-menu"
 import { LocaleSwitcher } from "@/components/locale-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Badge } from "@/components/ui/badge"
@@ -75,6 +76,7 @@ export async function AdminShell({
           <main className="flex-1 p-4 sm:p-6">{children}</main>
         </section>
       </div>
+      <DevMenu />
     </div>
   )
 }

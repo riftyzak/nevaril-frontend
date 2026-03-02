@@ -4,6 +4,7 @@ import { getMessages, setRequestLocale } from "next-intl/server"
 import { notFound } from "next/navigation"
 
 import { isAppLocale } from "@/i18n/locales"
+import { QueryProvider } from "@/lib/query/query-provider"
 
 export default async function LocaleLayout({
   children,
@@ -20,5 +21,9 @@ export default async function LocaleLayout({
   setRequestLocale(locale)
   const messages = await getMessages()
 
-  return <NextIntlClientProvider locale={locale} messages={messages}>{children}</NextIntlClientProvider>
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <QueryProvider>{children}</QueryProvider>
+    </NextIntlClientProvider>
+  )
 }

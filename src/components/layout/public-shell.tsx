@@ -2,6 +2,7 @@ import Link from "next/link"
 import type { ReactNode } from "react"
 import { getTranslations } from "next-intl/server"
 
+import { DevMenu } from "@/components/dev/dev-menu"
 import { LocaleSwitcher } from "@/components/locale-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { type AppLocale } from "@/i18n/locales"
@@ -50,6 +51,7 @@ export async function PublicShell({
           <span>{t("footerNote")}</span>
         </div>
       </footer>
+      <DevMenu />
     </div>
   )
 }
