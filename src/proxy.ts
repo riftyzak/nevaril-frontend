@@ -44,8 +44,9 @@ export function proxy(request: NextRequest) {
       ? stripTenantPrefix(pathname)
       : stripLocalePrefix(pathname)
     const isManagePath = remainder === "/m" || remainder.startsWith("/m/")
+    const isAdminAppPath = remainder === "/app" || remainder.startsWith("/app/")
 
-    if (isManagePath) {
+    if (isManagePath || isAdminAppPath) {
       return NextResponse.next({
         request: {
           headers: withTenantHeaders(request, resolution.tenantSlug, resolution.source),

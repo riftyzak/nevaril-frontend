@@ -18,6 +18,7 @@ export interface TenantConfig {
   staffSelectionEnabled: boolean
   customFields: TenantCustomField[]
   customerReadMode: "served-only" | "all-readonly"
+  customersVisibility: "own" | "all_readonly"
   updatedAt: string
 }
 
@@ -41,6 +42,8 @@ export interface Staff {
   fullName: string
   role: "owner" | "staff"
   active: boolean
+  availabilityNote: string
+  timeOffNote: string
   updatedAt: string
 }
 
@@ -213,6 +216,20 @@ export interface UpdateCustomerTagsInput {
   customerId: string
   expectedUpdatedAt: string
   tags: string[]
+}
+
+export interface UpdateServiceInput {
+  tenantSlug: string
+  serviceId: string
+  expectedUpdatedAt: string
+  patch: Partial<Pick<Service, "name" | "description" | "durationOptions" | "active">>
+}
+
+export interface UpdateStaffNotesInput {
+  tenantSlug: string
+  staffId: string
+  expectedUpdatedAt: string
+  patch: Partial<Pick<Staff, "availabilityNote" | "timeOffNote">>
 }
 
 export interface AssignWaitlistToSlotInput {

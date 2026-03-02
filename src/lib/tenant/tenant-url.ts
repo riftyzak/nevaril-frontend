@@ -11,6 +11,12 @@ interface LocalizedPathInput {
   path?: string
 }
 
+interface AdminAppInput {
+  locale: Locale
+  tenantSlug: string
+  path?: string
+}
+
 function normalizePath(path?: string) {
   if (!path || path === "/") return ""
   return path.startsWith("/") ? path : `/${path}`
@@ -22,6 +28,13 @@ export function tenantPath({ locale, tenantSlug, path }: TenantPathInput) {
 
 export function localePath({ locale, path }: LocalizedPathInput) {
   return `/${locale}${normalizePath(path)}`
+}
+
+export function adminAppPath({ locale, tenantSlug, path }: AdminAppInput) {
+  return localePath({
+    locale,
+    path: `/app/${tenantSlug}${normalizePath(path)}`,
+  })
 }
 
 export function tenantUrl(input: TenantPathInput) {

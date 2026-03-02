@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server"
 import { AdminShell } from "@/components/layout/admin-shell"
 import { type AppLocale } from "@/i18n/locales"
 import { AdminWaitlistInbox } from "@/features/waitlist/admin-waitlist-inbox"
-import { localePath } from "@/lib/tenant/tenant-url"
+import { getAdminPageContext } from "@/lib/auth/admin-page"
 
 export default async function AdminWaitlistPage({
   params,
@@ -12,20 +12,19 @@ export default async function AdminWaitlistPage({
 }>) {
   const { locale, tenantSlug } = await params
   const t = await getTranslations({ locale, namespace: "waitlist.admin" })
-
-  const waitlistHref = localePath({ locale, path: `/app/${tenantSlug}/waitlist` })
+  const { session, tenantSettings, navItems } = await getAdminPageContext({
+    locale,
+    tenantSlug,
+    module: "bookings",
+    ability: "view",
+  })
 
   return (
     <AdminShell
       locale={locale}
-      navItems={[
-        { href: waitlistHref, key: "dashboard" },
-        { href: waitlistHref, key: "calendar" },
-        { href: waitlistHref, key: "bookings" },
-        { href: waitlistHref, key: "customers" },
-        { href: waitlistHref, key: "waitlist" },
-        { href: waitlistHref, key: "settings" },
-      ]}
+      navItems={navItems}
+      session={session}
+      tenantSettings={tenantSettings}
     >
       <AdminWaitlistInbox
         tenantSlug={tenantSlug}

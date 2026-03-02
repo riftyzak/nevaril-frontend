@@ -20,6 +20,8 @@ import type {
   TenantConfig,
   TenantData,
   UpdateBookingInput,
+  UpdateServiceInput,
+  UpdateStaffNotesInput,
   UpdateCustomerTagsInput,
   Voucher,
   WaitlistEntry,
@@ -175,6 +177,50 @@ export async function getService(tenantSlug: string, serviceId: string): Promise
   return ok(service)
 }
 
+export async function updateService(input: UpdateServiceInput): Promise<ApiResult<Service>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(input.tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  const service = tenantResult.data.services.find((item) => item.id === input.serviceId)
+  if (!service) {
+    return fail(apiError("NOT_FOUND", `Service '${input.serviceId}' was not found`, 404))
+  }
+
+  if (service.updatedAt !== input.expectedUpdatedAt) {
+    return fail(
+      apiError("CONFLICT", "Service was modified by another request", 409, {
+        expectedUpdatedAt: input.expectedUpdatedAt,
+        actualUpdatedAt: service.updatedAt,
+      })
+    )
+  }
+
+  const updated: Service = {
+    ...service,
+    ...input.patch,
+    updatedAt: nowIso(),
+  }
+
+  mutateDb((current) => {
+    const tenant = current.tenants[input.tenantSlug]
+    return {
+      ...current,
+      tenants: {
+        ...current.tenants,
+        [input.tenantSlug]: {
+          ...tenant,
+          services: tenant.services.map((item) => (item.id === input.serviceId ? updated : item)),
+        },
+      },
+    }
+  })
+
+  return ok(updated)
+}
+
 export async function listStaff(tenantSlug: string): Promise<ApiResult<Staff[]>> {
   const simulatedError = await simulateBehavior()
   if (simulatedError) return fail(simulatedError)
@@ -183,6 +229,50 @@ export async function listStaff(tenantSlug: string): Promise<ApiResult<Staff[]>>
   if (!tenantResult.ok) return tenantResult
 
   return ok(tenantResult.data.staff)
+}
+
+export async function updateStaffNotes(input: UpdateStaffNotesInput): Promise<ApiResult<Staff>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(input.tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  const staff = tenantResult.data.staff.find((item) => item.id === input.staffId)
+  if (!staff) {
+    return fail(apiError("NOT_FOUND", `Staff '${input.staffId}' was not found`, 404))
+  }
+
+  if (staff.updatedAt !== input.expectedUpdatedAt) {
+    return fail(
+      apiError("CONFLICT", "Staff was modified by another request", 409, {
+        expectedUpdatedAt: input.expectedUpdatedAt,
+        actualUpdatedAt: staff.updatedAt,
+      })
+    )
+  }
+
+  const updated: Staff = {
+    ...staff,
+    ...input.patch,
+    updatedAt: nowIso(),
+  }
+
+  mutateDb((current) => {
+    const tenant = current.tenants[input.tenantSlug]
+    return {
+      ...current,
+      tenants: {
+        ...current.tenants,
+        [input.tenantSlug]: {
+          ...tenant,
+          staff: tenant.staff.map((item) => (item.id === input.staffId ? updated : item)),
+        },
+      },
+    }
+  })
+
+  return ok(updated)
 }
 
 export async function getAvailability(input: GetAvailabilityInput): Promise<ApiResult<AvailabilitySlot[]>> {

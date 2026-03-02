@@ -16,13 +16,19 @@
       "workspaceTitle": "Admin workspace",
       "workspaceSubtitle": "Role and permissions wiring will come in a later milestone",
       "ownerBadge": "Owner",
+      "staffBadge": "Staff",
       "nav": {
         "dashboard": "Dashboard",
         "calendar": "Calendar",
         "bookings": "Bookings",
         "customers": "Customers",
+        "services": "Services",
+        "staff": "Staff",
         "waitlist": "Waitlist",
         "settings": "Settings"
+      },
+      "lockedReason": {
+        "ownerOnly": "Owner only"
       }
     }
   },
@@ -234,6 +240,112 @@
       "wouldSendEmail": "Would send email",
       "wouldSendSms": "Would send SMS",
       "assignError": "Assignment failed. Please try again."
+    }
+  },
+  "adminAuth": {
+    "title": "Not authorized",
+    "description": "You do not have permission to access this admin route.",
+    "backHome": "Back to home"
+  },
+  "adminCore": {
+    "common": {
+      "save": "Save",
+      "back": "Back"
+    },
+    "dashboard": {
+      "todayBookings": "Today bookings",
+      "upcoming": "Upcoming"
+    },
+    "calendar": {
+      "bookingsByDay": "Bookings by day",
+      "placeholder": "Simple week/day placeholder view",
+      "ownAvailability": "Own availability/time-off",
+      "staffAvailability": "Staff availability/time-off",
+      "availabilityBlocks": "Availability blocks",
+      "timeOff": "Time-off",
+      "toastUpdated": "Availability updated"
+    },
+    "bookings": {
+      "title": "Bookings",
+      "description": "Search and filter list",
+      "searchPlaceholder": "Search customer",
+      "colCustomer": "Customer",
+      "colTime": "Time",
+      "colStaff": "Staff",
+      "colStatus": "Status"
+    },
+    "bookingDetail": {
+      "notFound": "Booking not found.",
+      "description": "Booking detail + history placeholder",
+      "time": "Time",
+      "status": "Status",
+      "staff": "Staff",
+      "history": "History: created -> confirmed (placeholder)",
+      "back": "Back to bookings",
+      "actionsTitle": "Actions",
+      "actionsDescription": "Reschedule / cancel (policy + own scope enforced)",
+      "ownOnly": "You can only manage own bookings.",
+      "policy": "Changes allowed up to 24h before start.",
+      "reschedule": "Reschedule",
+      "cancel": "Cancel",
+      "toastRescheduled": "Booking rescheduled",
+      "toastRescheduleFailed": "Reschedule failed",
+      "toastCanceled": "Booking canceled",
+      "toastCancelFailed": "Cancel failed"
+    },
+    "customers": {
+      "title": "Customers",
+      "readOnly": "Read only",
+      "ownerAccess": "Owner access",
+      "searchPlaceholder": "Search customer"
+    },
+    "customerDetail": {
+      "notFound": "Customer not found or not authorized.",
+      "description": "Customer card",
+      "email": "Email",
+      "phone": "Phone",
+      "visits": "Visits",
+      "credit": "Credit",
+      "tags": "Tags",
+      "bookingsTied": "Bookings tied",
+      "back": "Back to customers"
+    },
+    "services": {
+      "title": "Services",
+      "ownerCanEdit": "Owner can edit",
+      "staffViewOnly": "Staff view only"
+    },
+    "serviceDetail": {
+      "notFound": "Service not found.",
+      "edit": "Edit service",
+      "viewOnly": "View only",
+      "name": "Name",
+      "descriptionLabel": "Description",
+      "variants": "Variants (30,60,90)",
+      "toastUpdated": "Service updated",
+      "toastUpdateFailed": "Service update failed"
+    },
+    "staff": {
+      "title": "Staff",
+      "ownerDescription": "Owner can edit staff notes",
+      "staffDescription": "Staff edits own notes",
+      "editorTitle": "Working hours / time-off",
+      "selectStaff": "Select staff",
+      "availability": "Availability",
+      "timeOff": "Time-off",
+      "toastUpdated": "Staff notes updated",
+      "toastFailed": "Update failed"
+    },
+    "ownerOnly": {
+      "body": "Placeholder route, owner-only and gated.",
+      "billingTitle": "Billing",
+      "billingDescription": "Owner-only billing placeholder.",
+      "notificationsTitle": "Notifications",
+      "notificationsDescription": "Owner-only notifications placeholder.",
+      "rolesTitle": "Roles",
+      "rolesDescription": "Owner-only roles management placeholder.",
+      "tenantSettingsTitle": "Tenant settings",
+      "tenantSettingsDescription": "Owner-only tenant settings placeholder."
     }
   }
 }

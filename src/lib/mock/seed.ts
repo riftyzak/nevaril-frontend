@@ -1,6 +1,6 @@
 import type { MockDatabase, ServiceVariant, TenantData } from "@/lib/api/types"
 
-export const DB_VERSION = 3
+export const DB_VERSION = 4
 
 const BASE_TIMESTAMP = "2026-01-10T10:00:00.000Z"
 
@@ -41,6 +41,8 @@ function makeTenantData(tenantSlug: "barber" | "carservice"): TenantData {
       fullName: isBarber ? "Martin Novak" : "Petr Dvorak",
       role: "owner" as const,
       active: true,
+      availabilityNote: "",
+      timeOffNote: "",
       updatedAt: BASE_TIMESTAMP,
     },
     {
@@ -49,6 +51,8 @@ function makeTenantData(tenantSlug: "barber" | "carservice"): TenantData {
       fullName: isBarber ? "Tomas Kral" : "Jakub Svoboda",
       role: "staff" as const,
       active: true,
+      availabilityNote: "",
+      timeOffNote: "",
       updatedAt: BASE_TIMESTAMP,
     },
   ]
@@ -157,6 +161,7 @@ function makeTenantData(tenantSlug: "barber" | "carservice"): TenantData {
             },
           ],
       customerReadMode: "all-readonly",
+      customersVisibility: isBarber ? "own" : "all_readonly",
       updatedAt: BASE_TIMESTAMP,
     },
     services,

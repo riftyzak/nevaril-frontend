@@ -16,13 +16,19 @@
       "workspaceTitle": "Admin workspace",
       "workspaceSubtitle": "Role a oprávnenia budú doplnené v ďalšom míľniku",
       "ownerBadge": "Owner",
+      "staffBadge": "Staff",
       "nav": {
         "dashboard": "Prehľad",
         "calendar": "Kalendár",
         "bookings": "Rezervácie",
         "customers": "Zákazníci",
+        "services": "Služby",
+        "staff": "Pracovníci",
         "waitlist": "Čakacia listina",
         "settings": "Nastavenia"
+      },
+      "lockedReason": {
+        "ownerOnly": "Len owner"
       }
     }
   },
@@ -234,6 +240,112 @@
       "wouldSendEmail": "Poslal by sa e-mail",
       "wouldSendSms": "Poslala by sa SMS",
       "assignError": "Priradenie sa nepodarilo. Skúste to znova."
+    }
+  },
+  "adminAuth": {
+    "title": "Nedostatočné oprávnenie",
+    "description": "Na túto admin stránku nemáte prístup.",
+    "backHome": "Späť na úvod"
+  },
+  "adminCore": {
+    "common": {
+      "save": "Uložiť",
+      "back": "Späť"
+    },
+    "dashboard": {
+      "todayBookings": "Dnešné rezervácie",
+      "upcoming": "Nadchádzajúce"
+    },
+    "calendar": {
+      "bookingsByDay": "Rezervácie podľa dní",
+      "placeholder": "Jednoduchý týždenný/denný placeholder",
+      "ownAvailability": "Moja dostupnosť/voľno",
+      "staffAvailability": "Dostupnosť/voľno pracovníkov",
+      "availabilityBlocks": "Bloky dostupnosti",
+      "timeOff": "Voľno",
+      "toastUpdated": "Dostupnosť bola uložená"
+    },
+    "bookings": {
+      "title": "Rezervácie",
+      "description": "Vyhľadávanie a filtrovanie",
+      "searchPlaceholder": "Hľadať zákazníka",
+      "colCustomer": "Zákazník",
+      "colTime": "Čas",
+      "colStaff": "Pracovník",
+      "colStatus": "Stav"
+    },
+    "bookingDetail": {
+      "notFound": "Rezervácia nebola nájdená.",
+      "description": "Detail rezervácie + placeholder histórie",
+      "time": "Čas",
+      "status": "Stav",
+      "staff": "Pracovník",
+      "history": "História: vytvorené -> potvrdené (placeholder)",
+      "back": "Späť na rezervácie",
+      "actionsTitle": "Akcie",
+      "actionsDescription": "Presun / zrušenie (24h pravidlo + own scope)",
+      "ownOnly": "Môžete spravovať iba vlastné rezervácie.",
+      "policy": "Zmeny sú možné najneskôr 24h pred začiatkom.",
+      "reschedule": "Presunúť",
+      "cancel": "Zrušiť",
+      "toastRescheduled": "Rezervácia presunutá",
+      "toastRescheduleFailed": "Presun zlyhal",
+      "toastCanceled": "Rezervácia zrušená",
+      "toastCancelFailed": "Zrušenie zlyhalo"
+    },
+    "customers": {
+      "title": "Zákazníci",
+      "readOnly": "Len na čítanie",
+      "ownerAccess": "Owner prístup",
+      "searchPlaceholder": "Hľadať zákazníka"
+    },
+    "customerDetail": {
+      "notFound": "Zákazník nebol nájdený alebo nie je prístupný.",
+      "description": "Karta zákazníka",
+      "email": "E-mail",
+      "phone": "Telefón",
+      "visits": "Návštevy",
+      "credit": "Kredit",
+      "tags": "Tagy",
+      "bookingsTied": "Naviazané rezervácie",
+      "back": "Späť na zákazníkov"
+    },
+    "services": {
+      "title": "Služby",
+      "ownerCanEdit": "Owner môže upravovať",
+      "staffViewOnly": "Staff iba náhľad"
+    },
+    "serviceDetail": {
+      "notFound": "Služba nebola nájdená.",
+      "edit": "Upraviť službu",
+      "viewOnly": "Len náhľad",
+      "name": "Názov",
+      "descriptionLabel": "Popis",
+      "variants": "Varianty (30,60,90)",
+      "toastUpdated": "Služba uložená",
+      "toastUpdateFailed": "Uloženie služby zlyhalo"
+    },
+    "staff": {
+      "title": "Pracovníci",
+      "ownerDescription": "Owner môže upravovať poznámky pracovníkov",
+      "staffDescription": "Staff upravuje vlastné poznámky",
+      "editorTitle": "Pracovný čas / voľno",
+      "selectStaff": "Vyberte pracovníka",
+      "availability": "Dostupnosť",
+      "timeOff": "Voľno",
+      "toastUpdated": "Poznámky pracovníka uložené",
+      "toastFailed": "Uloženie zlyhalo"
+    },
+    "ownerOnly": {
+      "body": "Zástupná owner-only trasa.",
+      "billingTitle": "Billing",
+      "billingDescription": "Owner-only billing placeholder.",
+      "notificationsTitle": "Notifikácie",
+      "notificationsDescription": "Owner-only notifikácie placeholder.",
+      "rolesTitle": "Roly",
+      "rolesDescription": "Owner-only správa rolí placeholder.",
+      "tenantSettingsTitle": "Nastavenia tenanta",
+      "tenantSettingsDescription": "Owner-only nastavenia tenanta placeholder."
     }
   }
 }

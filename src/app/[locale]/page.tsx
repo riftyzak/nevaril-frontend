@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server"
 import { notFound } from "next/navigation"
 
 import { isAppLocale, type AppLocale } from "@/i18n/locales"
-import { tenantUrl } from "@/lib/tenant/tenant-url"
+import { adminAppPath, tenantUrl } from "@/lib/tenant/tenant-url"
 
 export default async function LocaleHomePage({
   params,
@@ -33,7 +33,7 @@ export default async function LocaleHomePage({
             {t("barberPublic")}
           </Link>
           <Link
-            href={tenantUrl({ locale: typedLocale, tenantSlug: "barber", path: "/admin" })}
+            href={adminAppPath({ locale: typedLocale, tenantSlug: "barber", path: "/dashboard" })}
             className="rounded-full border border-border bg-background px-5 py-2 text-sm font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             {t("barberAdmin")}

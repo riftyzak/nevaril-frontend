@@ -2,23 +2,39 @@
 
 import { useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { parseSessionCookieValue, SESSION_COOKIE_NAME, serializeSessionCookieValue } from "@/lib/auth/session-cookie"
 import { getDevSettings, resetSeed, setDevSettings } from "@/lib/mock/storage"
 import { useTenant } from "@/lib/tenant/tenant-provider"
 import { useServices } from "@/lib/query/hooks/use-services"
+import { useStaff } from "@/lib/query/hooks/use-staff"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
 
 export function DevMenu() {
+  const router = useRouter()
   const queryClient = useQueryClient()
   const { tenantSlug, locale } = useTenant()
   const { data: tenantConfig } = useTenantConfig(tenantSlug)
   const { data: services } = useServices(tenantSlug)
+  const { data: staff } = useStaff(tenantSlug)
 
   const [open, setOpen] = useState(false)
   const [latencyMs, setLatencyMs] = useState(() => getDevSettings().latencyMs)
   const [errorRatePct, setErrorRatePct] = useState(() => getDevSettings().errorRatePct)
+  const initialSession =
+    typeof document === "undefined"
+      ? null
+      : parseSessionCookieValue(
+          document.cookie
+            .split("; ")
+            .find((item) => item.startsWith(`${SESSION_COOKIE_NAME}=`))
+            ?.split("=")[1] ?? null
+        )
+  const [role, setRole] = useState<"owner" | "staff">(initialSession?.role ?? "owner")
+  const [staffId, setStaffId] = useState(initialSession?.staffId ?? "st-1")
 
   function applySettings() {
     const next = setDevSettings({ latencyMs, errorRatePct })
@@ -30,6 +46,16 @@ export function DevMenu() {
   function handleResetSeed() {
     resetSeed()
     void queryClient.invalidateQueries()
+  }
+
+  function applySession() {
+    const payload = serializeSessionCookieValue({
+      role,
+      tenantSlug,
+      staffId: role === "staff" ? staffId : null,
+    })
+    document.cookie = `${SESSION_COOKIE_NAME}=${payload}; path=/; max-age=2592000; samesite=lax`
+    router.refresh()
   }
 
   return (
@@ -56,6 +82,33 @@ export function DevMenu() {
             Services: <span className="font-medium text-foreground">{services?.length ?? 0}</span>
           </p>
           <label className="grid gap-1">
+            <span>Role</span>
+            <select
+              value={role}
+              onChange={(event) => setRole(event.target.value as "owner" | "staff")}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+            >
+              <option value="owner">owner</option>
+              <option value="staff">staff</option>
+            </select>
+          </label>
+          {role === "staff" ? (
+            <label className="grid gap-1">
+              <span>Staff</span>
+              <select
+                value={staffId}
+                onChange={(event) => setStaffId(event.target.value)}
+                className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+              >
+                {(staff ?? []).map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.fullName}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <label className="grid gap-1">
             <span>Latency (ms)</span>
             <Input
               type="number"
@@ -75,6 +128,9 @@ export function DevMenu() {
             />
           </label>
           <div className="mt-1 flex gap-2">
+            <Button type="button" size="xs" className="flex-1" onClick={applySession}>
+              Apply Role
+            </Button>
             <Button type="button" size="xs" className="flex-1" onClick={applySettings}>
               Apply
             </Button>

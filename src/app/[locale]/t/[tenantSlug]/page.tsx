@@ -2,7 +2,7 @@ import Link from "next/link"
 import { getTranslations } from "next-intl/server"
 
 import { type AppLocale } from "@/i18n/locales"
-import { tenantUrl } from "@/lib/tenant/tenant-url"
+import { adminAppPath, tenantUrl } from "@/lib/tenant/tenant-url"
 
 export default async function TenantHomePage({
   params,
@@ -31,7 +31,7 @@ export default async function TenantHomePage({
             {t("openPublic")}
           </Link>
           <Link
-            href={tenantUrl({ locale, tenantSlug, path: "/admin" })}
+            href={adminAppPath({ locale, tenantSlug, path: "/dashboard" })}
             className="rounded-full border border-border bg-background px-5 py-2 text-sm font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             {t("openAdmin")}
