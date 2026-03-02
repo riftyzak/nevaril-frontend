@@ -6,6 +6,11 @@ interface TenantPathInput {
   path?: string
 }
 
+interface LocalizedPathInput {
+  locale: Locale
+  path?: string
+}
+
 function normalizePath(path?: string) {
   if (!path || path === "/") return ""
   return path.startsWith("/") ? path : `/${path}`
@@ -13,6 +18,10 @@ function normalizePath(path?: string) {
 
 export function tenantPath({ locale, tenantSlug, path }: TenantPathInput) {
   return `/${locale}/t/${tenantSlug}${normalizePath(path)}`
+}
+
+export function localePath({ locale, path }: LocalizedPathInput) {
+  return `/${locale}${normalizePath(path)}`
 }
 
 export function tenantUrl(input: TenantPathInput) {

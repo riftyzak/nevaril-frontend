@@ -40,10 +40,20 @@ export function middleware(request: NextRequest) {
   const locale = getLocaleFromPath(pathname) ?? DEFAULT_LOCALE
 
   if (resolution.source === "subdomain" && resolution.tenantSlug) {
-    const target = request.nextUrl.clone()
     const remainder = pathname.includes("/t/")
       ? stripTenantPrefix(pathname)
       : stripLocalePrefix(pathname)
+    const isManagePath = remainder === "/m" || remainder.startsWith("/m/")
+
+    if (isManagePath) {
+      return NextResponse.next({
+        request: {
+          headers: withTenantHeaders(request, resolution.tenantSlug, resolution.source),
+        },
+      })
+    }
+
+    const target = request.nextUrl.clone()
 
     target.pathname = tenantPath({
       locale,

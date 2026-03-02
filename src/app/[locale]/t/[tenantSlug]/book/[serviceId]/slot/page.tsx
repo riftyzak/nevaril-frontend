@@ -39,6 +39,10 @@ export default async function SlotPage({
         variant={state.variant}
         staffId={state.staffId}
         initialDate={initialDate}
+        mode={state.mode}
+        bookingToken={state.token}
+        bookingId={state.bookingId}
+        originalStartAt={state.mode === "manage" ? state.startAt : undefined}
         t={{
           loading: t("slot.loading"),
           noSlots: t("slot.noSlots"),
@@ -50,6 +54,9 @@ export default async function SlotPage({
           durationUnit: t("durationUnit"),
           continue: t("slot.continue"),
           busy: t("slot.busy"),
+          manageBanner: t("slot.manageBanner"),
+          originalSlot: t("slot.originalSlot"),
+          manageContinue: t("slot.manageContinue"),
         }}
       />
     </PublicShell>

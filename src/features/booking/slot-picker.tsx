@@ -20,7 +20,7 @@ import { getAvailability } from "@/lib/api"
 import { type AvailabilitySlot, type ServiceVariant } from "@/lib/api/types"
 import { useService } from "@/lib/query/hooks/use-service"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
-import { tenantUrl } from "@/lib/tenant/tenant-url"
+import { localePath, tenantUrl } from "@/lib/tenant/tenant-url"
 
 interface SlotPickerProps {
   locale: AppLocale
@@ -29,6 +29,10 @@ interface SlotPickerProps {
   variant: ServiceVariant
   staffId?: string
   initialDate: string
+  mode?: "create" | "manage"
+  bookingToken?: string
+  bookingId?: string
+  originalStartAt?: string
   t: {
     loading: string
     noSlots: string
@@ -40,6 +44,9 @@ interface SlotPickerProps {
     durationUnit: string
     continue: string
     busy: string
+    manageBanner: string
+    originalSlot: string
+    manageContinue: string
   }
 }
 
@@ -54,6 +61,10 @@ export function SlotPicker({
   variant,
   staffId,
   initialDate,
+  mode = "create",
+  bookingToken,
+  bookingId,
+  originalStartAt,
   t,
 }: Readonly<SlotPickerProps>) {
   const tenantConfigQuery = useTenantConfig(tenantSlug)
@@ -88,15 +99,17 @@ export function SlotPicker({
   }, [date])
 
   const slots = availabilityQuery.data ?? []
+  const isManageMode = mode === "manage" && Boolean(bookingToken && bookingId)
+  const backHref =
+    isManageMode && bookingToken
+      ? localePath({ locale, path: `/m/${bookingToken}` })
+      : `${tenantUrl({ locale, tenantSlug, path: `/book/${serviceId}` })}?variant=${variant}${
+          staffId ? `&staffId=${staffId}` : ""
+        }`
 
   return (
     <div className="grid gap-4">
-      <Link
-        href={`${tenantUrl({ locale, tenantSlug, path: `/book/${serviceId}` })}?variant=${variant}${
-          staffId ? `&staffId=${staffId}` : ""
-        }`}
-        className="text-sm text-muted-foreground underline-offset-4 hover:underline"
-      >
+      <Link href={backHref} className="text-sm text-muted-foreground underline-offset-4 hover:underline">
         {t.back}
       </Link>
 
@@ -106,6 +119,16 @@ export function SlotPicker({
           <CardDescription>{t.description}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
+          {isManageMode && originalStartAt ? (
+            <div className="rounded-md border border-border bg-muted/40 p-3 text-sm">
+              <p className="font-medium">{t.manageBanner}</p>
+              <p className="mt-1 text-muted-foreground">
+                {t.originalSlot}:{" "}
+                {formatInTimeZone(new Date(originalStartAt), timezone, "yyyy-MM-dd HH:mm")}
+              </p>
+            </div>
+          ) : null}
+
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="outline">
               {t.selectedVariant}: {variant} {t.durationUnit}
@@ -155,6 +178,16 @@ export function SlotPicker({
                 })}?variant=${variant}${staffId ? `&staffId=${staffId}` : ""}&date=${date}&startAt=${encodeURIComponent(
                   slot.startAt
                 )}`
+                const manageHref = `${tenantUrl({
+                  locale,
+                  tenantSlug,
+                  path: "/book/confirmation",
+                })}?mode=manage&token=${encodeURIComponent(String(bookingToken ?? ""))}&bookingId=${encodeURIComponent(
+                  String(bookingId ?? "")
+                )}&serviceId=${encodeURIComponent(serviceId)}&variant=${variant}${
+                  staffId ? `&staffId=${encodeURIComponent(staffId)}` : ""
+                }&startAt=${encodeURIComponent(slot.startAt)}&date=${encodeURIComponent(date)}`
+                const href = isManageMode ? manageHref : detailsHref
 
                 if (slot.status !== "available") {
                   return (
@@ -171,11 +204,11 @@ export function SlotPicker({
                 return (
                   <Link
                     key={slot.id}
-                    href={detailsHref}
+                    href={href}
                     className="flex h-10 items-center justify-between rounded-md border border-border px-3 text-sm hover:bg-muted"
                   >
                     <span>{label}</span>
-                    <span>{t.continue}</span>
+                    <span>{isManageMode ? t.manageContinue : t.continue}</span>
                   </Link>
                 )
               })}

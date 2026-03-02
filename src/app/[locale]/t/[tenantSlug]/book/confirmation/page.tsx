@@ -17,8 +17,20 @@ export default async function ConfirmationPage({
   const query = await searchParams
   const tokenParam = query.token
   const serviceParam = query.serviceId
+  const modeParam = query.mode
+  const bookingIdParam = query.bookingId
+  const startAtParam = query.startAt
+  const dateParam = query.date
+  const variantParam = query.variant
+  const staffIdParam = query.staffId
   const token = Array.isArray(tokenParam) ? tokenParam[0] : tokenParam
   const serviceId = Array.isArray(serviceParam) ? serviceParam[0] : serviceParam
+  const mode = (Array.isArray(modeParam) ? modeParam[0] : modeParam) === "manage" ? "manage" : "create"
+  const bookingId = Array.isArray(bookingIdParam) ? bookingIdParam[0] : bookingIdParam
+  const startAt = Array.isArray(startAtParam) ? startAtParam[0] : startAtParam
+  const date = Array.isArray(dateParam) ? dateParam[0] : dateParam
+  const variant = Array.isArray(variantParam) ? variantParam[0] : variantParam
+  const staffId = Array.isArray(staffIdParam) ? staffIdParam[0] : staffIdParam
 
   const t = await getTranslations({ locale, namespace: "booking" })
 
@@ -38,6 +50,12 @@ export default async function ConfirmationPage({
         tenantSlug={tenantSlug}
         token={token}
         serviceId={serviceId}
+        mode={mode}
+        bookingId={bookingId}
+        startAt={startAt}
+        date={date}
+        variant={variant}
+        staffId={staffId}
         t={{
           missingToken: t("confirm.missingToken"),
           loading: t("confirm.loading"),
@@ -53,6 +71,18 @@ export default async function ConfirmationPage({
           addToCalendar: t("confirm.addToCalendar"),
           newBooking: t("confirm.newBooking"),
           noStaff: t("common.noStaff"),
+          manageBooking: t("confirm.manageBooking"),
+          manageTitle: t("confirm.manageTitle"),
+          manageDescription: t("confirm.manageDescription"),
+          originalTime: t("confirm.originalTime"),
+          selectedTime: t("confirm.selectedTime"),
+          confirmReschedule: t("confirm.confirmReschedule"),
+          rescheduleSuccess: t("confirm.rescheduleSuccess"),
+          rescheduleConflict: t("confirm.rescheduleConflict"),
+          reschedulePolicyBlocked: t("confirm.reschedulePolicyBlocked"),
+          rescheduleSubmitError: t("confirm.rescheduleSubmitError"),
+          backToSlots: t("confirm.backToSlots"),
+          submitting: t("confirm.submitting"),
         }}
       />
     </PublicShell>

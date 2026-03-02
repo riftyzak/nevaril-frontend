@@ -23,6 +23,7 @@ import type {
   Voucher,
   WaitlistEntry,
 } from "@/lib/api/types"
+import { canModifyBooking } from "@/lib/booking/policy"
 import { getDb, mutateDb } from "@/lib/mock/storage"
 
 const TZ_DEFAULT = "Europe/Prague"
@@ -83,6 +84,18 @@ function dateTimeInTimezone(date: string, hhmm: string, timezone: string) {
 
 function isBookingBusy(booking: Booking) {
   return booking.status === "confirmed" || booking.status === "rescheduled"
+}
+
+function hasBookingConflict(
+  bookings: Booking[],
+  candidate: { startAt: string; endAt: string; staffId: string | null; ignoreBookingId?: string }
+) {
+  return bookings.some((booking) => {
+    if (!isBookingBusy(booking)) return false
+    if (candidate.ignoreBookingId && booking.id === candidate.ignoreBookingId) return false
+    if (candidate.staffId && booking.staffId !== candidate.staffId) return false
+    return booking.startAt < candidate.endAt && candidate.startAt < booking.endAt
+  })
 }
 
 function createAvailabilitySlots(input: {
@@ -212,10 +225,10 @@ export async function createBooking(input: CreateBookingInput): Promise<ApiResul
   }
 
   const newEndAt = computeEndAt(input.startAt, input.serviceVariant)
-  const conflicts = tenantResult.data.bookings.some((booking) => {
-    if (!isBookingBusy(booking)) return false
-    if (input.staffId && booking.staffId !== input.staffId) return false
-    return booking.startAt < newEndAt && input.startAt < booking.endAt
+  const conflicts = hasBookingConflict(tenantResult.data.bookings, {
+    startAt: input.startAt,
+    endAt: newEndAt,
+    staffId: input.staffId ?? null,
   })
 
   if (conflicts) {
@@ -228,6 +241,7 @@ export async function createBooking(input: CreateBookingInput): Promise<ApiResul
   }
 
   const timestamp = nowIso()
+  const bookingToken = `${input.tenantSlug}-manage-${Date.now()}`
   const booking: Booking = {
     id: `bk-${Date.now()}`,
     tenantSlug: input.tenantSlug,
@@ -243,7 +257,8 @@ export async function createBooking(input: CreateBookingInput): Promise<ApiResul
     endAt: newEndAt,
     timezone: tenantResult.data.config.timezone || TZ_DEFAULT,
     status: "confirmed",
-    manageToken: `${input.tenantSlug}-manage-${Date.now()}`,
+    bookingToken,
+    manageToken: bookingToken,
     createdAt: timestamp,
     updatedAt: timestamp,
   }
@@ -286,15 +301,45 @@ export async function updateBooking(input: UpdateBookingInput): Promise<ApiResul
     )
   }
 
+  const isReschedule = typeof input.patch.startAt === "string"
+  const isCancel = input.patch.status === "cancelled"
+  if ((isReschedule || isCancel) && !canModifyBooking(nowIso(), existing.startAt, existing.timezone, 24)) {
+    return fail(
+      apiError("FORBIDDEN", "Booking can no longer be modified by policy window", 403, {
+        bookingId: existing.id,
+        startAt: existing.startAt,
+      })
+    )
+  }
+
   const updatedAt = nowIso()
   const nextStartAt = input.patch.startAt ?? existing.startAt
   const nextVariant = existing.serviceVariant
+  const nextEndAt = input.patch.endAt ?? computeEndAt(nextStartAt, nextVariant)
+  const nextStaffId = input.patch.staffId ?? existing.staffId
+
+  if (isReschedule) {
+    const hasConflict = hasBookingConflict(tenantResult.data.bookings, {
+      startAt: nextStartAt,
+      endAt: nextEndAt,
+      staffId: nextStaffId,
+      ignoreBookingId: existing.id,
+    })
+    if (hasConflict) {
+      return fail(
+        apiError("CONFLICT", "Selected slot is no longer available", 409, {
+          bookingId: existing.id,
+          startAt: nextStartAt,
+        })
+      )
+    }
+  }
 
   const updated: Booking = {
     ...existing,
     ...input.patch,
     startAt: nextStartAt,
-    endAt: input.patch.endAt ?? computeEndAt(nextStartAt, nextVariant),
+    endAt: nextEndAt,
     updatedAt,
   }
 
@@ -336,14 +381,26 @@ export async function listBookings(tenantSlug: string): Promise<ApiResult<Bookin
   return ok(tenantResult.data.bookings)
 }
 
-export async function getBookingByToken(tenantSlug: string, token: string): Promise<ApiResult<Booking>> {
+export async function getBookingByToken(token: string, tenantSlug?: string): Promise<ApiResult<Booking>> {
   const simulatedError = await simulateBehavior()
   if (simulatedError) return fail(simulatedError)
 
-  const tenantResult = getTenantOrError(tenantSlug)
-  if (!tenantResult.ok) return tenantResult
+  const db = getDb()
+  const tenantSlugs = tenantSlug ? [tenantSlug] : Object.keys(db.tenants)
+  let booking: Booking | null = null
 
-  const booking = tenantResult.data.bookings.find((item) => item.manageToken === token)
+  for (const slug of tenantSlugs) {
+    const tenant = db.tenants[slug]
+    if (!tenant) continue
+    const found = tenant.bookings.find(
+      (item) => item.bookingToken === token || item.manageToken === token
+    )
+    if (found) {
+      booking = found
+      break
+    }
+  }
+
   if (!booking) {
     return fail(apiError("NOT_FOUND", `Booking token '${token}' was not found`, 404))
   }

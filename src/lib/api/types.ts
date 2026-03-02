@@ -75,6 +75,7 @@ export interface Booking {
   endAt: string
   timezone: string
   status: BookingStatus
+  bookingToken: string
   manageToken: string
   createdAt: string
   updatedAt: string
@@ -133,6 +134,7 @@ export interface AnalyticsPoint {
 export type ApiErrorCode =
   | "NOT_FOUND"
   | "CONFLICT"
+  | "FORBIDDEN"
   | "VALIDATION"
   | "UNAUTHORIZED"
   | "INTERNAL"

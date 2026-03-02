@@ -11,7 +11,7 @@ import {
   stripTenantPrefix,
 } from "@/lib/tenant/resolveTenant"
 import { useTenant } from "@/lib/tenant/tenant-provider"
-import { tenantPathToSubdomainPath, tenantUrl } from "@/lib/tenant/tenant-url"
+import { localePath, tenantPathToSubdomainPath, tenantUrl } from "@/lib/tenant/tenant-url"
 import { cn } from "@/lib/utils"
 
 export function LocaleSwitcher() {
@@ -32,12 +32,18 @@ export function LocaleSwitcher() {
               ? stripTenantPrefix(pathname)
               : stripLocalePrefix(pathname)
             : stripTenantPrefix(pathname)
+        const isStandaloneManagePath = relativePath === "/m" || relativePath.startsWith("/m/")
 
-        const canonicalPath = tenantUrl({
-          locale: nextLocale as AppLocale,
-          tenantSlug,
-          path: relativePath,
-        })
+        const canonicalPath = isStandaloneManagePath
+          ? localePath({
+              locale: nextLocale as AppLocale,
+              path: relativePath,
+            })
+          : tenantUrl({
+              locale: nextLocale as AppLocale,
+              tenantSlug,
+              path: relativePath,
+            })
         const hrefPath =
           source === "subdomain"
             ? tenantPathToSubdomainPath(canonicalPath)

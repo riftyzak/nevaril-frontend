@@ -86,7 +86,10 @@
       "chooseDate": "Vyberte dátum",
       "selectedVariant": "Zvolená dĺžka",
       "continue": "Vybrať",
-      "busy": "Obsadené"
+      "busy": "Obsadené",
+      "manageBanner": "Režim správy: vyberte nový čas pre existujúcu rezerváciu.",
+      "originalSlot": "Pôvodný čas rezervácie",
+      "manageContinue": "Vybrať pre presun"
     },
     "details": {
       "missingSlot": "Chýba vybraný termín. Najprv vyberte čas.",
@@ -122,11 +125,50 @@
       "date": "Dátum a čas",
       "customer": "Zákazník",
       "addToCalendar": "Pridať do kalendára (ICS)",
-      "newBooking": "Vytvoriť ďalšiu rezerváciu"
+      "newBooking": "Vytvoriť ďalšiu rezerváciu",
+      "manageBooking": "Spravovať rezerváciu",
+      "manageTitle": "Potvrdenie presunu",
+      "manageDescription": "Skontrolujte nový termín a potvrďte zmenu rezervácie.",
+      "originalTime": "Pôvodný čas",
+      "selectedTime": "Novo zvolený čas",
+      "confirmReschedule": "Potvrdiť presun",
+      "rescheduleSuccess": "Rezervácia bola úspešne presunutá.",
+      "rescheduleConflict": "Zvolený termín už nie je dostupný.",
+      "reschedulePolicyBlocked": "Zmeny sú možné najneskôr 24h pred začiatkom.",
+      "rescheduleSubmitError": "Presun sa nepodaril. Skúste to znova.",
+      "backToSlots": "Späť na výber termínu",
+      "submitting": "Odosielam..."
     },
     "durationUnit": "min",
     "common": {
       "noStaff": "Nevybraný"
+    },
+    "manage": {
+      "loading": "Načítavam rezerváciu...",
+      "notFound": "Pre tento odkaz sa rezervácia nenašla.",
+      "title": "Správa rezervácie",
+      "description": "Na tejto stránke môžete rezerváciu presunúť alebo zrušiť.",
+      "policyBanner": "Zmeny sú možné najneskôr 24h pred začiatkom.",
+      "policyBlocked": "Rezerváciu už nemožno zmeniť kvôli pravidlu 24h.",
+      "service": "Služba",
+      "variant": "Dĺžka",
+      "durationUnit": "min",
+      "staff": "Pracovník",
+      "date": "Dátum a čas",
+      "customer": "Zákazník",
+      "status": "Stav",
+      "reschedule": "Presunúť",
+      "cancel": "Zrušiť rezerváciu",
+      "canceledState": "Zrušená",
+      "noStaff": "Nevybraný",
+      "cancelDialogTitle": "Zrušiť rezerváciu",
+      "cancelDialogDescription": "Naozaj chcete túto rezerváciu zrušiť?",
+      "close": "Zavrieť",
+      "confirmCancel": "Potvrdiť zrušenie",
+      "cancelSuccess": "Rezervácia bola zrušená.",
+      "cancelConflict": "Rezervácia bola zmenená v inej relácii. Obnovte stránku a skúste to znova.",
+      "cancelForbidden": "Zmeny sú možné najneskôr 24h pred začiatkom.",
+      "cancelError": "Zrušenie sa nepodarilo. Skúste to znova."
     }
   }
 }

@@ -148,7 +148,7 @@ export function DetailsForm({
     onSuccess: (booking) => {
       router.push(
         `${tenantUrl({ locale, tenantSlug, path: "/book/confirmation" })}?token=${encodeURIComponent(
-          booking.manageToken
+          booking.bookingToken
         )}&serviceId=${booking.serviceId}`
       )
     },

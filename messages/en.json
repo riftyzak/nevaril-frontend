@@ -86,7 +86,10 @@
       "chooseDate": "Choose date",
       "selectedVariant": "Selected duration",
       "continue": "Select",
-      "busy": "Busy"
+      "busy": "Busy",
+      "manageBanner": "Manage mode: choose a new time for your existing booking.",
+      "originalSlot": "Original booking time",
+      "manageContinue": "Select for reschedule"
     },
     "details": {
       "missingSlot": "Selected slot is missing. Choose a slot first.",
@@ -122,11 +125,50 @@
       "date": "Date and time",
       "customer": "Customer",
       "addToCalendar": "Add to calendar (ICS)",
-      "newBooking": "Create another booking"
+      "newBooking": "Create another booking",
+      "manageBooking": "Manage booking",
+      "manageTitle": "Confirm reschedule",
+      "manageDescription": "Review your selected slot and confirm the booking change.",
+      "originalTime": "Original time",
+      "selectedTime": "Selected new time",
+      "confirmReschedule": "Confirm reschedule",
+      "rescheduleSuccess": "Booking was rescheduled successfully.",
+      "rescheduleConflict": "This selected slot is no longer available.",
+      "reschedulePolicyBlocked": "Changes are allowed up to 24h before start.",
+      "rescheduleSubmitError": "Reschedule failed. Please try again.",
+      "backToSlots": "Back to slot picker",
+      "submitting": "Submitting..."
     },
     "durationUnit": "min",
     "common": {
       "noStaff": "Not selected"
+    },
+    "manage": {
+      "loading": "Loading booking...",
+      "notFound": "Booking was not found for this manage link.",
+      "title": "Manage booking",
+      "description": "You can reschedule or cancel from this page.",
+      "policyBanner": "Changes allowed up to 24h before start.",
+      "policyBlocked": "This booking can no longer be modified by policy window.",
+      "service": "Service",
+      "variant": "Duration",
+      "durationUnit": "min",
+      "staff": "Staff",
+      "date": "Date and time",
+      "customer": "Customer",
+      "status": "Status",
+      "reschedule": "Reschedule",
+      "cancel": "Cancel booking",
+      "canceledState": "Canceled",
+      "noStaff": "Not selected",
+      "cancelDialogTitle": "Cancel booking",
+      "cancelDialogDescription": "Do you really want to cancel this booking?",
+      "close": "Close",
+      "confirmCancel": "Confirm cancel",
+      "cancelSuccess": "Booking was canceled.",
+      "cancelConflict": "Booking was changed in another session. Refresh and try again.",
+      "cancelForbidden": "Changes are allowed up to 24h before start.",
+      "cancelError": "Cancel failed. Please try again."
     }
   }
 }
