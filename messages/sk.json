@@ -1,0 +1,56 @@
+{
+  "localeSwitcher": {
+    "ariaLabel": "Prepnúť jazyk"
+  },
+  "shell": {
+    "public": {
+      "brandName": "Nevaril",
+      "logoPlaceholder": "Zástupné logo tenanta",
+      "footerTitle": "Booking shell v1",
+      "footerNote": "Všetky funkcie sú v tejto fáze mock"
+    },
+    "admin": {
+      "brandName": "Nevaril Admin",
+      "subtitle": "Rozloženie shell v1",
+      "navAriaLabel": "Admin navigácia",
+      "workspaceTitle": "Admin workspace",
+      "workspaceSubtitle": "Role a oprávnenia budú doplnené v ďalšom míľniku",
+      "ownerBadge": "Owner",
+      "nav": {
+        "dashboard": "Prehľad",
+        "calendar": "Kalendár",
+        "bookings": "Rezervácie",
+        "customers": "Zákazníci",
+        "settings": "Nastavenia"
+      }
+    }
+  },
+  "landing": {
+    "eyebrow": "Míľnik 3",
+    "title": "i18n základ (CZ/SK/EN)",
+    "description": "Vyberte tenant demo trasu. Interné odkazy rešpektujú locale.",
+    "barberPublic": "Barber verejné demo",
+    "barberAdmin": "Barber admin demo"
+  },
+  "tenantHome": {
+    "tenantLabel": "Tenant:",
+    "title": "Tenant demo vstup",
+    "description": "Middleware a tenant URL helpery sú aktívne pre tento route strom.",
+    "openPublic": "Otvoriť verejný shell",
+    "openAdmin": "Otvoriť admin shell"
+  },
+  "publicDemo": {
+    "title": "Verejný booking shell",
+    "description": "Moduly verejnej rezervácie budú pridané v ďalších míľnikoch.",
+    "tenantLine": "Tenant slug v URL: {tenantSlug}",
+    "routingLine": "Path aj subdomain požiadavky vykreslia rovnaký route strom."
+  },
+  "adminDemo": {
+    "cardDashboardTitle": "Zástupný dashboard",
+    "cardDashboardDescription": "KPI a analytické moduly prídu neskôr.",
+    "cardDashboardBody": "Prázdny stav pre grafy a denný súhrn.",
+    "cardModulesTitle": "Zástupné admin moduly",
+    "cardModulesDescription": "Rezervácie, služby, zákazníci a staff sekcie prídu ako ďalšie.",
+    "cardModulesBody": "Role gating a permissions zámerne nie sú súčasťou Míľnika 2."
+  }
+}

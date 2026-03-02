@@ -19,3 +19,14 @@ export function tenantUrl(input: TenantPathInput) {
   // Canonical internal links always use path form in MVP.
   return tenantPath(input)
 }
+
+export function tenantPathToSubdomainPath(pathname: string) {
+  const segments = pathname.split("/").filter(Boolean)
+  if (segments.length < 3 || segments[1] !== "t") {
+    return pathname
+  }
+
+  const locale = segments[0]
+  const rest = segments.slice(3)
+  return rest.length ? `/${locale}/${rest.join("/")}` : `/${locale}`
+}

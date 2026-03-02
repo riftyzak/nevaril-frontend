@@ -1,6 +1,13 @@
-export const SUPPORTED_LOCALES = ["cs", "sk", "en"] as const
+import {
+  APP_LOCALES,
+  DEFAULT_LOCALE as APP_DEFAULT_LOCALE,
+  isAppLocale,
+  type AppLocale,
+} from "@/i18n/locales"
 
-export type Locale = (typeof SUPPORTED_LOCALES)[number]
+export const SUPPORTED_LOCALES = APP_LOCALES
+
+export type Locale = AppLocale
 export type TenantRoutingMode = "subdomain" | "path" | "hybrid"
 export type TenantSource = "subdomain" | "path" | null
 
@@ -16,7 +23,7 @@ interface ResolveTenantInput {
   mode: TenantRoutingMode
 }
 
-export const DEFAULT_LOCALE: Locale = "cs"
+export const DEFAULT_LOCALE: Locale = APP_DEFAULT_LOCALE
 
 function normalizeHost(host?: string | null) {
   if (!host) return null
@@ -28,7 +35,7 @@ function getPathSegments(pathname: string) {
 }
 
 export function isSupportedLocale(value: string): value is Locale {
-  return SUPPORTED_LOCALES.includes(value as Locale)
+  return isAppLocale(value)
 }
 
 export function getRoutingMode(): TenantRoutingMode {

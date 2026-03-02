@@ -1,48 +1,60 @@
 import Link from "next/link"
 import type { ReactNode } from "react"
 import { CalendarDays, ChartColumnBig, CircleUserRound, Settings, Users } from "lucide-react"
+import { getTranslations } from "next-intl/server"
 
+import { LocaleSwitcher } from "@/components/locale-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Badge } from "@/components/ui/badge"
+import { type AppLocale } from "@/i18n/locales"
 
 const navIcons = {
-  Dashboard: ChartColumnBig,
-  Calendar: CalendarDays,
-  Bookings: CircleUserRound,
-  Customers: Users,
-  Settings: Settings,
+  dashboard: ChartColumnBig,
+  calendar: CalendarDays,
+  bookings: CircleUserRound,
+  customers: Users,
+  settings: Settings,
 } as const
 
-export function AdminShell({
+type AdminNavKey = keyof typeof navIcons
+
+export async function AdminShell({
   children,
   navItems,
+  locale,
 }: Readonly<{
   children: ReactNode
-  navItems: Array<{ href: string; label: keyof typeof navIcons }>
+  navItems: Array<{ href: string; key: AdminNavKey }>
+  locale: AppLocale
 }>) {
+  const t = await getTranslations({ locale, namespace: "shell.admin" })
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto grid min-h-screen max-w-7xl grid-cols-1 md:grid-cols-[240px_1fr]">
         <aside className="border-b border-border p-4 md:border-r md:border-b-0">
-          <div className="mb-6 flex items-center justify-between md:block">
+          <div className="mb-6 flex items-center justify-between gap-3 md:block">
             <div>
-              <p className="text-base font-semibold">Nevaril Admin</p>
-              <p className="text-xs text-muted-foreground">Layout shell v1</p>
+              <p className="text-base font-semibold">{t("brandName")}</p>
+              <p className="text-xs text-muted-foreground">{t("subtitle")}</p>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-2 md:mt-3">
+              <LocaleSwitcher />
+              <ThemeToggle />
+            </div>
           </div>
-          <nav aria-label="Admin navigation">
+          <nav aria-label={t("navAriaLabel")}>
             <ul className="grid grid-cols-2 gap-2 md:grid-cols-1">
               {navItems.map((item) => {
-                const Icon = navIcons[item.label]
+                const Icon = navIcons[item.key]
                 return (
-                  <li key={item.label}>
+                  <li key={item.key}>
                     <Link
                       href={item.href}
                       className="flex items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm text-muted-foreground hover:border-border hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     >
                       <Icon className="size-4" />
-                      {item.label}
+                      {t(`nav.${item.key}`)}
                     </Link>
                   </li>
                 )
@@ -53,12 +65,12 @@ export function AdminShell({
         <section className="flex min-h-screen flex-col">
           <header className="flex items-center justify-between border-b border-border px-4 py-3 sm:px-6">
             <div>
-              <h1 className="text-lg font-semibold">Admin Workspace</h1>
+              <h1 className="text-lg font-semibold">{t("workspaceTitle")}</h1>
               <p className="text-xs text-muted-foreground">
-                Role and permissions wiring will come in a later milestone
+                {t("workspaceSubtitle")}
               </p>
             </div>
-            <Badge>Owner</Badge>
+            <Badge>{t("ownerBadge")}</Badge>
           </header>
           <main className="flex-1 p-4 sm:p-6">{children}</main>
         </section>

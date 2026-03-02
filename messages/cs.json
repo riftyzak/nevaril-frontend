@@ -1,0 +1,56 @@
+{
+  "localeSwitcher": {
+    "ariaLabel": "Přepnout jazyk"
+  },
+  "shell": {
+    "public": {
+      "brandName": "Nevaril",
+      "logoPlaceholder": "Zástupné logo tenanta",
+      "footerTitle": "Booking shell v1",
+      "footerNote": "Všechny funkce jsou v této fázi mock"
+    },
+    "admin": {
+      "brandName": "Nevaril Admin",
+      "subtitle": "Rozvržení shell v1",
+      "navAriaLabel": "Administrace navigace",
+      "workspaceTitle": "Admin workspace",
+      "workspaceSubtitle": "Role a oprávnění budou doplněny v dalším milníku",
+      "ownerBadge": "Owner",
+      "nav": {
+        "dashboard": "Přehled",
+        "calendar": "Kalendář",
+        "bookings": "Rezervace",
+        "customers": "Zákazníci",
+        "settings": "Nastavení"
+      }
+    }
+  },
+  "landing": {
+    "eyebrow": "Milník 3",
+    "title": "i18n základ (CZ/SK/EN)",
+    "description": "Vyberte tenant demo trasu. Interní odkazy respektují locale.",
+    "barberPublic": "Barber veřejné demo",
+    "barberAdmin": "Barber admin demo"
+  },
+  "tenantHome": {
+    "tenantLabel": "Tenant:",
+    "title": "Tenant demo vstup",
+    "description": "Middleware a tenant URL helpery jsou aktivní pro tento route strom.",
+    "openPublic": "Otevřít veřejný shell",
+    "openAdmin": "Otevřít admin shell"
+  },
+  "publicDemo": {
+    "title": "Veřejný booking shell",
+    "description": "Moduly veřejné rezervace budou přidány v dalších milnících.",
+    "tenantLine": "Tenant slug v URL: {tenantSlug}",
+    "routingLine": "Path i subdomain požadavky vykreslí stejný route strom."
+  },
+  "adminDemo": {
+    "cardDashboardTitle": "Zástupný dashboard",
+    "cardDashboardDescription": "KPI a analytické moduly přijdou později.",
+    "cardDashboardBody": "Prázdný stav pro grafy a denní souhrn.",
+    "cardModulesTitle": "Zástupné admin moduly",
+    "cardModulesDescription": "Rezervace, služby, zákazníci a staff sekce přijdou jako další.",
+    "cardModulesBody": "Role gating a permissions záměrně nejsou součástí Milníku 2."
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "localeSwitcher": {
+    "ariaLabel": "Switch language"
+  },
+  "shell": {
+    "public": {
+      "brandName": "Nevaril",
+      "logoPlaceholder": "Tenant logo placeholder",
+      "footerTitle": "Booking shell v1",
+      "footerNote": "All features are mock in this stage"
+    },
+    "admin": {
+      "brandName": "Nevaril Admin",
+      "subtitle": "Layout shell v1",
+      "navAriaLabel": "Admin navigation",
+      "workspaceTitle": "Admin workspace",
+      "workspaceSubtitle": "Role and permissions wiring will come in a later milestone",
+      "ownerBadge": "Owner",
+      "nav": {
+        "dashboard": "Dashboard",
+        "calendar": "Calendar",
+        "bookings": "Bookings",
+        "customers": "Customers",
+        "settings": "Settings"
+      }
+    }
+  },
+  "landing": {
+    "eyebrow": "Milestone 3",
+    "title": "i18n baseline (CZ/SK/EN)",
+    "description": "Choose a tenant demo route. Internal links are locale-aware.",
+    "barberPublic": "Barber public demo",
+    "barberAdmin": "Barber admin demo"
+  },
+  "tenantHome": {
+    "tenantLabel": "Tenant:",
+    "title": "Tenant demo entry",
+    "description": "Middleware and tenant URL helpers are active for this route tree.",
+    "openPublic": "Open public shell",
+    "openAdmin": "Open admin shell"
+  },
+  "publicDemo": {
+    "title": "Public booking shell",
+    "description": "Customer booking modules will be added in later milestones.",
+    "tenantLine": "Tenant slug in URL: {tenantSlug}",
+    "routingLine": "Path and subdomain requests render through the same route tree."
+  },
+  "adminDemo": {
+    "cardDashboardTitle": "Dashboard placeholder",
+    "cardDashboardDescription": "KPIs and analytics modules come later.",
+    "cardDashboardBody": "Empty-state layout for charts and day summary widgets.",
+    "cardModulesTitle": "Admin modules placeholder",
+    "cardModulesDescription": "Bookings, services, customers, and staff sections are next.",
+    "cardModulesBody": "Role gating and permissions are intentionally not part of Milestone 2."
+  }
+}
