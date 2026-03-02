@@ -1,6 +1,6 @@
 import type { MockDatabase, ServiceVariant, TenantData } from "@/lib/api/types"
 
-export const DB_VERSION = 2
+export const DB_VERSION = 3
 
 const BASE_TIMESTAMP = "2026-01-10T10:00:00.000Z"
 
@@ -170,9 +170,11 @@ function makeTenantData(tenantSlug: "barber" | "carservice"): TenantData {
         serviceId: services[0].id,
         customerName: "Iva Horakova",
         email: "iva@example.com",
+        phone: "+420777100333",
+        note: "",
         preferredDate: "2026-01-13",
         preferredTimeLabel: "afternoon",
-        status: "waiting",
+        status: "new",
         assignedBookingId: null,
         createdAt: BASE_TIMESTAMP,
         updatedAt: BASE_TIMESTAMP,

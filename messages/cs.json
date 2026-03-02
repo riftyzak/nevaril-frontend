@@ -21,6 +21,7 @@
         "calendar": "Kalendář",
         "bookings": "Rezervace",
         "customers": "Zákazníci",
+        "waitlist": "Čekací listina",
         "settings": "Nastavení"
       }
     }
@@ -169,6 +170,70 @@
       "cancelConflict": "Rezervace byla změněna v jiné relaci. Obnovte stránku a zkuste to znovu.",
       "cancelForbidden": "Změny jsou možné nejpozději 24h před začátkem.",
       "cancelError": "Zrušení se nepodařilo. Zkuste to znovu."
+    }
+  },
+  "waitlist": {
+    "public": {
+      "title": "Zapsat do čekací listiny",
+      "description": "Zanechte preference a volný termín vám přiřadíme ručně.",
+      "service": "Služba",
+      "servicePlaceholder": "Vyberte službu",
+      "date": "Preferované datum",
+      "timeWindow": "Preferované časové okno",
+      "timeAny": "Kdykoliv",
+      "timeMorning": "Dopoledne",
+      "timeAfternoon": "Odpoledne",
+      "timeEvening": "Večer",
+      "note": "Poznámka (volitelně)",
+      "name": "Jméno a příjmení",
+      "email": "E-mail",
+      "phone": "Telefon",
+      "submit": "Přidat do čekací listiny",
+      "submitLoading": "Odesílám...",
+      "required": "Toto pole je povinné",
+      "invalidEmail": "Zadejte platný e-mail",
+      "successTitle": "Jste v čekací listině",
+      "successDescription": "Jakmile se uvolní termín, ozveme se vám.",
+      "error": "Položku čekací listiny se nepodařilo vytvořit. Zkuste to znovu."
+    },
+    "admin": {
+      "title": "Inbox čekací listiny",
+      "description": "Owner ručně přiřazuje položky čekací listiny do volných slotů.",
+      "filterService": "Filtrovat podle služby",
+      "filterStatus": "Filtrovat podle stavu",
+      "allServices": "Všechny služby",
+      "allStatuses": "Všechny stavy",
+      "statusNew": "Nové",
+      "statusAssigned": "Přiřazeno",
+      "statusCancelled": "Zrušeno",
+      "empty": "Pro zvolené filtry nebyly nalezeny žádné položky.",
+      "colCustomer": "Zákazník",
+      "colService": "Služba",
+      "colPreferred": "Preference",
+      "colCreated": "Vytvořeno",
+      "colStatus": "Stav",
+      "colAction": "Akce",
+      "assignAction": "Přiřadit do slotu",
+      "assignedLabel": "Přiřazeno",
+      "openAssignTitle": "Přiřadit položku čekací listiny",
+      "openAssignDescription": "Vyberte pracovníka a dostupný slot, potom potvrďte přiřazení.",
+      "staff": "Pracovník",
+      "anyStaff": "Libovolný pracovník",
+      "date": "Datum",
+      "duration": "Délka",
+      "minutesUnit": "min",
+      "availableSlots": "Dostupné sloty",
+      "slotLoading": "Načítám sloty...",
+      "noSlots": "Pro zvolené parametry nejsou volné sloty.",
+      "selectSlot": "Vyberte slot",
+      "close": "Zavřít",
+      "confirm": "Potvrdit přiřazení",
+      "confirmLoading": "Přiřazuji...",
+      "successToast": "Položka čekací listiny byla přiřazena",
+      "wouldSendTitle": "Náhled notifikace (mock)",
+      "wouldSendEmail": "Poslal by se e-mail",
+      "wouldSendSms": "Poslala by se SMS",
+      "assignError": "Přiřazení se nepodařilo. Zkuste to znovu."
     }
   }
 }

@@ -21,6 +21,7 @@
         "calendar": "Calendar",
         "bookings": "Bookings",
         "customers": "Customers",
+        "waitlist": "Waitlist",
         "settings": "Settings"
       }
     }
@@ -169,6 +170,70 @@
       "cancelConflict": "Booking was changed in another session. Refresh and try again.",
       "cancelForbidden": "Changes are allowed up to 24h before start.",
       "cancelError": "Cancel failed. Please try again."
+    }
+  },
+  "waitlist": {
+    "public": {
+      "title": "Join waitlist",
+      "description": "Leave your preferences and we will manually assign a free slot.",
+      "service": "Service",
+      "servicePlaceholder": "Select service",
+      "date": "Preferred date",
+      "timeWindow": "Preferred time window",
+      "timeAny": "Any time",
+      "timeMorning": "Morning",
+      "timeAfternoon": "Afternoon",
+      "timeEvening": "Evening",
+      "note": "Note (optional)",
+      "name": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "submit": "Join waitlist",
+      "submitLoading": "Submitting...",
+      "required": "This field is required",
+      "invalidEmail": "Enter a valid email",
+      "successTitle": "You are on the waitlist",
+      "successDescription": "We will contact you when a slot is available.",
+      "error": "Could not create waitlist entry. Please try again."
+    },
+    "admin": {
+      "title": "Waitlist inbox",
+      "description": "Owner manually assigns waitlist entries to free slots.",
+      "filterService": "Filter by service",
+      "filterStatus": "Filter by status",
+      "allServices": "All services",
+      "allStatuses": "All statuses",
+      "statusNew": "New",
+      "statusAssigned": "Assigned",
+      "statusCancelled": "Cancelled",
+      "empty": "No waitlist entries found for selected filters.",
+      "colCustomer": "Customer",
+      "colService": "Service",
+      "colPreferred": "Preferred",
+      "colCreated": "Created",
+      "colStatus": "Status",
+      "colAction": "Action",
+      "assignAction": "Assign to slot",
+      "assignedLabel": "Assigned",
+      "openAssignTitle": "Assign waitlist entry",
+      "openAssignDescription": "Pick staff and available slot, then confirm assignment.",
+      "staff": "Staff",
+      "anyStaff": "Any staff",
+      "date": "Date",
+      "duration": "Duration",
+      "minutesUnit": "min",
+      "availableSlots": "Available slots",
+      "slotLoading": "Loading slots...",
+      "noSlots": "No available slots for the selected options.",
+      "selectSlot": "Select a slot",
+      "close": "Close",
+      "confirm": "Confirm assignment",
+      "confirmLoading": "Assigning...",
+      "successToast": "Waitlist entry assigned",
+      "wouldSendTitle": "Notification preview (mock)",
+      "wouldSendEmail": "Would send email",
+      "wouldSendSms": "Would send SMS",
+      "assignError": "Assignment failed. Please try again."
     }
   }
 }

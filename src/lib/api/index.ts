@@ -10,6 +10,7 @@ import type {
   Booking,
   CancelBookingInput,
   CreateBookingInput,
+  CreateWaitlistEntryInput,
   CreateVoucherOrderInput,
   Customer,
   GetAvailabilityInput,
@@ -474,6 +475,52 @@ export async function listWaitlist(tenantSlug: string): Promise<ApiResult<Waitli
   return ok(tenantResult.data.waitlist)
 }
 
+export async function createWaitlistEntry(input: CreateWaitlistEntryInput): Promise<ApiResult<WaitlistEntry>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(input.tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  const service = tenantResult.data.services.find((item) => item.id === input.serviceId)
+  if (!service) {
+    return fail(apiError("NOT_FOUND", `Service '${input.serviceId}' was not found`, 404))
+  }
+
+  const timestamp = nowIso()
+  const entry: WaitlistEntry = {
+    id: `wl-${Date.now()}`,
+    tenantSlug: input.tenantSlug,
+    serviceId: input.serviceId,
+    customerName: input.customerName,
+    email: input.email,
+    phone: input.phone,
+    note: input.note ?? "",
+    preferredDate: input.preferredDate,
+    preferredTimeLabel: input.preferredTimeLabel,
+    status: "new",
+    assignedBookingId: null,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  }
+
+  mutateDb((current) => {
+    const tenant = current.tenants[input.tenantSlug]
+    return {
+      ...current,
+      tenants: {
+        ...current.tenants,
+        [input.tenantSlug]: {
+          ...tenant,
+          waitlist: [entry, ...tenant.waitlist],
+        },
+      },
+    }
+  })
+
+  return ok(entry)
+}
+
 export async function assignWaitlistToSlot(input: AssignWaitlistToSlotInput): Promise<ApiResult<WaitlistEntry>> {
   const simulatedError = await simulateBehavior()
   if (simulatedError) return fail(simulatedError)
@@ -495,15 +542,25 @@ export async function assignWaitlistToSlot(input: AssignWaitlistToSlotInput): Pr
     )
   }
 
+  if (waitlist.serviceId !== input.serviceId) {
+    return fail(
+      apiError("VALIDATION", "Assigned service must match waitlist service", 400, {
+        waitlistServiceId: waitlist.serviceId,
+        requestedServiceId: input.serviceId,
+      })
+    )
+  }
+
   const bookingResult = await createBooking({
     tenantSlug: input.tenantSlug,
-    serviceId: waitlist.serviceId,
-    serviceVariant: input.serviceVariant,
+    serviceId: input.serviceId,
+    serviceVariant: input.duration,
     staffId: input.staffId,
     customerId: `wl-${waitlist.id}`,
     customerName: waitlist.customerName,
     customerEmail: waitlist.email,
-    customerPhone: "",
+    customerPhone: waitlist.phone,
+    customFieldValues: waitlist.note ? { note: waitlist.note } : {},
     startAt: input.startAt,
   })
 

@@ -93,7 +93,7 @@ export interface Customer {
   updatedAt: string
 }
 
-export type WaitlistStatus = "waiting" | "assigned" | "cancelled"
+export type WaitlistStatus = "new" | "assigned" | "cancelled"
 
 export interface WaitlistEntry {
   id: string
@@ -101,6 +101,8 @@ export interface WaitlistEntry {
   serviceId: string
   customerName: string
   email: string
+  phone: string
+  note: string
   preferredDate: string
   preferredTimeLabel: string
   status: WaitlistStatus
@@ -217,9 +219,21 @@ export interface AssignWaitlistToSlotInput {
   tenantSlug: string
   waitlistId: string
   expectedUpdatedAt: string
+  serviceId: string
   startAt: string
-  serviceVariant: ServiceVariant
+  duration: ServiceVariant
   staffId?: string
+}
+
+export interface CreateWaitlistEntryInput {
+  tenantSlug: string
+  serviceId: string
+  customerName: string
+  email: string
+  phone: string
+  note?: string
+  preferredDate: string
+  preferredTimeLabel: string
 }
 
 export interface CreateVoucherOrderInput {

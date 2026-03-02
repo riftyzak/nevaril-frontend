@@ -1,6 +1,6 @@
 import Link from "next/link"
 import type { ReactNode } from "react"
-import { CalendarDays, ChartColumnBig, CircleUserRound, Settings, Users } from "lucide-react"
+import { CalendarDays, ChartColumnBig, CircleUserRound, ListTodo, Settings, Users } from "lucide-react"
 import { getTranslations } from "next-intl/server"
 
 import { DevMenu } from "@/components/dev/dev-menu"
@@ -14,6 +14,7 @@ const navIcons = {
   calendar: CalendarDays,
   bookings: CircleUserRound,
   customers: Users,
+  waitlist: ListTodo,
   settings: Settings,
 } as const
 

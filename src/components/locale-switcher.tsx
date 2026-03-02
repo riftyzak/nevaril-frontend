@@ -33,8 +33,10 @@ export function LocaleSwitcher() {
               : stripLocalePrefix(pathname)
             : stripTenantPrefix(pathname)
         const isStandaloneManagePath = relativePath === "/m" || relativePath.startsWith("/m/")
+        const isStandaloneAdminPath = relativePath === "/app" || relativePath.startsWith("/app/")
+        const isStandalonePath = isStandaloneManagePath || isStandaloneAdminPath
 
-        const canonicalPath = isStandaloneManagePath
+        const canonicalPath = isStandalonePath
           ? localePath({
               locale: nextLocale as AppLocale,
               path: relativePath,
