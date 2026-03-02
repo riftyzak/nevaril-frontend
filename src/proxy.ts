@@ -22,7 +22,7 @@ function withTenantHeaders(
   return requestHeaders
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl
   const mode = getRoutingMode()
 
