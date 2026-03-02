@@ -18,16 +18,18 @@ function LogoPlaceholder() {
 
 export function PublicShell({
   children,
+  homeHref,
   localeSlot,
 }: Readonly<{
   children: ReactNode
+  homeHref: string
   localeSlot?: ReactNode
 }>) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Link href="/" className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg">
+          <Link href={homeHref} className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg">
             <LogoPlaceholder />
           </Link>
           <div className="flex items-center gap-2">

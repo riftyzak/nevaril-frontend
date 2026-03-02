@@ -6,10 +6,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { tenantUrl } from "@/lib/tenant/tenant-url"
 
-export default function PublicDemoPage() {
+export default async function PublicDemoPage({
+  params,
+}: Readonly<{
+  params: Promise<{ locale: "cs" | "sk" | "en"; tenantSlug: string }>
+}>) {
+  const { locale, tenantSlug } = await params
+
   return (
-    <PublicShell>
+    <PublicShell homeHref={tenantUrl({ locale, tenantSlug })}>
       <div className="grid gap-4">
         <Card>
           <CardHeader>
@@ -19,8 +26,8 @@ export default function PublicDemoPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 text-sm text-muted-foreground">
-            <p>Placeholder for service cards, slot picker, and booking forms.</p>
-            <p>Theme and spacing are now token-driven for both light and dark mode.</p>
+            <p>Tenant slug in URL: {tenantSlug}</p>
+            <p>Path and subdomain requests render through the same route tree.</p>
           </CardContent>
         </Card>
       </div>
