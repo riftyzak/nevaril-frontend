@@ -52,5 +52,81 @@
     "cardModulesTitle": "Admin modules placeholder",
     "cardModulesDescription": "Bookings, services, customers, and staff sections are next.",
     "cardModulesBody": "Role gating and permissions are intentionally not part of Milestone 2."
+  },
+  "booking": {
+    "progress": {
+      "service": "Service",
+      "slot": "Slot",
+      "details": "Details",
+      "confirm": "Confirm"
+    },
+    "catalog": {
+      "searchPlaceholder": "Search service",
+      "loading": "Loading services...",
+      "empty": "No services found for your search.",
+      "openService": "Choose service",
+      "categoryLabel": "Category"
+    },
+    "detail": {
+      "loading": "Loading service...",
+      "notFound": "Service was not found.",
+      "backToCatalog": "Back to service catalog",
+      "chooseVariant": "Choose duration",
+      "chooseStaff": "Choose staff (optional)",
+      "anyStaff": "Any staff",
+      "continueToSlots": "Continue to slots",
+      "photosPlaceholder": "Photos placeholder"
+    },
+    "slot": {
+      "loading": "Loading availability...",
+      "noSlots": "No slots available for selected date.",
+      "back": "Back to service detail",
+      "title": "Choose a time slot",
+      "description": "Pick one of the available slots.",
+      "chooseDate": "Choose date",
+      "selectedVariant": "Selected duration",
+      "continue": "Select",
+      "busy": "Busy"
+    },
+    "details": {
+      "missingSlot": "Selected slot is missing. Choose a slot first.",
+      "backToSlot": "Back to slot picker",
+      "back": "Back to slot picker",
+      "title": "Your details",
+      "description": "Fill in your contact details to confirm booking.",
+      "name": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "submit": "Confirm booking",
+      "slotConflict": "This slot has just been taken. Please choose another one.",
+      "slotConflictAction": "Choose another slot",
+      "submitError": "Booking could not be created. Try again.",
+      "requiredField": "This field is required",
+      "customFieldPrefix": "Custom field",
+      "summaryTitle": "Booking summary",
+      "summaryService": "Service",
+      "summaryVariant": "Duration",
+      "summaryStaff": "Staff",
+      "summaryDate": "Date and time",
+      "submitting": "Submitting..."
+    },
+    "confirm": {
+      "missingToken": "Missing booking token.",
+      "loading": "Loading booking confirmation...",
+      "notFound": "Booking was not found.",
+      "title": "Booking confirmed",
+      "description": "Your reservation was created successfully.",
+      "service": "Service",
+      "variant": "Duration",
+      "staff": "Staff",
+      "date": "Date and time",
+      "customer": "Customer",
+      "addToCalendar": "Add to calendar (ICS)",
+      "newBooking": "Create another booking"
+    },
+    "durationUnit": "min",
+    "common": {
+      "noStaff": "Not selected"
+    }
   }
 }

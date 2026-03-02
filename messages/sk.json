@@ -52,5 +52,81 @@
     "cardModulesTitle": "Zástupné admin moduly",
     "cardModulesDescription": "Rezervácie, služby, zákazníci a staff sekcie prídu ako ďalšie.",
     "cardModulesBody": "Role gating a permissions zámerne nie sú súčasťou Míľnika 2."
+  },
+  "booking": {
+    "progress": {
+      "service": "Služba",
+      "slot": "Termín",
+      "details": "Detaily",
+      "confirm": "Potvrdenie"
+    },
+    "catalog": {
+      "searchPlaceholder": "Hľadať službu",
+      "loading": "Načítavam služby...",
+      "empty": "Žiadne služby nezodpovedajú hľadaniu.",
+      "openService": "Vybrať službu",
+      "categoryLabel": "Kategória"
+    },
+    "detail": {
+      "loading": "Načítavam službu...",
+      "notFound": "Služba nebola nájdená.",
+      "backToCatalog": "Späť na katalóg služieb",
+      "chooseVariant": "Vyberte dĺžku",
+      "chooseStaff": "Vyberte pracovníka (voliteľné)",
+      "anyStaff": "Ľubovoľný pracovník",
+      "continueToSlots": "Pokračovať na termíny",
+      "photosPlaceholder": "Zástupné miesto pre fotky"
+    },
+    "slot": {
+      "loading": "Načítavam dostupnosť...",
+      "noSlots": "Pre vybraný deň nie sú voľné termíny.",
+      "back": "Späť na detail služby",
+      "title": "Vyberte termín",
+      "description": "Zvoľte jeden z dostupných časov.",
+      "chooseDate": "Vyberte dátum",
+      "selectedVariant": "Zvolená dĺžka",
+      "continue": "Vybrať",
+      "busy": "Obsadené"
+    },
+    "details": {
+      "missingSlot": "Chýba vybraný termín. Najprv vyberte čas.",
+      "backToSlot": "Späť na výber termínu",
+      "back": "Späť na výber termínu",
+      "title": "Vaše údaje",
+      "description": "Vyplňte kontaktné údaje na potvrdenie rezervácie.",
+      "name": "Meno a priezvisko",
+      "email": "E-mail",
+      "phone": "Telefón",
+      "submit": "Potvrdiť rezerváciu",
+      "slotConflict": "Tento termín bol práve obsadený. Vyberte prosím iný.",
+      "slotConflictAction": "Vybrať iný termín",
+      "submitError": "Rezerváciu sa nepodarilo vytvoriť. Skúste to znova.",
+      "requiredField": "Toto pole je povinné",
+      "customFieldPrefix": "Vlastné pole",
+      "summaryTitle": "Zhrnutie rezervácie",
+      "summaryService": "Služba",
+      "summaryVariant": "Dĺžka",
+      "summaryStaff": "Pracovník",
+      "summaryDate": "Dátum a čas",
+      "submitting": "Odosielam..."
+    },
+    "confirm": {
+      "missingToken": "Chýba token rezervácie.",
+      "loading": "Načítavam potvrdenie rezervácie...",
+      "notFound": "Rezervácia nebola nájdená.",
+      "title": "Rezervácia potvrdená",
+      "description": "Vaša rezervácia bola úspešne vytvorená.",
+      "service": "Služba",
+      "variant": "Dĺžka",
+      "staff": "Pracovník",
+      "date": "Dátum a čas",
+      "customer": "Zákazník",
+      "addToCalendar": "Pridať do kalendára (ICS)",
+      "newBooking": "Vytvoriť ďalšiu rezerváciu"
+    },
+    "durationUnit": "min",
+    "common": {
+      "noStaff": "Nevybraný"
+    }
   }
 }

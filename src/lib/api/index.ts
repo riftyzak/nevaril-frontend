@@ -211,6 +211,22 @@ export async function createBooking(input: CreateBookingInput): Promise<ApiResul
     return fail(apiError("NOT_FOUND", `Service '${input.serviceId}' was not found`, 404))
   }
 
+  const newEndAt = computeEndAt(input.startAt, input.serviceVariant)
+  const conflicts = tenantResult.data.bookings.some((booking) => {
+    if (!isBookingBusy(booking)) return false
+    if (input.staffId && booking.staffId !== input.staffId) return false
+    return booking.startAt < newEndAt && input.startAt < booking.endAt
+  })
+
+  if (conflicts) {
+    return fail(
+      apiError("CONFLICT", "Selected slot is no longer available", 409, {
+        startAt: input.startAt,
+        staffId: input.staffId ?? null,
+      })
+    )
+  }
+
   const timestamp = nowIso()
   const booking: Booking = {
     id: `bk-${Date.now()}`,
@@ -220,8 +236,11 @@ export async function createBooking(input: CreateBookingInput): Promise<ApiResul
     staffId: input.staffId ?? null,
     customerId: input.customerId,
     customerName: input.customerName,
+    customerEmail: input.customerEmail,
+    customerPhone: input.customerPhone,
+    customFieldValues: input.customFieldValues ?? {},
     startAt: input.startAt,
-    endAt: computeEndAt(input.startAt, input.serviceVariant),
+    endAt: newEndAt,
     timezone: tenantResult.data.config.timezone || TZ_DEFAULT,
     status: "confirmed",
     manageToken: `${input.tenantSlug}-manage-${Date.now()}`,
@@ -426,6 +445,8 @@ export async function assignWaitlistToSlot(input: AssignWaitlistToSlotInput): Pr
     staffId: input.staffId,
     customerId: `wl-${waitlist.id}`,
     customerName: waitlist.customerName,
+    customerEmail: waitlist.email,
+    customerPhone: "",
     startAt: input.startAt,
   })
 

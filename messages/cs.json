@@ -52,5 +52,81 @@
     "cardModulesTitle": "Zástupné admin moduly",
     "cardModulesDescription": "Rezervace, služby, zákazníci a staff sekce přijdou jako další.",
     "cardModulesBody": "Role gating a permissions záměrně nejsou součástí Milníku 2."
+  },
+  "booking": {
+    "progress": {
+      "service": "Služba",
+      "slot": "Termín",
+      "details": "Detaily",
+      "confirm": "Potvrzení"
+    },
+    "catalog": {
+      "searchPlaceholder": "Hledat službu",
+      "loading": "Načítám služby...",
+      "empty": "Žádné služby neodpovídají hledání.",
+      "openService": "Vybrat službu",
+      "categoryLabel": "Kategorie"
+    },
+    "detail": {
+      "loading": "Načítám službu...",
+      "notFound": "Služba nebyla nalezena.",
+      "backToCatalog": "Zpět na katalog služeb",
+      "chooseVariant": "Vyberte délku",
+      "chooseStaff": "Vyberte pracovníka (volitelné)",
+      "anyStaff": "Libovolný pracovník",
+      "continueToSlots": "Pokračovat na termíny",
+      "photosPlaceholder": "Zástupné místo pro fotky"
+    },
+    "slot": {
+      "loading": "Načítám dostupnost...",
+      "noSlots": "Pro vybraný den nejsou volné termíny.",
+      "back": "Zpět na detail služby",
+      "title": "Vyberte termín",
+      "description": "Zvolte jeden z dostupných časů.",
+      "chooseDate": "Vyberte datum",
+      "selectedVariant": "Zvolená délka",
+      "continue": "Vybrat",
+      "busy": "Obsazeno"
+    },
+    "details": {
+      "missingSlot": "Chybí vybraný termín. Nejprve vyberte čas.",
+      "backToSlot": "Zpět na výběr termínu",
+      "back": "Zpět na výběr termínu",
+      "title": "Vaše údaje",
+      "description": "Vyplňte kontaktní údaje pro potvrzení rezervace.",
+      "name": "Jméno a příjmení",
+      "email": "E-mail",
+      "phone": "Telefon",
+      "submit": "Potvrdit rezervaci",
+      "slotConflict": "Tento termín byl právě obsazen. Vyberte prosím jiný.",
+      "slotConflictAction": "Vybrat jiný termín",
+      "submitError": "Rezervaci se nepodařilo vytvořit. Zkuste to znovu.",
+      "requiredField": "Toto pole je povinné",
+      "customFieldPrefix": "Vlastní pole",
+      "summaryTitle": "Shrnutí rezervace",
+      "summaryService": "Služba",
+      "summaryVariant": "Délka",
+      "summaryStaff": "Pracovník",
+      "summaryDate": "Datum a čas",
+      "submitting": "Odesílám..."
+    },
+    "confirm": {
+      "missingToken": "Chybí token rezervace.",
+      "loading": "Načítám potvrzení rezervace...",
+      "notFound": "Rezervace nebyla nalezena.",
+      "title": "Rezervace potvrzena",
+      "description": "Vaše rezervace byla úspěšně vytvořena.",
+      "service": "Služba",
+      "variant": "Délka",
+      "staff": "Pracovník",
+      "date": "Datum a čas",
+      "customer": "Zákazník",
+      "addToCalendar": "Přidat do kalendáře (ICS)",
+      "newBooking": "Vytvořit další rezervaci"
+    },
+    "durationUnit": "min",
+    "common": {
+      "noStaff": "Nevybrán"
+    }
   }
 }

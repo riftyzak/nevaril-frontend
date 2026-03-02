@@ -87,6 +87,9 @@ function makeTenantData(tenantSlug: "barber" | "carservice"): TenantData {
       staffId: "st-1",
       customerId: "cus-1",
       customerName: "Anna Novakova",
+      customerEmail: "anna@example.com",
+      customerPhone: "+420777000111",
+      customFieldValues: {},
       startAt: "2026-01-12T09:00:00.000Z",
       endAt: "2026-01-12T10:00:00.000Z",
       timezone: "Europe/Prague",
@@ -103,6 +106,9 @@ function makeTenantData(tenantSlug: "barber" | "carservice"): TenantData {
       staffId: "st-owner",
       customerId: "cus-2",
       customerName: "Marek Sramek",
+      customerEmail: "marek@example.com",
+      customerPhone: "+420777000222",
+      customFieldValues: {},
       startAt: "2026-01-12T10:30:00.000Z",
       endAt: "2026-01-12T11:00:00.000Z",
       timezone: "Europe/Prague",
@@ -122,6 +128,32 @@ function makeTenantData(tenantSlug: "barber" | "carservice"): TenantData {
       plan: isBarber ? "business" : "lite",
       currency: "CZK",
       staffSelectionEnabled: true,
+      customFields: isBarber
+        ? [
+            {
+              id: "note",
+              label: "Poznamka",
+              type: "textarea",
+              required: false,
+              placeholder: "Napiste poznamku k rezervaci",
+            },
+          ]
+        : [
+            {
+              id: "plate",
+              label: "SPZ vozidla",
+              type: "text",
+              required: true,
+              placeholder: "1AB2345",
+            },
+            {
+              id: "note",
+              label: "Poznamka",
+              type: "textarea",
+              required: false,
+              placeholder: "Co je potreba zkontrolovat",
+            },
+          ],
       customerReadMode: "all-readonly",
       updatedAt: BASE_TIMESTAMP,
     },

@@ -1,5 +1,13 @@
 export type TenantPlan = "starter" | "lite" | "business" | "ultimate"
 
+export interface TenantCustomField {
+  id: string
+  label: string
+  type: "text" | "textarea"
+  required: boolean
+  placeholder?: string
+}
+
 export interface TenantConfig {
   tenantSlug: string
   tenantName: string
@@ -8,6 +16,7 @@ export interface TenantConfig {
   plan: TenantPlan
   currency: string
   staffSelectionEnabled: boolean
+  customFields: TenantCustomField[]
   customerReadMode: "served-only" | "all-readonly"
   updatedAt: string
 }
@@ -59,6 +68,9 @@ export interface Booking {
   staffId: string | null
   customerId: string
   customerName: string
+  customerEmail: string
+  customerPhone: string
+  customFieldValues: Record<string, string>
   startAt: string
   endAt: string
   timezone: string
@@ -173,6 +185,9 @@ export interface CreateBookingInput {
   staffId?: string
   customerId: string
   customerName: string
+  customerEmail: string
+  customerPhone: string
+  customFieldValues?: Record<string, string>
   startAt: string
 }
 
