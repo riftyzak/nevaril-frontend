@@ -211,6 +211,7 @@ export function SlotPicker({
                   <Link
                     key={slot.id}
                     href={href}
+                    data-testid={`slot-option-${slot.id}`}
                     onClick={() => {
                       pushEvent("select_slot", {
                         tenantSlug,

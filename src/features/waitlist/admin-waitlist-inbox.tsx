@@ -252,7 +252,7 @@ export function AdminWaitlistInbox({ tenantSlug, t }: Readonly<AdminWaitlistInbo
                     entry.serviceId
                   return (
                     <tr key={entry.id} className="border-t border-border">
-                      <td className="px-3 py-2">
+                      <td data-testid={`waitlist-status-${entry.id}`} className="px-3 py-2">
                         <p className="font-medium">{entry.customerName}</p>
                         <p className="text-xs text-muted-foreground">{entry.email}</p>
                         <p className="text-xs text-muted-foreground">{entry.phone}</p>
@@ -275,6 +275,7 @@ export function AdminWaitlistInbox({ tenantSlug, t }: Readonly<AdminWaitlistInbo
                         <Button
                           type="button"
                           size="sm"
+                          data-testid={`waitlist-assign-${entry.id}`}
                           disabled={entry.status !== "new"}
                           onClick={() => openAssign(entry)}
                         >
@@ -289,7 +290,7 @@ export function AdminWaitlistInbox({ tenantSlug, t }: Readonly<AdminWaitlistInbo
           </div>
 
           {notificationPreview ? (
-            <div className="rounded-md border border-border bg-muted/40 p-3 text-sm">
+            <div data-testid="waitlist-notification-preview" className="rounded-md border border-border bg-muted/40 p-3 text-sm">
               <p className="font-medium">{t.wouldSendTitle}</p>
               <p className="mt-1 text-muted-foreground">{notificationPreview.email}</p>
               <p className="text-muted-foreground">{notificationPreview.sms}</p>
@@ -309,6 +310,7 @@ export function AdminWaitlistInbox({ tenantSlug, t }: Readonly<AdminWaitlistInbo
             <label className="grid gap-1 text-sm">
               <span className="text-muted-foreground">{t.staff}</span>
               <select
+                data-testid="waitlist-assign-staff"
                 value={selectedStaffId}
                 onChange={(event) => setSelectedStaffId(event.target.value)}
                 className="h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -327,6 +329,7 @@ export function AdminWaitlistInbox({ tenantSlug, t }: Readonly<AdminWaitlistInbo
                 <span className="text-muted-foreground">{t.date}</span>
                 <input
                   type="date"
+                  data-testid="waitlist-assign-date"
                   value={selectedDate}
                   onChange={(event) => setSelectedDate(event.target.value)}
                   className="h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -335,6 +338,7 @@ export function AdminWaitlistInbox({ tenantSlug, t }: Readonly<AdminWaitlistInbo
               <label className="grid gap-1 text-sm">
                 <span className="text-muted-foreground">{t.duration}</span>
                 <select
+                  data-testid="waitlist-assign-duration"
                   value={selectedDuration}
                   onChange={(event) => setSelectedDuration(Number(event.target.value) as ServiceVariant)}
                   className="h-9 rounded-md border border-input bg-background px-3 text-sm"
@@ -360,6 +364,7 @@ export function AdminWaitlistInbox({ tenantSlug, t }: Readonly<AdminWaitlistInbo
                       <button
                         key={slot.id}
                         type="button"
+                        data-testid={`waitlist-slot-${slot.id}`}
                         onClick={() => setSelectedStartAt(slot.startAt)}
                         className={`h-9 rounded-md border text-sm ${
                           selectedStartAt === slot.startAt
@@ -384,6 +389,7 @@ export function AdminWaitlistInbox({ tenantSlug, t }: Readonly<AdminWaitlistInbo
             </Button>
             <Button
               type="button"
+              data-testid="waitlist-assign-confirm"
               onClick={() => assignMutation.mutate()}
               disabled={!selectedStartAt || assignMutation.isPending}
             >

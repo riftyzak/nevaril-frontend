@@ -512,6 +512,7 @@ export function ServicesListPanel({ locale, tenantSlug, session, tenantSettings 
         {(servicesQuery.data ?? []).map((service) => (
           <Link
             key={service.id}
+            data-testid={`admin-service-link-${service.id}`}
             href={adminAppPath({ locale, tenantSlug, path: `/services/${service.id}` })}
             className="rounded-md border border-border p-3 text-sm hover:bg-muted"
           >
@@ -595,12 +596,19 @@ export function ServiceDetailPanel({
       <CardContent className="grid gap-3">
         <div className="grid gap-2">
           <Label htmlFor="service-name">{t("serviceDetail.name")}</Label>
-          <Input id="service-name" defaultValue={service.name} onChange={(event) => setName(event.target.value)} disabled={!canUpdateService} />
+          <Input
+            id="service-name"
+            data-testid="admin-service-name"
+            defaultValue={service.name}
+            onChange={(event) => setName(event.target.value)}
+            disabled={!canUpdateService}
+          />
         </div>
         <div className="grid gap-2">
           <Label htmlFor="service-description">{t("serviceDetail.descriptionLabel")}</Label>
           <textarea
             id="service-description"
+            data-testid="admin-service-description"
             defaultValue={service.description}
             onChange={(event) => setDescription(event.target.value)}
             disabled={!canUpdateService}
@@ -617,7 +625,12 @@ export function ServiceDetailPanel({
           />
         </div>
         <div className="flex gap-2">
-          <Button type="button" onClick={() => updateMutation.mutate()} disabled={!canUpdateService || updateMutation.isPending}>
+          <Button
+            type="button"
+            data-testid="admin-service-save"
+            onClick={() => updateMutation.mutate()}
+            disabled={!canUpdateService || updateMutation.isPending}
+          >
             {t("common.save")}
           </Button>
           <Link

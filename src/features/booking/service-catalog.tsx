@@ -95,7 +95,7 @@ export function ServiceCatalog({ locale, tenantSlug, uiQuery, t }: Readonly<Serv
           </h2>
           <div className="grid gap-3 md:grid-cols-2">
             {services.map((service) => (
-              <Card key={service.id}>
+              <Card key={service.id} data-testid={`service-card-${service.id}`}>
                 <CardHeader>
                   <CardTitle>{service.name}</CardTitle>
                   <CardDescription>{service.description}</CardDescription>
@@ -112,6 +112,7 @@ export function ServiceCatalog({ locale, tenantSlug, uiQuery, t }: Readonly<Serv
                     href={`${tenantUrl({ locale, tenantSlug, path: `/book/${service.id}` })}?variant=60${
                       uiQuery ? `&${uiQuery}` : ""
                     }`}
+                    data-testid={`service-open-${service.id}`}
                     onClick={() => {
                       pushEvent("select_service", {
                         tenantSlug,

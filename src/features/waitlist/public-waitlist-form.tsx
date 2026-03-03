@@ -145,6 +145,7 @@ export function PublicWaitlistForm({ tenantSlug, t }: Readonly<PublicWaitlistFor
             <Label htmlFor="waitlist-service">{t.service}</Label>
             <select
               id="waitlist-service"
+              data-testid="waitlist-service"
               {...form.register("serviceId")}
               className="h-9 rounded-md border border-input bg-background px-3 text-sm"
             >
@@ -163,7 +164,7 @@ export function PublicWaitlistForm({ tenantSlug, t }: Readonly<PublicWaitlistFor
           <div className="grid gap-2 sm:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="waitlist-date">{t.date}</Label>
-              <Input id="waitlist-date" type="date" {...form.register("preferredDate")} />
+              <Input id="waitlist-date" data-testid="waitlist-date" type="date" {...form.register("preferredDate")} />
               {form.formState.errors.preferredDate ? (
                 <p className="text-xs text-destructive">{form.formState.errors.preferredDate.message}</p>
               ) : null}
@@ -173,6 +174,7 @@ export function PublicWaitlistForm({ tenantSlug, t }: Readonly<PublicWaitlistFor
               <Label htmlFor="waitlist-window">{t.timeWindow}</Label>
               <select
                 id="waitlist-window"
+                data-testid="waitlist-window"
                 {...form.register("preferredTimeLabel")}
                 className="h-9 rounded-md border border-input bg-background px-3 text-sm"
               >
@@ -196,28 +198,28 @@ export function PublicWaitlistForm({ tenantSlug, t }: Readonly<PublicWaitlistFor
           <div className="grid gap-2 sm:grid-cols-3">
             <div className="grid gap-2">
               <Label htmlFor="waitlist-name">{t.name}</Label>
-              <Input id="waitlist-name" {...form.register("name")} />
+              <Input id="waitlist-name" data-testid="waitlist-name" {...form.register("name")} />
               {form.formState.errors.name ? (
                 <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>
               ) : null}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="waitlist-email">{t.email}</Label>
-              <Input id="waitlist-email" type="email" {...form.register("email")} />
+              <Input id="waitlist-email" data-testid="waitlist-email" type="email" {...form.register("email")} />
               {form.formState.errors.email ? (
                 <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
               ) : null}
             </div>
             <div className="grid gap-2">
               <Label htmlFor="waitlist-phone">{t.phone}</Label>
-              <Input id="waitlist-phone" {...form.register("phone")} />
+              <Input id="waitlist-phone" data-testid="waitlist-phone" {...form.register("phone")} />
               {form.formState.errors.phone ? (
                 <p className="text-xs text-destructive">{form.formState.errors.phone.message}</p>
               ) : null}
             </div>
           </div>
 
-          <Button type="submit" disabled={mutation.isPending || servicesQuery.isLoading}>
+          <Button type="submit" data-testid="waitlist-submit" disabled={mutation.isPending || servicesQuery.isLoading}>
             {mutation.isPending ? t.submitLoading : t.submit}
           </Button>
         </form>

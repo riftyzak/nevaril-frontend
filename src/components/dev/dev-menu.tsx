@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useQueryClient } from "@tanstack/react-query"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,6 +17,8 @@ import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
 
 export function DevMenu() {
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const queryClient = useQueryClient()
   const { tenantSlug, locale } = useTenant()
   const { data: tenantConfig } = useTenantConfig(tenantSlug)
@@ -39,6 +41,7 @@ export function DevMenu() {
         )
   const [role, setRole] = useState<"owner" | "staff">(initialSession?.role ?? "owner")
   const [staffId, setStaffId] = useState(initialSession?.staffId ?? "st-1")
+  const e2eAppliedRef = useRef(false)
 
   function applySettings() {
     const next = setDevSettings({ latencyMs, errorRatePct })
@@ -61,6 +64,35 @@ export function DevMenu() {
     document.cookie = `${SESSION_COOKIE_NAME}=${payload}; path=/; max-age=2592000; samesite=lax`
     router.refresh()
   }
+
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_E2E !== "1") return
+    if (e2eAppliedRef.current) return
+    if (searchParams.get("__e2e") !== "reset") return
+
+    e2eAppliedRef.current = true
+    resetSeed()
+    setDevSettings({ latencyMs: 0, errorRatePct: 0 })
+    const nextRole = searchParams.get("__role") === "staff" ? "staff" : "owner"
+    const nextStaffId = searchParams.get("__staff") ?? "st-1"
+
+    const payload = serializeSessionCookieValue({
+      role: nextRole,
+      tenantSlug,
+      staffId: nextRole === "staff" ? nextStaffId : null,
+    })
+    document.cookie = `${SESSION_COOKIE_NAME}=${payload}; path=/; max-age=2592000; samesite=lax`
+
+    void queryClient.invalidateQueries().then(() => {
+      const next = new URLSearchParams(searchParams.toString())
+      next.delete("__e2e")
+      next.delete("__role")
+      next.delete("__staff")
+      const query = next.toString()
+      router.replace(query ? `${pathname}?${query}` : pathname)
+      router.refresh()
+    })
+  }, [pathname, queryClient, router, searchParams, tenantSlug])
 
   async function applyPlan() {
     if (!tenantConfig) return

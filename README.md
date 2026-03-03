@@ -1,36 +1,172 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nevaril Frontend (Next.js App Router)
 
-## Getting Started
+Frontend-first multi-tenant booking SaaS demo for small businesses and rentals.
 
-First, run the development server:
+## Stack
+
+- Next.js App Router + TypeScript + TailwindCSS + shadcn/ui
+- TanStack Query + local mock API
+- react-hook-form + zod
+- next-intl (`cs`, `sk`, `en`)
+- Recharts
+- date-fns + date-fns-tz
+- GTM-ready event utility (`window.dataLayer` only)
+
+## Setup
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Core scripts:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run lint
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Storybook scripts:
 
-## Learn More
+```bash
+npm run storybook
+npm run build-storybook
+```
 
-To learn more about Next.js, take a look at the following resources:
+Playwright scripts:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run test:e2e
+npm run test:e2e:ui
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Routing Modes
 
-## Deploy on Vercel
+Routing mode is controlled by:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+NEXT_PUBLIC_TENANT_ROUTING_MODE=hybrid|path|subdomain
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Internal canonical links use path form:
+
+- `/{locale}/t/{tenantSlug}/...`
+
+Supported external modes:
+
+- Path mode: `http://localhost:3000/cs/t/barber/book`
+- Subdomain mode: `http://barber.localhost:3000/cs/book`
+- Hybrid mode: both work, subdomain requests rewrite to canonical internal path.
+
+`/` is redirected to default locale `/cs`.
+
+## Mock DB and Seed Governance
+
+Mock persistence is local-first and tenant-scoped:
+
+- Primary persistence: `localStorage`
+- Seed/version governance: `DB_VERSION` in [`src/lib/mock/seed.ts`](src/lib/mock/seed.ts)
+- Storage helpers: [`src/lib/mock/storage.ts`](src/lib/mock/storage.ts)
+- Deterministic reset: `resetSeed()`
+
+DevMenu supports:
+
+- reset seed
+- latency override (ms)
+- error rate override (%)
+- active tenant + locale preview
+- mock role/session switching
+- plan switching
+
+## Roles and Plan Gating
+
+Session entry point:
+
+- [`src/lib/auth/getSession.ts`](src/lib/auth/getSession.ts)
+
+Permissions engine:
+
+- `can(...)` + `getModuleAccess(...)` in [`src/lib/auth/permissions.ts`](src/lib/auth/permissions.ts)
+- owner vs staff scopes (including own-bookings scope by `assignedStaffId`)
+
+Plan gating:
+
+- features model: [`src/lib/plans/features.ts`](src/lib/plans/features.ts)
+- gate check: [`src/lib/plans/gates.ts`](src/lib/plans/gates.ts)
+
+## GTM Prepared Events
+
+Utility:
+
+- [`src/lib/gtm/useGtm.ts`](src/lib/gtm/useGtm.ts)
+
+Implemented events:
+
+- `view_form`
+- `select_service`
+- `select_staff`
+- `select_slot`
+- `submit_booking`
+- `booking_confirmed`
+- `open_manage_booking`
+- `cancel_booking`
+- `reschedule_booking`
+- `start_checkout_mock`
+
+To verify manually in browser console:
+
+```js
+window.dataLayer = []
+```
+
+Then run a flow and inspect `window.dataLayer`.
+
+## Storybook Notes
+
+Storybook stories are under `src/stories/` and include:
+
+- theme tokens/typography preview
+- public/admin shell mocks
+- booking component stories
+- guards UX stories (locked tooltip / not-authorized / locked-by-plan)
+
+## Playwright Smoke Suite
+
+Smoke spec: [`tests/smoke.spec.js`](tests/smoke.spec.js)
+
+Scenarios:
+
+- booking happy path
+- manage reschedule
+- owner service edit persistence
+- waitlist create + assign
+- RBAC redirect (staff -> owner-only route)
+
+Deterministic test reset in test env:
+
+- Start app with `NEXT_PUBLIC_E2E=1` (configured in `playwright.config.js`)
+- Visit any public page with `?__e2e=reset`
+- Optional session overrides:
+  - `__role=owner|staff`
+  - `__staff=st-1`
+
+Example:
+
+```text
+/cs/t/barber/book?__e2e=reset&__role=staff&__staff=st-1
+```
+
+This reset path is handled in DevMenu logic only when `NEXT_PUBLIC_E2E=1`.
+
+## Backend Wiring Direction
+
+Mock API contracts live in:
+
+- [`src/lib/api/types.ts`](src/lib/api/types.ts)
+- [`src/lib/api/index.ts`](src/lib/api/index.ts)
+
+To wire a real backend later:
+
+1. Keep function signatures in `src/lib/api/index.ts`.
+2. Replace local storage implementation with network adapters.
+3. Preserve TanStack Query hooks and query keys to minimize UI churn.

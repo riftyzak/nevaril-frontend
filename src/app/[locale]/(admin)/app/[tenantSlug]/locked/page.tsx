@@ -27,7 +27,7 @@ export default async function PlanLockedPage({
 
   return (
     <AdminShell locale={locale} navItems={navItems} session={session} tenantSettings={tenantSettings}>
-      <section className="max-w-xl rounded-xl border border-border bg-card p-6">
+      <section data-testid="locked-plan-screen" className="max-w-xl rounded-xl border border-border bg-card p-6">
         <h1 className="text-xl font-semibold">{t("title")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {t("description", { requiredPlan: (requiredPlan ?? "business").toUpperCase() })}

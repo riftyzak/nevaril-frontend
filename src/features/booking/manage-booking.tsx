@@ -224,6 +224,7 @@ export function ManageBooking({
           <div className="mt-2 flex flex-wrap gap-2">
             <Link
               href={rescheduleHref}
+              data-testid="manage-reschedule-link"
               aria-disabled={!canModify || isCancelled}
               className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 aria-disabled:pointer-events-none aria-disabled:opacity-50"
             >
@@ -231,6 +232,7 @@ export function ManageBooking({
             </Link>
             <Button
               type="button"
+              data-testid="manage-cancel-button"
               variant="outline"
               disabled={!canModify || isCancelled || cancelMutation.isPending}
               onClick={() => setConfirmOpen(true)}
@@ -254,6 +256,7 @@ export function ManageBooking({
             <Button
               type="button"
               variant="destructive"
+              data-testid="manage-confirm-cancel"
               onClick={() => {
                 setActionError(null)
                 setActionSuccess(null)

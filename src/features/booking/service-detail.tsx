@@ -137,6 +137,7 @@ export function ServiceDetail({
                 <Button
                   key={option}
                   type="button"
+                  data-testid={`variant-option-${option}`}
                   variant={option === variant ? "default" : "outline"}
                   onClick={() =>
                     router.replace(setParam(pathname, new URLSearchParams(searchParams), "variant", String(option)))
@@ -153,6 +154,7 @@ export function ServiceDetail({
               <Label htmlFor="staff-select">{t.chooseStaff}</Label>
               <select
                 id="staff-select"
+                data-testid="staff-select"
                 value={staffId ?? ""}
                 onChange={(event) => {
                   const selectedStaffId = event.target.value || undefined

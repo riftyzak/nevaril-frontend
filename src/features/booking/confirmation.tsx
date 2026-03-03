@@ -286,6 +286,7 @@ export function Confirmation({
           {effectiveMode === "manage" && startAt ? (
             <Button
               type="button"
+              data-testid="manage-confirm-reschedule"
               onClick={() => {
                 setSubmitError(null)
                 setSubmitSuccess(null)
@@ -302,6 +303,7 @@ export function Confirmation({
               </Button>
               <Link
                 href={localePath({ locale, path: `/m/${booking.bookingToken}` })}
+                data-testid="manage-booking-link"
                 className="inline-flex h-9 items-center justify-center rounded-md border border-border px-4 text-sm font-medium hover:bg-muted"
               >
                 {t.manageBooking}

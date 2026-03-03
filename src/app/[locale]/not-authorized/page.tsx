@@ -13,7 +13,7 @@ export default async function NotAuthorizedPage({
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-xl items-center px-4">
-      <section className="w-full rounded-xl border border-border bg-card p-6">
+      <section data-testid="not-authorized-screen" className="w-full rounded-xl border border-border bg-card p-6">
         <h1 className="text-xl font-semibold">{t("title")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">{t("description")}</p>
         <Link

@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import type { CSSProperties, ReactNode } from "react"
 import { getTranslations } from "next-intl/server"
 
@@ -16,7 +17,14 @@ async function LogoPlaceholder({
   return (
     <div className="flex items-center gap-3">
       {logoUrl ? (
-        <img src={logoUrl} alt={t("brandName")} className="size-8 rounded-lg object-cover ring-1 ring-border" />
+        <Image
+          src={logoUrl}
+          alt={t("brandName")}
+          width={32}
+          height={32}
+          unoptimized
+          className="size-8 rounded-lg object-cover ring-1 ring-border"
+        />
       ) : (
         <div className="size-8 rounded-lg bg-primary/20 ring-1 ring-border" />
       )}

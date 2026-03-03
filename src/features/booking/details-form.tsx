@@ -201,7 +201,7 @@ export function DetailsForm({
             >
               <div className="grid gap-2">
                 <Label htmlFor="booking-name">{t.name}</Label>
-                <Input id="booking-name" {...form.register("name")} />
+                <Input id="booking-name" data-testid="booking-name" {...form.register("name")} />
                 {form.formState.errors.name ? (
                   <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>
                 ) : null}
@@ -209,7 +209,7 @@ export function DetailsForm({
 
               <div className="grid gap-2">
                 <Label htmlFor="booking-email">{t.email}</Label>
-                <Input id="booking-email" type="email" {...form.register("email")} />
+                <Input id="booking-email" data-testid="booking-email" type="email" {...form.register("email")} />
                 {form.formState.errors.email ? (
                   <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
                 ) : null}
@@ -217,7 +217,7 @@ export function DetailsForm({
 
               <div className="grid gap-2">
                 <Label htmlFor="booking-phone">{t.phone}</Label>
-                <Input id="booking-phone" {...form.register("phone")} />
+                <Input id="booking-phone" data-testid="booking-phone" {...form.register("phone")} />
                 {form.formState.errors.phone ? (
                   <p className="text-xs text-destructive">{form.formState.errors.phone.message}</p>
                 ) : null}
@@ -264,7 +264,7 @@ export function DetailsForm({
                 </div>
               ) : null}
 
-              <Button type="submit" disabled={mutation.isPending}>
+              <Button type="submit" data-testid="booking-submit" disabled={mutation.isPending}>
                 {mutation.isPending ? t.submitting : t.submit}
               </Button>
             </form>
