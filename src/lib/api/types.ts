@@ -128,6 +128,18 @@ export interface Voucher {
   updatedAt: string
 }
 
+export interface NotificationTemplates {
+  sms: string
+  email: string
+  updatedAt: string
+}
+
+export interface LoyaltyConfig {
+  points: number
+  nextBookingLabel: string
+  updatedAt: string
+}
+
 export interface AnalyticsPoint {
   id: string
   tenantSlug: string
@@ -170,6 +182,8 @@ export interface TenantData {
   waitlist: WaitlistEntry[]
   vouchers: Voucher[]
   analytics: AnalyticsPoint[]
+  notificationTemplates: NotificationTemplates
+  loyaltyConfig: LoyaltyConfig
 }
 
 export interface MockDatabase {
@@ -258,4 +272,24 @@ export interface CreateVoucherOrderInput {
   type: VoucherType
   amount: number
   currency: string
+}
+
+export interface UpdateNotificationTemplatesInput {
+  tenantSlug: string
+  expectedUpdatedAt: string
+  sms: string
+  email: string
+}
+
+export interface UpdateLoyaltyConfigInput {
+  tenantSlug: string
+  expectedUpdatedAt: string
+  points: number
+  nextBookingLabel: string
+}
+
+export interface UpdateTenantPlanInput {
+  tenantSlug: string
+  expectedUpdatedAt: string
+  plan: TenantPlan
 }

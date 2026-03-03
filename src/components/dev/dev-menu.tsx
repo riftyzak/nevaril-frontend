@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { parseSessionCookieValue, SESSION_COOKIE_NAME, serializeSessionCookieValue } from "@/lib/auth/session-cookie"
+import { updateTenantPlan } from "@/lib/api"
+import type { TenantPlan } from "@/lib/api/types"
 import { getDevSettings, resetSeed, setDevSettings } from "@/lib/mock/storage"
 import { useTenant } from "@/lib/tenant/tenant-provider"
 import { useServices } from "@/lib/query/hooks/use-services"
@@ -24,6 +26,8 @@ export function DevMenu() {
   const [open, setOpen] = useState(false)
   const [latencyMs, setLatencyMs] = useState(() => getDevSettings().latencyMs)
   const [errorRatePct, setErrorRatePct] = useState(() => getDevSettings().errorRatePct)
+  const [planOverride, setPlanOverride] = useState<TenantPlan | null>(null)
+  const plan = planOverride ?? tenantConfig?.plan ?? "business"
   const initialSession =
     typeof document === "undefined"
       ? null
@@ -58,6 +62,19 @@ export function DevMenu() {
     router.refresh()
   }
 
+  async function applyPlan() {
+    if (!tenantConfig) return
+    const result = await updateTenantPlan({
+      tenantSlug,
+      expectedUpdatedAt: tenantConfig.updatedAt,
+      plan,
+    })
+    if (result.ok) {
+      await queryClient.invalidateQueries()
+      router.refresh()
+    }
+  }
+
   return (
     <div className="fixed right-4 bottom-4 z-50 w-[300px] max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-card p-3 shadow-lg">
       <div className="mb-2 flex items-center justify-between gap-2">
@@ -78,6 +95,19 @@ export function DevMenu() {
           <p>
             Config: <span className="font-medium text-foreground">{tenantConfig?.tenantName ?? "loading..."}</span>
           </p>
+          <label className="grid gap-1">
+            <span>Plan</span>
+            <select
+              value={plan}
+              onChange={(event) => setPlanOverride(event.target.value as TenantPlan)}
+              className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+            >
+              <option value="starter">starter</option>
+              <option value="lite">lite</option>
+              <option value="business">business</option>
+              <option value="ultimate">ultimate</option>
+            </select>
+          </label>
           <p>
             Services: <span className="font-medium text-foreground">{services?.length ?? 0}</span>
           </p>
@@ -130,6 +160,9 @@ export function DevMenu() {
           <div className="mt-1 flex gap-2">
             <Button type="button" size="xs" className="flex-1" onClick={applySession}>
               Apply Role
+            </Button>
+            <Button type="button" size="xs" className="flex-1" onClick={() => void applyPlan()}>
+              Apply Plan
             </Button>
             <Button type="button" size="xs" className="flex-1" onClick={applySettings}>
               Apply

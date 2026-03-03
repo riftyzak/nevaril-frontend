@@ -1,13 +1,17 @@
 import Link from "next/link"
 import type { ReactNode } from "react"
 import {
+  BellRing,
   CalendarDays,
   ChartColumnBig,
   CircleUserRound,
   ListTodo,
+  MessageSquareQuote,
   Settings,
+  TicketPercent,
   UserCog,
   Users,
+  WalletCards,
   Wrench,
 } from "lucide-react"
 import { getTranslations } from "next-intl/server"
@@ -16,9 +20,11 @@ import { DevMenu } from "@/components/dev/dev-menu"
 import { LocaleSwitcher } from "@/components/locale-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Badge } from "@/components/ui/badge"
+import type { AdminNavItem } from "@/lib/auth/admin-nav"
 import { getModuleAccess } from "@/lib/auth/permissions"
-import type { MockSession, PermissionModule, TenantPermissionSettings } from "@/lib/auth/types"
+import type { MockSession, TenantPermissionSettings } from "@/lib/auth/types"
 import { type AppLocale } from "@/i18n/locales"
+import { isFeatureEnabled } from "@/lib/plans/gates"
 
 const navIcons = {
   dashboard: ChartColumnBig,
@@ -28,10 +34,13 @@ const navIcons = {
   services: Wrench,
   staff: UserCog,
   waitlist: ListTodo,
+  notifications: BellRing,
+  loyalty: WalletCards,
+  vouchers: TicketPercent,
+  reviews: MessageSquareQuote,
+  analytics: ChartColumnBig,
   settings: Settings,
 } as const
-
-type AdminNavKey = keyof typeof navIcons
 
 export async function AdminShell({
   children,
@@ -41,7 +50,7 @@ export async function AdminShell({
   tenantSettings,
 }: Readonly<{
   children: ReactNode
-  navItems: Array<{ href: string; key: AdminNavKey; module: PermissionModule }>
+  navItems: AdminNavItem[]
   locale: AppLocale
   session: MockSession
   tenantSettings: TenantPermissionSettings
@@ -67,10 +76,14 @@ export async function AdminShell({
               {navItems.map((item) => {
                 const Icon = navIcons[item.key]
                 const access = getModuleAccess(session, item.module, tenantSettings)
+                const planEnabled = item.requiredFeature
+                  ? isFeatureEnabled(session.plan, item.requiredFeature)
+                  : true
+                const enabled = access.enabled && planEnabled
                 if (!access.visible) return null
                 return (
                   <li key={item.key}>
-                    {access.enabled ? (
+                    {enabled ? (
                       <Link
                         href={item.href}
                         className="flex items-center gap-2 rounded-lg border border-transparent px-3 py-2 text-sm text-muted-foreground hover:border-border hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
@@ -80,7 +93,13 @@ export async function AdminShell({
                       </Link>
                     ) : (
                       <div
-                        title={access.reason ? t(`lockedReason.${access.reason}`) : undefined}
+                        title={
+                          !planEnabled
+                            ? t("lockedReason.plan")
+                            : access.reason
+                              ? t(`lockedReason.${access.reason}`)
+                              : undefined
+                        }
                         className="flex cursor-not-allowed items-center gap-2 rounded-lg border border-dashed border-border px-3 py-2 text-sm text-muted-foreground/70"
                       >
                         <Icon className="size-4" />

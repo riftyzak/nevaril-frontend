@@ -12,6 +12,9 @@ import type {
 } from "@/lib/auth/types"
 import { getDb } from "@/lib/mock/storage"
 import { localePath } from "@/lib/tenant/tenant-url"
+import { requiredPlanForFeature, isFeatureEnabled } from "@/lib/plans/gates"
+import type { PlanFeature } from "@/lib/plans/features"
+import { adminAppPath } from "@/lib/tenant/tenant-url"
 
 interface RequireAccessInput {
   locale: string
@@ -50,4 +53,26 @@ export async function requireRouteAccess(input: RequireAccessInput): Promise<{
   }
 
   return { session, tenantSettings }
+}
+
+interface RequirePlanInput {
+  locale: AppLocale
+  tenantSlug: string
+  feature: PlanFeature
+  session: MockSession
+}
+
+export function requirePlanAccess(input: RequirePlanInput) {
+  if (isFeatureEnabled(input.session.plan, input.feature)) {
+    return
+  }
+
+  const minPlan = requiredPlanForFeature(input.feature)
+  redirect(
+    `${adminAppPath({
+      locale: input.locale,
+      tenantSlug: input.tenantSlug,
+      path: "/locked",
+    })}?feature=${encodeURIComponent(input.feature)}&requiredPlan=${encodeURIComponent(minPlan)}`
+  )
 }

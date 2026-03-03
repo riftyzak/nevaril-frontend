@@ -14,6 +14,8 @@ import type {
   CreateVoucherOrderInput,
   Customer,
   GetAvailabilityInput,
+  LoyaltyConfig,
+  NotificationTemplates,
   Service,
   ServiceVariant,
   Staff,
@@ -22,6 +24,9 @@ import type {
   UpdateBookingInput,
   UpdateServiceInput,
   UpdateStaffNotesInput,
+  UpdateLoyaltyConfigInput,
+  UpdateNotificationTemplatesInput,
+  UpdateTenantPlanInput,
   UpdateCustomerTagsInput,
   Voucher,
   WaitlistEntry,
@@ -150,6 +155,147 @@ export async function getTenantConfig(tenantSlug: string): Promise<ApiResult<Ten
   if (!tenantResult.ok) return tenantResult
 
   return ok(tenantResult.data.config)
+}
+
+export async function updateTenantPlan(input: UpdateTenantPlanInput): Promise<ApiResult<TenantConfig>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(input.tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  if (tenantResult.data.config.updatedAt !== input.expectedUpdatedAt) {
+    return fail(
+      apiError("CONFLICT", "Tenant config was modified by another request", 409, {
+        expectedUpdatedAt: input.expectedUpdatedAt,
+        actualUpdatedAt: tenantResult.data.config.updatedAt,
+      })
+    )
+  }
+
+  const updated: TenantConfig = {
+    ...tenantResult.data.config,
+    plan: input.plan,
+    updatedAt: nowIso(),
+  }
+
+  mutateDb((current) => {
+    const tenant = current.tenants[input.tenantSlug]
+    return {
+      ...current,
+      tenants: {
+        ...current.tenants,
+        [input.tenantSlug]: {
+          ...tenant,
+          config: updated,
+        },
+      },
+    }
+  })
+
+  return ok(updated)
+}
+
+export async function getNotificationTemplates(tenantSlug: string): Promise<ApiResult<NotificationTemplates>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  return ok(tenantResult.data.notificationTemplates)
+}
+
+export async function updateNotificationTemplates(
+  input: UpdateNotificationTemplatesInput
+): Promise<ApiResult<NotificationTemplates>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(input.tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  const currentTemplates = tenantResult.data.notificationTemplates
+  if (currentTemplates.updatedAt !== input.expectedUpdatedAt) {
+    return fail(
+      apiError("CONFLICT", "Templates were modified by another request", 409, {
+        expectedUpdatedAt: input.expectedUpdatedAt,
+        actualUpdatedAt: currentTemplates.updatedAt,
+      })
+    )
+  }
+
+  const updated: NotificationTemplates = {
+    sms: input.sms,
+    email: input.email,
+    updatedAt: nowIso(),
+  }
+
+  mutateDb((current) => {
+    const tenant = current.tenants[input.tenantSlug]
+    return {
+      ...current,
+      tenants: {
+        ...current.tenants,
+        [input.tenantSlug]: {
+          ...tenant,
+          notificationTemplates: updated,
+        },
+      },
+    }
+  })
+
+  return ok(updated)
+}
+
+export async function getLoyaltyConfig(tenantSlug: string): Promise<ApiResult<LoyaltyConfig>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  return ok(tenantResult.data.loyaltyConfig)
+}
+
+export async function updateLoyaltyConfig(input: UpdateLoyaltyConfigInput): Promise<ApiResult<LoyaltyConfig>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(input.tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  const currentConfig = tenantResult.data.loyaltyConfig
+  if (currentConfig.updatedAt !== input.expectedUpdatedAt) {
+    return fail(
+      apiError("CONFLICT", "Loyalty config was modified by another request", 409, {
+        expectedUpdatedAt: input.expectedUpdatedAt,
+        actualUpdatedAt: currentConfig.updatedAt,
+      })
+    )
+  }
+
+  const updated: LoyaltyConfig = {
+    points: input.points,
+    nextBookingLabel: input.nextBookingLabel,
+    updatedAt: nowIso(),
+  }
+
+  mutateDb((current) => {
+    const tenant = current.tenants[input.tenantSlug]
+    return {
+      ...current,
+      tenants: {
+        ...current.tenants,
+        [input.tenantSlug]: {
+          ...tenant,
+          loyaltyConfig: updated,
+        },
+      },
+    }
+  })
+
+  return ok(updated)
 }
 
 export async function listServices(tenantSlug: string): Promise<ApiResult<Service[]>> {

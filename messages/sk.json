@@ -25,10 +25,16 @@
         "services": "Služby",
         "staff": "Pracovníci",
         "waitlist": "Čakacia listina",
+        "notifications": "Notifikácie",
+        "loyalty": "Vernosť",
+        "vouchers": "Vouchery",
+        "reviews": "Recenzie",
+        "analytics": "Analytika",
         "settings": "Nastavenia"
       },
       "lockedReason": {
-        "ownerOnly": "Len owner"
+        "ownerOnly": "Len owner",
+        "plan": "Vyžaduje vyšší plán"
       }
     }
   },
@@ -346,6 +352,91 @@
       "rolesDescription": "Owner-only správa rolí placeholder.",
       "tenantSettingsTitle": "Nastavenia tenanta",
       "tenantSettingsDescription": "Owner-only nastavenia tenanta placeholder."
+    }
+  },
+  "planLocked": {
+    "title": "Funkcia je zamknutá plánom",
+    "description": "Tento modul vyžaduje minimálne plán {requiredPlan}.",
+    "upgrade": "Upgradovať plán",
+    "back": "Späť na dashboard"
+  },
+  "advanced": {
+    "notifications": {
+      "title": "Šablóny notifikácií",
+      "description": "Upravte SMS a email šablóny s premennými.",
+      "sms": "SMS šablóna",
+      "email": "Email šablóna",
+      "save": "Uložiť šablóny",
+      "preview": "Živý náhľad",
+      "smsPreview": "Náhľad SMS",
+      "emailPreview": "Náhľad emailu",
+      "saved": "Šablóny uložené",
+      "saveError": "Uloženie šablón zlyhalo"
+    },
+    "loyalty": {
+      "title": "Vernostný wallet",
+      "description": "Wallet karta + placeholder push sekcie.",
+      "walletCard": "Wallet karta",
+      "points": "Body",
+      "addApple": "Pridať do Apple Wallet",
+      "addGoogle": "Pridať do Google Wallet",
+      "pointsLabel": "Body",
+      "nextBookingLabel": "Popis ďalšej rezervácie",
+      "save": "Uložiť vernosť",
+      "saved": "Vernostná konfigurácia uložená",
+      "pushTitle": "Push notifikácie",
+      "pushDescription": "Zástupná sekcia",
+      "pushPlaceholder": "Push automatizácia je v tomto míľniku placeholder."
+    },
+    "vouchers": {
+      "title": "Vouchery",
+      "description": "Tvorba voucher produktov a kódov v mock checkoute.",
+      "productType": "Typ produktu",
+      "amount": "Suma",
+      "checkout": "Spustiť checkout (mock)",
+      "checkoutStarted": "Mock checkout spustený",
+      "generatedCode": "Vygenerovaný kód",
+      "printableView": "Tlačiteľný náhľad",
+      "issued": "Vydané vouchery",
+      "types": {
+        "fixed": "Fixná hodnota",
+        "credit": "Predplatený kredit",
+        "percent": "Percentuálna zľava",
+        "pack": "Vstupný balíček"
+      }
+    },
+    "reviews": {
+      "title": "Recenzie",
+      "description": "Interné recenzie + placeholder Google Place ID.",
+      "googlePlaceId": "Google Place ID",
+      "internalTitle": "Interné recenzie",
+      "saveMock": "Uložiť (mock)"
+    },
+    "analytics": {
+      "revenue": "Mesačné tržby",
+      "bookings": "Rezervácie v čase",
+      "ratings": "Trend hodnotenia",
+      "topServices": "Top služby"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Plány",
+    "title": "Vyberte plán Nevaril",
+    "description": "Feature matrix pre Starter, Lite, Business a Ultimate.",
+    "currentPlan": "Aktuálny plán",
+    "feature": "Funkcia",
+    "plans": {
+      "starter": { "name": "Starter", "price": "€0" },
+      "lite": { "name": "Lite", "price": "€19" },
+      "business": { "name": "Business", "price": "€49" },
+      "ultimate": { "name": "Ultimate", "price": "€99" }
+    },
+    "features": {
+      "notifications": "Šablóny notifikácií",
+      "reviews": "Recenzie placeholder",
+      "loyalty": "Vernostný wallet UI",
+      "vouchers": "Vouchery",
+      "analytics": "Analytika"
     }
   }
 }

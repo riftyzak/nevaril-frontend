@@ -1,6 +1,6 @@
 import type { MockDatabase, ServiceVariant, TenantData } from "@/lib/api/types"
 
-export const DB_VERSION = 4
+export const DB_VERSION = 5
 
 const BASE_TIMESTAMP = "2026-01-10T10:00:00.000Z"
 
@@ -213,7 +213,32 @@ function makeTenantData(tenantSlug: "barber" | "carservice"): TenantData {
         label: "2026-01",
         value: isBarber ? 72 : 48,
       },
+      {
+        id: `${tenantSlug}-a-rating-jan`,
+        tenantSlug,
+        metric: "rating",
+        label: "2026-01",
+        value: isBarber ? 47 : 44,
+      },
+      {
+        id: `${tenantSlug}-a-top-jan`,
+        tenantSlug,
+        metric: "top-service",
+        label: services[0].name,
+        value: isBarber ? 31 : 22,
+      },
     ],
+    notificationTemplates: {
+      sms: "Hello {{customer_name}}, your {{service}} is on {{date}} at {{time}}.",
+      email:
+        "Hi {{customer_name}},\n\nYour reservation for {{service}} is confirmed for {{date}} {{time}}.\nManage: {{manage_link}}",
+      updatedAt: BASE_TIMESTAMP,
+    },
+    loyaltyConfig: {
+      points: isBarber ? 120 : 80,
+      nextBookingLabel: "Next reward at 200 points",
+      updatedAt: BASE_TIMESTAMP,
+    },
   }
 }
 

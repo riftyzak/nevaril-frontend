@@ -25,10 +25,16 @@
         "services": "Services",
         "staff": "Staff",
         "waitlist": "Waitlist",
+        "notifications": "Notifications",
+        "loyalty": "Loyalty",
+        "vouchers": "Vouchers",
+        "reviews": "Reviews",
+        "analytics": "Analytics",
         "settings": "Settings"
       },
       "lockedReason": {
-        "ownerOnly": "Owner only"
+        "ownerOnly": "Owner only",
+        "plan": "Upgrade plan required"
       }
     }
   },
@@ -346,6 +352,91 @@
       "rolesDescription": "Owner-only roles management placeholder.",
       "tenantSettingsTitle": "Tenant settings",
       "tenantSettingsDescription": "Owner-only tenant settings placeholder."
+    }
+  },
+  "planLocked": {
+    "title": "Feature locked by plan",
+    "description": "This module requires at least {requiredPlan}.",
+    "upgrade": "Upgrade plan",
+    "back": "Back to dashboard"
+  },
+  "advanced": {
+    "notifications": {
+      "title": "Notification templates",
+      "description": "Edit SMS and email templates with variables.",
+      "sms": "SMS template",
+      "email": "Email template",
+      "save": "Save templates",
+      "preview": "Live preview",
+      "smsPreview": "SMS preview",
+      "emailPreview": "Email preview",
+      "saved": "Templates saved",
+      "saveError": "Saving templates failed"
+    },
+    "loyalty": {
+      "title": "Loyalty wallet",
+      "description": "Wallet-style loyalty card and push placeholder.",
+      "walletCard": "Wallet card",
+      "points": "Points",
+      "addApple": "Add to Apple Wallet",
+      "addGoogle": "Add to Google Wallet",
+      "pointsLabel": "Points",
+      "nextBookingLabel": "Next booking label",
+      "save": "Save loyalty config",
+      "saved": "Loyalty config saved",
+      "pushTitle": "Push notifications",
+      "pushDescription": "Placeholder section",
+      "pushPlaceholder": "Push automation is placeholder in this milestone."
+    },
+    "vouchers": {
+      "title": "Vouchers",
+      "description": "Create voucher products and generate codes in mock checkout.",
+      "productType": "Product type",
+      "amount": "Amount",
+      "checkout": "Start checkout (mock)",
+      "checkoutStarted": "Mock checkout started",
+      "generatedCode": "Generated code",
+      "printableView": "Printable view",
+      "issued": "Issued vouchers",
+      "types": {
+        "fixed": "Fixed value",
+        "credit": "Prepaid credit",
+        "percent": "Percent discount",
+        "pack": "Entry pack"
+      }
+    },
+    "reviews": {
+      "title": "Reviews",
+      "description": "Internal reviews and Google Place ID placeholder.",
+      "googlePlaceId": "Google Place ID",
+      "internalTitle": "Internal reviews",
+      "saveMock": "Save (mock)"
+    },
+    "analytics": {
+      "revenue": "Revenue per month",
+      "bookings": "Bookings over time",
+      "ratings": "Ratings trend",
+      "topServices": "Top services"
+    }
+  },
+  "pricing": {
+    "eyebrow": "Plans",
+    "title": "Choose your Nevaril plan",
+    "description": "Feature matrix for Starter, Lite, Business and Ultimate.",
+    "currentPlan": "Current plan",
+    "feature": "Feature",
+    "plans": {
+      "starter": { "name": "Starter", "price": "€0" },
+      "lite": { "name": "Lite", "price": "€19" },
+      "business": { "name": "Business", "price": "€49" },
+      "ultimate": { "name": "Ultimate", "price": "€99" }
+    },
+    "features": {
+      "notifications": "Notification templates",
+      "reviews": "Reviews placeholder",
+      "loyalty": "Loyalty wallet UI",
+      "vouchers": "Vouchers",
+      "analytics": "Analytics"
     }
   }
 }
