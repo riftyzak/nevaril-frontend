@@ -22,6 +22,7 @@ import { Label } from "@/components/ui/label"
 import { type AppLocale } from "@/i18n/locales"
 import { createBooking } from "@/lib/api"
 import { type ServiceVariant } from "@/lib/api/types"
+import { useGtm } from "@/lib/gtm/useGtm"
 import { useService } from "@/lib/query/hooks/use-service"
 import { useStaff } from "@/lib/query/hooks/use-staff"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
@@ -79,6 +80,7 @@ export function DetailsForm({
 }: Readonly<DetailsFormProps>) {
   const router = useRouter()
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const { pushEvent } = useGtm()
   const tenantConfigQuery = useTenantConfig(tenantSlug)
   const serviceQuery = useService(tenantSlug, serviceId)
   const staffQuery = useStaff(tenantSlug)
@@ -150,6 +152,11 @@ export function DetailsForm({
       return result.data
     },
     onSuccess: (booking) => {
+      pushEvent("booking_confirmed", {
+        tenantSlug,
+        bookingId: booking.id,
+        token: booking.bookingToken,
+      })
       router.push(
         `${tenantUrl({ locale, tenantSlug, path: "/book/confirmation" })}?token=${encodeURIComponent(
           booking.bookingToken
@@ -181,7 +188,17 @@ export function DetailsForm({
             <CardDescription>{t.description}</CardDescription>
           </CardHeader>
           <CardContent>
-            <form className="grid gap-4" onSubmit={form.handleSubmit((values) => mutation.mutate(values))}>
+            <form
+              className="grid gap-4"
+              onSubmit={form.handleSubmit((values) => {
+                pushEvent("submit_booking", {
+                  tenantSlug,
+                  serviceId,
+                  duration: variant,
+                })
+                mutation.mutate(values)
+              })}
+            >
               <div className="grid gap-2">
                 <Label htmlFor="booking-name">{t.name}</Label>
                 <Input id="booking-name" {...form.register("name")} />

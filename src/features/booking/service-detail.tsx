@@ -16,6 +16,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { type AppLocale } from "@/i18n/locales"
 import { type ServiceVariant } from "@/lib/api/types"
+import { useGtm } from "@/lib/gtm/useGtm"
 import { useService } from "@/lib/query/hooks/use-service"
 import { useStaff } from "@/lib/query/hooks/use-staff"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
@@ -64,6 +65,7 @@ export function ServiceDetail({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { pushEvent } = useGtm()
 
   const serviceQuery = useService(tenantSlug, serviceId)
   const staffQuery = useStaff(tenantSlug)
@@ -152,16 +154,19 @@ export function ServiceDetail({
               <select
                 id="staff-select"
                 value={staffId ?? ""}
-                onChange={(event) =>
+                onChange={(event) => {
+                  const selectedStaffId = event.target.value || undefined
+                  if (selectedStaffId) {
+                    pushEvent("select_staff", {
+                      tenantSlug,
+                      serviceId,
+                      staffId: selectedStaffId,
+                    })
+                  }
                   router.replace(
-                    setParam(
-                      pathname,
-                      new URLSearchParams(searchParams),
-                      "staffId",
-                      event.target.value || undefined
-                    )
+                    setParam(pathname, new URLSearchParams(searchParams), "staffId", selectedStaffId)
                   )
-                }
+                }}
                 className="h-9 rounded-md border border-input bg-background px-3 text-sm"
               >
                 <option value="">{t.anyStaff}</option>

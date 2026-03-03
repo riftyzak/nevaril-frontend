@@ -29,6 +29,7 @@ import {
   updateLoyaltyConfig,
   updateNotificationTemplates,
 } from "@/lib/api"
+import { useGtm } from "@/lib/gtm/useGtm"
 import type { TenantPlan, VoucherType } from "@/lib/api/types"
 
 interface AdvancedProps {
@@ -239,6 +240,7 @@ export function LoyaltyPanel({ tenantSlug }: AdvancedProps) {
 export function VouchersPanel({ tenantSlug }: AdvancedProps) {
   const t = useTranslations("advanced.vouchers")
   const queryClient = useQueryClient()
+  const { pushEvent } = useGtm()
   const [type, setType] = useState<VoucherType>("fixed")
   const [amount, setAmount] = useState("100")
   const [selectedCode, setSelectedCode] = useState("")
@@ -296,7 +298,19 @@ export function VouchersPanel({ tenantSlug }: AdvancedProps) {
             <Label htmlFor="voucher-amount">{t("amount")}</Label>
             <Input id="voucher-amount" value={amount} onChange={(event) => setAmount(event.target.value)} />
           </div>
-          <Button type="button" onClick={() => mutation.mutate()}>{t("checkout")}</Button>
+          <Button
+            type="button"
+            onClick={() => {
+              pushEvent("start_checkout_mock", {
+                tenantSlug,
+                voucherType: type,
+                amount: Number(amount),
+              })
+              mutation.mutate()
+            }}
+          >
+            {t("checkout")}
+          </Button>
           {selectedCode ? (
             <div className="rounded-md border border-border bg-muted/40 p-3 text-sm">
               <p className="font-medium">{t("generatedCode")}: {selectedCode}</p>

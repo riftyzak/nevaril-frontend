@@ -17,6 +17,7 @@ import {
 import { type AppLocale } from "@/i18n/locales"
 import { getBookingByToken, updateBooking } from "@/lib/api"
 import { canModifyBooking } from "@/lib/booking/policy"
+import { useGtm } from "@/lib/gtm/useGtm"
 import { useService } from "@/lib/query/hooks/use-service"
 import { useStaff } from "@/lib/query/hooks/use-staff"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
@@ -83,6 +84,7 @@ export function Confirmation({
   const router = useRouter()
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null)
+  const { pushEvent } = useGtm()
   const tenantConfigQuery = useTenantConfig(tenantSlug)
   const staffQuery = useStaff(tenantSlug)
   const bookingQuery = useQuery({
@@ -166,7 +168,12 @@ export function Confirmation({
       }
       return result.data
     },
-    onSuccess: () => {
+    onSuccess: (updatedBooking) => {
+      pushEvent("reschedule_booking", {
+        bookingId: updatedBooking.id,
+        from: bookingQuery.data?.startAt,
+        to: updatedBooking.startAt,
+      })
       setSubmitSuccess(t.rescheduleSuccess)
       router.push(localePath({ locale, path: `/m/${token}` }))
     },

@@ -18,6 +18,7 @@ import {
 import { type AppLocale } from "@/i18n/locales"
 import { getAvailability } from "@/lib/api"
 import { type AvailabilitySlot, type ServiceVariant } from "@/lib/api/types"
+import { useGtm } from "@/lib/gtm/useGtm"
 import { useService } from "@/lib/query/hooks/use-service"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
 import { localePath, tenantUrl } from "@/lib/tenant/tenant-url"
@@ -72,6 +73,7 @@ export function SlotPicker({
   const tenantConfigQuery = useTenantConfig(tenantSlug)
   const serviceQuery = useService(tenantSlug, serviceId)
   const [date, setDate] = useState(initialDate)
+  const { pushEvent } = useGtm()
 
   const availabilityQuery = useQuery({
     queryKey: ["availability", tenantSlug, serviceId, variant, staffId ?? "any", date],
@@ -209,6 +211,15 @@ export function SlotPicker({
                   <Link
                     key={slot.id}
                     href={href}
+                    onClick={() => {
+                      pushEvent("select_slot", {
+                        tenantSlug,
+                        serviceId,
+                        staffId: slot.staffId ?? staffId ?? null,
+                        startAt: slot.startAt,
+                        duration: variant,
+                      })
+                    }}
                     className="flex h-10 items-center justify-between rounded-md border border-border px-3 text-sm hover:bg-muted"
                   >
                     <span>{label}</span>

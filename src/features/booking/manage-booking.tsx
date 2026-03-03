@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { formatInTimeZone } from "date-fns-tz"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -24,6 +24,7 @@ import {
 import { type AppLocale } from "@/i18n/locales"
 import { cancelBooking, getBookingByToken } from "@/lib/api"
 import { canModifyBooking } from "@/lib/booking/policy"
+import { useGtm } from "@/lib/gtm/useGtm"
 import { useService } from "@/lib/query/hooks/use-service"
 import { useStaff } from "@/lib/query/hooks/use-staff"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
@@ -71,7 +72,9 @@ export function ManageBooking({
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
   const [actionSuccess, setActionSuccess] = useState<string | null>(null)
+  const openedForBookingIdRef = useRef<string | null>(null)
   const queryClient = useQueryClient()
+  const { pushEvent } = useGtm()
 
   const bookingQuery = useQuery({
     queryKey: ["booking-token", bookingToken],
@@ -87,6 +90,16 @@ export function ManageBooking({
   const serviceQuery = useService(tenantSlug, bookingQuery.data?.serviceId ?? "")
   const staffQuery = useStaff(tenantSlug)
   const timezone = tenantConfigQuery.data?.timezone ?? bookingQuery.data?.timezone ?? "Europe/Prague"
+
+  useEffect(() => {
+    const booking = bookingQuery.data
+    if (!booking || openedForBookingIdRef.current === booking.id) return
+    openedForBookingIdRef.current = booking.id
+    pushEvent("open_manage_booking", {
+      bookingId: booking.id,
+      token: booking.bookingToken,
+    })
+  }, [bookingQuery.data, pushEvent])
 
   const cancelMutation = useMutation({
     mutationFn: async () => {
@@ -105,10 +118,13 @@ export function ManageBooking({
       }
       return result.data
     },
-    onSuccess: async () => {
+    onSuccess: async (booking) => {
       setConfirmOpen(false)
       setActionError(null)
       setActionSuccess(t.cancelSuccess)
+      pushEvent("cancel_booking", {
+        bookingId: booking.id,
+      })
       await queryClient.invalidateQueries({ queryKey: ["booking-token", bookingToken] })
     },
     onError: (error) => {

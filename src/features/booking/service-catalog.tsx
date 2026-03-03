@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { usePathname, useSearchParams } from "next/navigation"
 
 import { Badge } from "@/components/ui/badge"
 import {
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { type AppLocale } from "@/i18n/locales"
+import { useGtm } from "@/lib/gtm/useGtm"
 import { useServices } from "@/lib/query/hooks/use-services"
 import { tenantUrl } from "@/lib/tenant/tenant-url"
 
@@ -32,6 +34,9 @@ interface ServiceCatalogProps {
 
 export function ServiceCatalog({ locale, tenantSlug, uiQuery, t }: Readonly<ServiceCatalogProps>) {
   const [query, setQuery] = useState("")
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const { pushEvent, pushEventOnce } = useGtm()
   const servicesQuery = useServices(tenantSlug)
 
   const filtered = useMemo(() => {
@@ -51,6 +56,16 @@ export function ServiceCatalog({ locale, tenantSlug, uiQuery, t }: Readonly<Serv
       return acc
     }, {})
   }, [filtered])
+
+  useEffect(() => {
+    pushEventOnce(
+      "view_form",
+      {
+        tenantSlug,
+      },
+      `view_form:${pathname}:${searchParams.toString()}`
+    )
+  }, [pathname, pushEventOnce, searchParams, tenantSlug])
 
   return (
     <div className="grid gap-4">
@@ -97,6 +112,12 @@ export function ServiceCatalog({ locale, tenantSlug, uiQuery, t }: Readonly<Serv
                     href={`${tenantUrl({ locale, tenantSlug, path: `/book/${service.id}` })}?variant=60${
                       uiQuery ? `&${uiQuery}` : ""
                     }`}
+                    onClick={() => {
+                      pushEvent("select_service", {
+                        tenantSlug,
+                        serviceId: service.id,
+                      })
+                    }}
                     className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {t.openService}
