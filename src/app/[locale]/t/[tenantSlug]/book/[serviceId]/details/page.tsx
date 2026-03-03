@@ -5,7 +5,7 @@ import { PublicShell } from "@/components/layout/public-shell"
 import { type AppLocale } from "@/i18n/locales"
 import { DetailsForm } from "@/features/booking/details-form"
 import { BookingProgress } from "@/features/booking/progress"
-import { parseBookingState } from "@/features/booking/state"
+import { createUiSearchParams, parseBookingState } from "@/features/booking/state"
 import { tenantUrl } from "@/lib/tenant/tenant-url"
 
 export default async function DetailsPage({
@@ -17,10 +17,20 @@ export default async function DetailsPage({
 }>) {
   const { locale, tenantSlug, serviceId } = await params
   const state = parseBookingState(await searchParams)
+  const uiQuery = createUiSearchParams(state)
   const t = await getTranslations({ locale, namespace: "booking" })
 
   return (
-    <PublicShell homeHref={tenantUrl({ locale, tenantSlug })} locale={locale}>
+    <PublicShell
+      homeHref={tenantUrl({ locale, tenantSlug })}
+      locale={locale}
+      widgetMode={state.widget}
+      themeOverrides={{
+        primary: state.primary,
+        radius: state.radius,
+        logoUrl: state.logoUrl,
+      }}
+    >
       <BookingProgress
         current="details"
         labels={{
@@ -35,7 +45,9 @@ export default async function DetailsPage({
         <div className="rounded-md border border-border p-4 text-sm text-muted-foreground">
           <p>{t("details.missingSlot")}</p>
           <Link
-            href={`${tenantUrl({ locale, tenantSlug, path: `/book/${serviceId}/slot` })}?variant=${state.variant}`}
+            href={`${tenantUrl({ locale, tenantSlug, path: `/book/${serviceId}/slot` })}?variant=${state.variant}${
+              uiQuery ? `&${uiQuery}` : ""
+            }`}
             className="mt-1 inline-block underline-offset-4 hover:underline"
           >
             {t("details.backToSlot")}
@@ -50,6 +62,7 @@ export default async function DetailsPage({
           staffId={state.staffId}
           startAt={state.startAt}
           date={state.date}
+          uiQuery={uiQuery}
           t={{
             back: t("details.back"),
             title: t("details.title"),

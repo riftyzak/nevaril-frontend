@@ -19,6 +19,7 @@ import { tenantUrl } from "@/lib/tenant/tenant-url"
 interface ServiceCatalogProps {
   locale: AppLocale
   tenantSlug: string
+  uiQuery?: string
   t: {
     searchPlaceholder: string
     loading: string
@@ -29,7 +30,7 @@ interface ServiceCatalogProps {
   }
 }
 
-export function ServiceCatalog({ locale, tenantSlug, t }: Readonly<ServiceCatalogProps>) {
+export function ServiceCatalog({ locale, tenantSlug, uiQuery, t }: Readonly<ServiceCatalogProps>) {
   const [query, setQuery] = useState("")
   const servicesQuery = useServices(tenantSlug)
 
@@ -93,7 +94,9 @@ export function ServiceCatalog({ locale, tenantSlug, t }: Readonly<ServiceCatalo
                     ))}
                   </div>
                   <Link
-                    href={`${tenantUrl({ locale, tenantSlug, path: `/book/${service.id}` })}?variant=60`}
+                    href={`${tenantUrl({ locale, tenantSlug, path: `/book/${service.id}` })}?variant=60${
+                      uiQuery ? `&${uiQuery}` : ""
+                    }`}
                     className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {t.openService}

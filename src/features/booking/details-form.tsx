@@ -35,6 +35,7 @@ interface DetailsFormProps {
   staffId?: string
   startAt: string
   date?: string
+  uiQuery?: string
   t: {
     back: string
     title: string
@@ -73,6 +74,7 @@ export function DetailsForm({
   staffId,
   startAt,
   date,
+  uiQuery,
   t,
 }: Readonly<DetailsFormProps>) {
   const router = useRouter()
@@ -116,7 +118,9 @@ export function DetailsForm({
     locale,
     tenantSlug,
     path: `/book/${serviceId}/slot`,
-  })}?variant=${variant}${staffId ? `&staffId=${staffId}` : ""}${date ? `&date=${date}` : ""}`
+  })}?variant=${variant}${staffId ? `&staffId=${staffId}` : ""}${date ? `&date=${date}` : ""}${
+    uiQuery ? `&${uiQuery}` : ""
+  }`
 
   const mutation = useMutation({
     mutationFn: async (values: BookingDetailsValues) => {
@@ -149,7 +153,7 @@ export function DetailsForm({
       router.push(
         `${tenantUrl({ locale, tenantSlug, path: "/book/confirmation" })}?token=${encodeURIComponent(
           booking.bookingToken
-        )}&serviceId=${booking.serviceId}`
+        )}&serviceId=${booking.serviceId}${uiQuery ? `&${uiQuery}` : ""}`
       )
     },
     onError: (error) => {

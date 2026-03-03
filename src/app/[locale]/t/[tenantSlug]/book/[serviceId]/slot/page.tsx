@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server"
 import { PublicShell } from "@/components/layout/public-shell"
 import { type AppLocale } from "@/i18n/locales"
 import { BookingProgress } from "@/features/booking/progress"
-import { parseBookingState } from "@/features/booking/state"
+import { createUiSearchParams, parseBookingState } from "@/features/booking/state"
 import { SlotPicker } from "@/features/booking/slot-picker"
 import { tenantUrl } from "@/lib/tenant/tenant-url"
 
@@ -17,12 +17,22 @@ export default async function SlotPage({
 }>) {
   const { locale, tenantSlug, serviceId } = await params
   const state = parseBookingState(await searchParams)
+  const uiQuery = createUiSearchParams(state)
   const t = await getTranslations({ locale, namespace: "booking" })
 
   const initialDate = state.date ?? formatInTimeZone(new Date(), "Europe/Prague", "yyyy-MM-dd")
 
   return (
-    <PublicShell homeHref={tenantUrl({ locale, tenantSlug })} locale={locale}>
+    <PublicShell
+      homeHref={tenantUrl({ locale, tenantSlug })}
+      locale={locale}
+      widgetMode={state.widget}
+      themeOverrides={{
+        primary: state.primary,
+        radius: state.radius,
+        logoUrl: state.logoUrl,
+      }}
+    >
       <BookingProgress
         current="slot"
         labels={{
@@ -39,6 +49,7 @@ export default async function SlotPage({
         variant={state.variant}
         staffId={state.staffId}
         initialDate={initialDate}
+        uiQuery={uiQuery}
         mode={state.mode}
         bookingToken={state.token}
         bookingId={state.bookingId}

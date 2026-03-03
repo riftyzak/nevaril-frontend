@@ -29,6 +29,7 @@ interface SlotPickerProps {
   variant: ServiceVariant
   staffId?: string
   initialDate: string
+  uiQuery?: string
   mode?: "create" | "manage"
   bookingToken?: string
   bookingId?: string
@@ -61,6 +62,7 @@ export function SlotPicker({
   variant,
   staffId,
   initialDate,
+  uiQuery,
   mode = "create",
   bookingToken,
   bookingId,
@@ -105,7 +107,7 @@ export function SlotPicker({
       ? localePath({ locale, path: `/m/${bookingToken}` })
       : `${tenantUrl({ locale, tenantSlug, path: `/book/${serviceId}` })}?variant=${variant}${
           staffId ? `&staffId=${staffId}` : ""
-        }`
+        }${uiQuery ? `&${uiQuery}` : ""}`
 
   return (
     <div className="grid gap-4">
@@ -177,7 +179,7 @@ export function SlotPicker({
                   path: `/book/${serviceId}/details`,
                 })}?variant=${variant}${staffId ? `&staffId=${staffId}` : ""}&date=${date}&startAt=${encodeURIComponent(
                   slot.startAt
-                )}`
+                )}${uiQuery ? `&${uiQuery}` : ""}`
                 const manageHref = `${tenantUrl({
                   locale,
                   tenantSlug,
@@ -186,7 +188,9 @@ export function SlotPicker({
                   String(bookingId ?? "")
                 )}&serviceId=${encodeURIComponent(serviceId)}&variant=${variant}${
                   staffId ? `&staffId=${encodeURIComponent(staffId)}` : ""
-                }&startAt=${encodeURIComponent(slot.startAt)}&date=${encodeURIComponent(date)}`
+                }&startAt=${encodeURIComponent(slot.startAt)}&date=${encodeURIComponent(date)}${
+                  uiQuery ? `&${uiQuery}` : ""
+                }`
                 const href = isManageMode ? manageHref : detailsHref
 
                 if (slot.status !== "available") {

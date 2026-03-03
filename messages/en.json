@@ -30,6 +30,7 @@
         "vouchers": "Vouchers",
         "reviews": "Reviews",
         "analytics": "Analytics",
+        "embed": "Embed",
         "settings": "Settings"
       },
       "lockedReason": {
@@ -438,5 +439,21 @@
       "vouchers": "Vouchers",
       "analytics": "Analytics"
     }
+  },
+  "embed": {
+    "title": "Embed & QR",
+    "description": "Generate booking URLs, QR codes and iframe snippet.",
+    "bookingEntry": "Tenant booking entry URL",
+    "serviceLink": "Service deep link URL",
+    "chooseService": "Choose service",
+    "copyUrl": "Copy URL",
+    "copied": "Copied",
+    "widgetTitle": "Widget snippet generator",
+    "widgetDescription": "Configure optional theme overrides for iframe mode.",
+    "primary": "Primary color",
+    "radius": "Radius",
+    "logoUrl": "Logo URL",
+    "iframeSnippet": "Iframe snippet",
+    "copySnippet": "Copy snippet"
   }
 }

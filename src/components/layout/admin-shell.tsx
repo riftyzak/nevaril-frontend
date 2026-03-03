@@ -7,6 +7,7 @@ import {
   CircleUserRound,
   ListTodo,
   MessageSquareQuote,
+  QrCode,
   Settings,
   TicketPercent,
   UserCog,
@@ -39,6 +40,7 @@ const navIcons = {
   vouchers: TicketPercent,
   reviews: MessageSquareQuote,
   analytics: ChartColumnBig,
+  embed: QrCode,
   settings: Settings,
 } as const
 

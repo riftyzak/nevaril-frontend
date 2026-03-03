@@ -27,6 +27,7 @@ interface ServiceDetailProps {
   serviceId: string
   initialVariant: ServiceVariant
   initialStaffId?: string
+  uiQuery?: string
   t: {
     loading: string
     notFound: string
@@ -57,6 +58,7 @@ export function ServiceDetail({
   serviceId,
   initialVariant,
   initialStaffId,
+  uiQuery,
   t,
 }: Readonly<ServiceDetailProps>) {
   const router = useRouter()
@@ -105,11 +107,12 @@ export function ServiceDetail({
   slotParams.set("variant", String(variant))
   if (staffId) slotParams.set("staffId", staffId)
   const slotHref = `${slotPath}?${slotParams.toString()}`
+  const slotHrefWithUi = `${slotHref}${uiQuery ? `&${uiQuery}` : ""}`
 
   return (
     <div className="grid gap-4">
       <Link
-        href={tenantUrl({ locale, tenantSlug, path: "/book" })}
+        href={`${tenantUrl({ locale, tenantSlug, path: "/book" })}${uiQuery ? `?${uiQuery}` : ""}`}
         className="text-sm text-muted-foreground underline-offset-4 hover:underline"
       >
         {t.backToCatalog}
@@ -174,7 +177,7 @@ export function ServiceDetail({
           )}
 
           <Link
-            href={slotHref}
+            href={slotHrefWithUi}
             className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {t.continueToSlots}

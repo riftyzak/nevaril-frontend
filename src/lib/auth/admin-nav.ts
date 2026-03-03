@@ -18,6 +18,7 @@ export interface AdminNavItem {
     | "vouchers"
     | "reviews"
     | "analytics"
+    | "embed"
     | "settings"
   href: string
   module: PermissionModule
@@ -63,6 +64,7 @@ export function buildAdminNav(locale: AppLocale, tenantSlug: string): AdminNavIt
       module: "bookings",
       requiredFeature: PLAN_FEATURES.ANALYTICS,
     },
+    { key: "embed", href: adminAppPath({ locale, tenantSlug, path: "/embed" }), module: "bookings" },
     { key: "settings", href: adminAppPath({ locale, tenantSlug, path: "/tenant-settings" }), module: "tenantSettings" },
   ]
 }

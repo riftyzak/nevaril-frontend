@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server"
 import { PublicShell } from "@/components/layout/public-shell"
 import { Confirmation } from "@/features/booking/confirmation"
 import { BookingProgress } from "@/features/booking/progress"
+import { createUiSearchParams, parseBookingState } from "@/features/booking/state"
 import { type AppLocale } from "@/i18n/locales"
 import { tenantUrl } from "@/lib/tenant/tenant-url"
 
@@ -31,11 +32,22 @@ export default async function ConfirmationPage({
   const date = Array.isArray(dateParam) ? dateParam[0] : dateParam
   const variant = Array.isArray(variantParam) ? variantParam[0] : variantParam
   const staffId = Array.isArray(staffIdParam) ? staffIdParam[0] : staffIdParam
+  const state = parseBookingState(query)
+  const uiQuery = createUiSearchParams(state)
 
   const t = await getTranslations({ locale, namespace: "booking" })
 
   return (
-    <PublicShell homeHref={tenantUrl({ locale, tenantSlug })} locale={locale}>
+    <PublicShell
+      homeHref={tenantUrl({ locale, tenantSlug })}
+      locale={locale}
+      widgetMode={state.widget}
+      themeOverrides={{
+        primary: state.primary,
+        radius: state.radius,
+        logoUrl: state.logoUrl,
+      }}
+    >
       <BookingProgress
         current="confirm"
         labels={{
@@ -56,6 +68,7 @@ export default async function ConfirmationPage({
         date={date}
         variant={variant}
         staffId={staffId}
+        uiQuery={uiQuery}
         t={{
           missingToken: t("confirm.missingToken"),
           loading: t("confirm.loading"),

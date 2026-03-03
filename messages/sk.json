@@ -30,6 +30,7 @@
         "vouchers": "Vouchery",
         "reviews": "Recenzie",
         "analytics": "Analytika",
+        "embed": "Embed",
         "settings": "Nastavenia"
       },
       "lockedReason": {
@@ -438,5 +439,21 @@
       "vouchers": "Vouchery",
       "analytics": "Analytika"
     }
+  },
+  "embed": {
+    "title": "Embed a QR",
+    "description": "Generujte booking URL, QR kódy a iframe snippet.",
+    "bookingEntry": "Tenant booking vstupná URL",
+    "serviceLink": "URL deep linku služby",
+    "chooseService": "Vyberte službu",
+    "copyUrl": "Kopírovať URL",
+    "copied": "Skopírované",
+    "widgetTitle": "Generátor widget snippetu",
+    "widgetDescription": "Nastavte voliteľné theme override pre iframe režim.",
+    "primary": "Primárna farba",
+    "radius": "Radius",
+    "logoUrl": "URL loga",
+    "iframeSnippet": "Iframe snippet",
+    "copySnippet": "Kopírovať snippet"
   }
 }

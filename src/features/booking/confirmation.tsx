@@ -35,6 +35,7 @@ interface ConfirmationProps {
   date?: string
   variant?: string
   staffId?: string
+  uiQuery?: string
   t: {
     missingToken: string
     loading: string
@@ -76,6 +77,7 @@ export function Confirmation({
   date,
   variant,
   staffId,
+  uiQuery,
   t,
 }: Readonly<ConfirmationProps>) {
   const router = useRouter()
@@ -125,7 +127,7 @@ export function Confirmation({
       locale,
       tenantSlug,
       path: `/book/${resolvedServiceId}/slot`,
-    })}?${params.toString()}`
+    })}?${params.toString()}${uiQuery ? `&${uiQuery}` : ""}`
   }, [
     bookingId,
     bookingQuery.data?.serviceId,
@@ -140,6 +142,7 @@ export function Confirmation({
     timezone,
     token,
     variant,
+    uiQuery,
   ])
 
   const rescheduleMutation = useMutation({
@@ -297,7 +300,7 @@ export function Confirmation({
                 {t.manageBooking}
               </Link>
               <Link
-                href={tenantUrl({ locale, tenantSlug, path: "/book" })}
+                href={`${tenantUrl({ locale, tenantSlug, path: "/book" })}${uiQuery ? `?${uiQuery}` : ""}`}
                 className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
                 {t.newBooking}
