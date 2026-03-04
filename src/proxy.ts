@@ -5,6 +5,7 @@ import {
   getLocaleFromPath,
   getRoutingMode,
   hasLocalePrefix,
+  isSupportedLocale,
   resolveTenant,
   stripLocalePrefix,
   stripTenantPrefix,
@@ -20,6 +21,28 @@ function withTenantHeaders(
   if (tenantSlug) requestHeaders.set("x-tenant-slug", tenantSlug)
   if (source) requestHeaders.set("x-tenant-source", source)
   return requestHeaders
+}
+
+function getPathPublicRedirect(pathname: string) {
+  const segments = pathname.split("/").filter(Boolean)
+  if (
+    segments.length >= 4 &&
+    isSupportedLocale(segments[0]) &&
+    segments[1] === "t" &&
+    segments[3] === "public"
+  ) {
+    const locale = segments[0]
+    const tenantSlug = segments[2]
+    const remainder = segments.slice(4)
+
+    return tenantPath({
+      locale,
+      tenantSlug,
+      path: `/book${remainder.length ? `/${remainder.join("/")}` : ""}`,
+    })
+  }
+
+  return null
 }
 
 export function proxy(request: NextRequest) {
@@ -38,6 +61,13 @@ export function proxy(request: NextRequest) {
     mode,
   })
   const locale = getLocaleFromPath(pathname) ?? DEFAULT_LOCALE
+  const pathPublicRedirect = getPathPublicRedirect(pathname)
+  if (pathPublicRedirect) {
+    const target = request.nextUrl.clone()
+    target.pathname = pathPublicRedirect
+    target.search = search
+    return NextResponse.redirect(target, 301)
+  }
 
   if (resolution.source === "subdomain" && resolution.tenantSlug) {
     const remainder = pathname.includes("/t/")
@@ -52,6 +82,19 @@ export function proxy(request: NextRequest) {
           headers: withTenantHeaders(request, resolution.tenantSlug, resolution.source),
         },
       })
+    }
+
+    if (remainder === "/public" || remainder.startsWith("/public/")) {
+      const target = request.nextUrl.clone()
+      const remainderSuffix = remainder === "/public" ? "" : remainder.slice("/public".length)
+
+      target.pathname = tenantPath({
+        locale,
+        tenantSlug: resolution.tenantSlug,
+        path: `/book${remainderSuffix}`,
+      })
+      target.search = search
+      return NextResponse.redirect(target, 301)
     }
 
     const target = request.nextUrl.clone()

@@ -40,17 +40,27 @@
     }
   },
   "landing": {
-    "eyebrow": "Míľnik 3",
-    "title": "i18n základ (CZ/SK/EN)",
-    "description": "Vyberte tenant demo trasu. Interné odkazy rešpektujú locale.",
-    "barberPublic": "Barber verejné demo",
-    "barberAdmin": "Barber admin demo"
+    "eyebrow": "Nevaril",
+    "title": "Online rezervácie, ktoré pôsobia profesionálne od prvého dňa",
+    "description": "Moderný verejný booking flow pre služby: rýchly výber termínu, jasné kroky a spoľahlivé potvrdenie.",
+    "ctaBook": "Rezervovať",
+    "ctaSignIn": "Prihlásiť sa",
+    "pricingTeaser": "Zobraziť ceny a plány",
+    "feature1Title": "Rýchla cesta k termínu",
+    "feature1Body": "Zákazník prejde od výberu služby po potvrdenie rezervácie za pár kliknutí.",
+    "feature2Title": "Jasná dostupnosť",
+    "feature2Body": "Voľné, obsadené aj blokované časy sú na prvý pohľad rozlíšiteľné.",
+    "feature3Title": "Lepšia konverzia",
+    "feature3Body": "Čistejšie UX znižuje odpad v procese a zvyšuje počet dokončených rezervácií.",
+    "feature4Title": "Pripravené pre widget",
+    "feature4Body": "Rovnaký booking flow funguje aj v embed režime bez rušivých prvkov.",
+    "trustLine": "Navrhnuté pre barberov, salóny a lokálne služby, ktoré chcú pôsobiť ako hotový produkt."
   },
   "tenantHome": {
     "tenantLabel": "Tenant:",
     "title": "Tenant demo vstup",
     "description": "Middleware a tenant URL helpery sú aktívne pre tento route strom.",
-    "openPublic": "Otvoriť verejný shell",
+    "openPublic": "Otvoriť rezervácie",
     "openAdmin": "Otvoriť admin shell"
   },
   "publicDemo": {

@@ -40,17 +40,27 @@
     }
   },
   "landing": {
-    "eyebrow": "Milestone 3",
-    "title": "i18n baseline (CZ/SK/EN)",
-    "description": "Choose a tenant demo route. Internal links are locale-aware.",
-    "barberPublic": "Barber public demo",
-    "barberAdmin": "Barber admin demo"
+    "eyebrow": "Nevaril",
+    "title": "Online booking that feels production-ready from day one",
+    "description": "A modern public booking flow for service businesses: fast slot selection, clear steps, and confident confirmation.",
+    "ctaBook": "Book now",
+    "ctaSignIn": "Sign in",
+    "pricingTeaser": "See pricing and plans",
+    "feature1Title": "Fast path to booking",
+    "feature1Body": "Customers can go from service choice to confirmation in just a few clicks.",
+    "feature2Title": "Clear availability",
+    "feature2Body": "Available, busy, and blocked times are visually easy to scan.",
+    "feature3Title": "Better conversion",
+    "feature3Body": "A cleaner UX reduces drop-off and increases completed bookings.",
+    "feature4Title": "Widget-ready flow",
+    "feature4Body": "The same public booking flow works in embed mode with minimal chrome.",
+    "trustLine": "Built for barbers, salons, and local services that need a sellable public experience."
   },
   "tenantHome": {
     "tenantLabel": "Tenant:",
     "title": "Tenant demo entry",
     "description": "Middleware and tenant URL helpers are active for this route tree.",
-    "openPublic": "Open public shell",
+    "openPublic": "Open booking",
     "openAdmin": "Open admin shell"
   },
   "publicDemo": {

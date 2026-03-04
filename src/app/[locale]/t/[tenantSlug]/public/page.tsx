@@ -1,38 +1,39 @@
-import { getTranslations } from "next-intl/server"
+import { redirect } from "next/navigation"
 
-import { PublicShell } from "@/components/layout/public-shell"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { type AppLocale } from "@/i18n/locales"
 import { tenantUrl } from "@/lib/tenant/tenant-url"
 
-export default async function PublicDemoPage({
+function createSearchParams(
+  searchParams: Record<string, string | string[] | undefined>
+) {
+  const params = new URLSearchParams()
+
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (item !== undefined) params.append(key, item)
+      }
+      continue
+    }
+
+    if (value !== undefined) {
+      params.set(key, value)
+    }
+  }
+
+  return params.toString()
+}
+
+export default async function PublicPageRedirect({
   params,
+  searchParams,
 }: Readonly<{
   params: Promise<{ locale: AppLocale; tenantSlug: string }>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }>) {
   const { locale, tenantSlug } = await params
-  const t = await getTranslations({ locale, namespace: "publicDemo" })
+  const query = createSearchParams(await searchParams)
+  const target = tenantUrl({ locale, tenantSlug, path: "/book" })
 
-  return (
-    <PublicShell homeHref={tenantUrl({ locale, tenantSlug })} locale={locale}>
-      <div className="grid gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("title")}</CardTitle>
-            <CardDescription>{t("description")}</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-3 text-sm text-muted-foreground">
-            <p>{t("tenantLine", { tenantSlug })}</p>
-            <p>{t("routingLine")}</p>
-          </CardContent>
-        </Card>
-      </div>
-    </PublicShell>
-  )
+  redirect(query ? `${target}?${query}` : target)
 }

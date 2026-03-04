@@ -40,17 +40,27 @@
     }
   },
   "landing": {
-    "eyebrow": "Milník 3",
-    "title": "i18n základ (CZ/SK/EN)",
-    "description": "Vyberte tenant demo trasu. Interní odkazy respektují locale.",
-    "barberPublic": "Barber veřejné demo",
-    "barberAdmin": "Barber admin demo"
+    "eyebrow": "Nevaril",
+    "title": "Online rezervace, které vypadají profesionálně od prvního dne",
+    "description": "Moderní booking flow pro služby: rychlý výběr termínu, přehledný proces a potvrzení bez zbytečných kroků.",
+    "ctaBook": "Rezervovat",
+    "ctaSignIn": "Přihlásit se",
+    "pricingTeaser": "Zobrazit ceny a plány",
+    "feature1Title": "Rychlá cesta k termínu",
+    "feature1Body": "Zákazník projde od výběru služby po potvrzení rezervace během pár kliknutí.",
+    "feature2Title": "Jasná dostupnost",
+    "feature2Body": "Volné, obsazené i blokované časy jsou na první pohled odlišitelné.",
+    "feature3Title": "Lepší konverze",
+    "feature3Body": "Čisté UX snižuje odpad v procesu a zvyšuje dokončení rezervací.",
+    "feature4Title": "Připraveno pro widget",
+    "feature4Body": "Stejný booking flow funguje i v embed režimu bez rušivých prvků.",
+    "trustLine": "Navrženo pro barbery, salony a lokální služby, které chtějí působit jako hotový produkt."
   },
   "tenantHome": {
     "tenantLabel": "Tenant:",
     "title": "Tenant demo vstup",
     "description": "Middleware a tenant URL helpery jsou aktivní pro tento route strom.",
-    "openPublic": "Otevřít veřejný shell",
+    "openPublic": "Otevřít rezervace",
     "openAdmin": "Otevřít admin shell"
   },
   "publicDemo": {

@@ -25,7 +25,7 @@ export default async function TenantHomePage({
         <p className="mt-3 text-muted-foreground">{t("description")}</p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link
-            href={tenantUrl({ locale, tenantSlug, path: "/public" })}
+            href={tenantUrl({ locale, tenantSlug, path: "/book" })}
             className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             {t("openPublic")}
