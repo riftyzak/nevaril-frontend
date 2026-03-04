@@ -169,7 +169,7 @@
       "rescheduleConflict": "Zvolený termín už nie je dostupný.",
       "reschedulePolicyBlocked": "Zmeny sú možné najneskôr 24h pred začiatkom.",
       "rescheduleSubmitError": "Presun sa nepodaril. Skúste to znova.",
-      "backToSlots": "Späť na výber termínu",
+      "backToSlots": "Vybrať iný termín",
       "submitting": "Odosielam..."
     },
     "durationUnit": "min",

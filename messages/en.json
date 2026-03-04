@@ -169,7 +169,7 @@
       "rescheduleConflict": "This selected slot is no longer available.",
       "reschedulePolicyBlocked": "Changes are allowed up to 24h before start.",
       "rescheduleSubmitError": "Reschedule failed. Please try again.",
-      "backToSlots": "Back to slot picker",
+      "backToSlots": "Choose another slot",
       "submitting": "Submitting..."
     },
     "durationUnit": "min",

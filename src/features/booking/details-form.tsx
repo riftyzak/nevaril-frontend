@@ -178,6 +178,7 @@ export function DetailsForm({
           <form
             className="grid gap-4"
             onSubmit={form.handleSubmit((values) => {
+              setSubmitError(null)
               pushEvent("submit_booking", {
                 tenantSlug,
                 serviceId,

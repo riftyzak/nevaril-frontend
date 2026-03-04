@@ -119,8 +119,14 @@ export function Confirmation({
     params.set("token", String(token ?? ""))
     params.set("bookingId", String(bookingId ?? ""))
     params.set("variant", variant ?? String(bookingQuery.data?.serviceVariant ?? 60))
-    params.set("date", date ?? formatInTimeZone(new Date(), timezone, "yyyy-MM-dd"))
-    params.set("startAt", bookingQuery.data?.startAt ?? "")
+    params.set(
+      "date",
+      date ??
+        (startAt
+          ? formatInTimeZone(new Date(startAt), timezone, "yyyy-MM-dd")
+          : formatInTimeZone(new Date(), timezone, "yyyy-MM-dd"))
+    )
+    params.set("startAt", startAt ?? bookingQuery.data?.startAt ?? "")
     if (staffId ?? bookingQuery.data?.staffId) {
       params.set("staffId", String(staffId ?? bookingQuery.data?.staffId ?? ""))
     }
@@ -139,6 +145,7 @@ export function Confirmation({
     date,
     locale,
     serviceId,
+    startAt,
     staffId,
     tenantSlug,
     timezone,
