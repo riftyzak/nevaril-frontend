@@ -5,9 +5,9 @@
   "shell": {
     "public": {
       "brandName": "Nevaril",
-      "logoPlaceholder": "Tenant logo placeholder",
-      "footerTitle": "Booking shell v1",
-      "footerNote": "All features are mock in this stage"
+      "logoPlaceholder": "Booking platform",
+      "footerTitle": "Nevaril",
+      "footerNote": "Online booking for service businesses"
     },
     "admin": {
       "brandName": "Nevaril Admin",
@@ -58,8 +58,8 @@
   },
   "tenantHome": {
     "tenantLabel": "Tenant:",
-    "title": "Tenant demo entry",
-    "description": "Middleware and tenant URL helpers are active for this route tree.",
+    "title": "Tenant public entry",
+    "description": "Manage online bookings and send customers directly to your booking flow.",
     "openPublic": "Open booking",
     "openAdmin": "Open admin shell"
   },
@@ -99,7 +99,7 @@
       "chooseStaff": "Choose staff (optional)",
       "anyStaff": "Any staff",
       "continueToSlots": "Continue to slots",
-      "photosPlaceholder": "Photos placeholder"
+      "photosPlaceholder": "Service gallery will be available soon"
     },
     "slot": {
       "loading": "Loading availability...",

@@ -5,9 +5,9 @@
   "shell": {
     "public": {
       "brandName": "Nevaril",
-      "logoPlaceholder": "Zástupné logo tenanta",
-      "footerTitle": "Booking shell v1",
-      "footerNote": "Všechny funkce jsou v této fázi mock"
+      "logoPlaceholder": "Rezervační platforma",
+      "footerTitle": "Nevaril",
+      "footerNote": "Online rezervace pro služby"
     },
     "admin": {
       "brandName": "Nevaril Admin",
@@ -58,8 +58,8 @@
   },
   "tenantHome": {
     "tenantLabel": "Tenant:",
-    "title": "Tenant demo vstup",
-    "description": "Middleware a tenant URL helpery jsou aktivní pro tento route strom.",
+    "title": "Veřejná stránka tenanta",
+    "description": "Spravujte online rezervace a přesměrujte zákazníky přímo do booking flow.",
     "openPublic": "Otevřít rezervace",
     "openAdmin": "Otevřít admin shell"
   },
@@ -99,7 +99,7 @@
       "chooseStaff": "Vyberte pracovníka (volitelné)",
       "anyStaff": "Libovolný pracovník",
       "continueToSlots": "Pokračovat na termíny",
-      "photosPlaceholder": "Zástupné místo pro fotky"
+      "photosPlaceholder": "Fotogalerie služby bude dostupná brzy"
     },
     "slot": {
       "loading": "Načítám dostupnost...",
