@@ -164,6 +164,16 @@
       "submitting": "Submitting..."
     },
     "durationUnit": "min",
+    "summary": {
+      "title": "Booking summary",
+      "service": "Service",
+      "variant": "Duration",
+      "staff": "Staff",
+      "date": "Date and time",
+      "price": "Price",
+      "priceValue": "Price is shown before final confirmation",
+      "notSelected": "Not selected"
+    },
     "common": {
       "noStaff": "Not selected"
     },

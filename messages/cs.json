@@ -164,6 +164,16 @@
       "submitting": "Odesílám..."
     },
     "durationUnit": "min",
+    "summary": {
+      "title": "Přehled rezervace",
+      "service": "Služba",
+      "variant": "Délka",
+      "staff": "Pracovník",
+      "date": "Datum a čas",
+      "price": "Cena",
+      "priceValue": "Cena se zobrazí před potvrzením",
+      "notSelected": "Nevybráno"
+    },
     "common": {
       "noStaff": "Nevybrán"
     },

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server"
 
 import { PublicShell } from "@/components/layout/public-shell"
 import { type AppLocale } from "@/i18n/locales"
+import { BookingSummary } from "@/features/booking/booking-summary"
 import { DetailsForm } from "@/features/booking/details-form"
 import { BookingProgress } from "@/features/booking/progress"
 import { createUiSearchParams, parseBookingState } from "@/features/booking/state"
@@ -31,62 +32,80 @@ export default async function DetailsPage({
         logoUrl: state.logoUrl,
       }}
     >
-      <BookingProgress
-        current="details"
-        labels={{
-          service: t("progress.service"),
-          slot: t("progress.slot"),
-          details: t("progress.details"),
-          confirm: t("progress.confirm"),
-        }}
-      />
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div>
+          <BookingProgress
+            current="details"
+            labels={{
+              service: t("progress.service"),
+              slot: t("progress.slot"),
+              details: t("progress.details"),
+              confirm: t("progress.confirm"),
+            }}
+          />
 
-      {!state.startAt ? (
-        <div className="rounded-md border border-border p-4 text-sm text-muted-foreground">
-          <p>{t("details.missingSlot")}</p>
-          <Link
-            href={`${tenantUrl({ locale, tenantSlug, path: `/book/${serviceId}/slot` })}?variant=${state.variant}${
-              uiQuery ? `&${uiQuery}` : ""
-            }`}
-            className="mt-1 inline-block underline-offset-4 hover:underline"
-          >
-            {t("details.backToSlot")}
-          </Link>
+          {!state.startAt ? (
+            <div className="rounded-md border border-border p-4 text-sm text-muted-foreground">
+              <p>{t("details.missingSlot")}</p>
+              <Link
+                href={`${tenantUrl({ locale, tenantSlug, path: `/book/${serviceId}/slot` })}?variant=${state.variant}${
+                  uiQuery ? `&${uiQuery}` : ""
+                }`}
+                className="mt-1 inline-block underline-offset-4 hover:underline"
+              >
+                {t("details.backToSlot")}
+              </Link>
+            </div>
+          ) : (
+            <DetailsForm
+              locale={locale}
+              tenantSlug={tenantSlug}
+              serviceId={serviceId}
+              variant={state.variant}
+              staffId={state.staffId}
+              startAt={state.startAt}
+              date={state.date}
+              uiQuery={uiQuery}
+              t={{
+                back: t("details.back"),
+                title: t("details.title"),
+                description: t("details.description"),
+                name: t("details.name"),
+                email: t("details.email"),
+                phone: t("details.phone"),
+                submit: t("details.submit"),
+                slotConflict: t("details.slotConflict"),
+                slotConflictAction: t("details.slotConflictAction"),
+                submitError: t("details.submitError"),
+                requiredField: t("details.requiredField"),
+                customFieldPrefix: t("details.customFieldPrefix"),
+                submitting: t("details.submitting"),
+              }}
+            />
+          )}
         </div>
-      ) : (
-        <DetailsForm
-          locale={locale}
+        <BookingSummary
           tenantSlug={tenantSlug}
           serviceId={serviceId}
           variant={state.variant}
           staffId={state.staffId}
-          startAt={state.startAt}
           date={state.date}
-          uiQuery={uiQuery}
+          startAt={state.startAt}
+          className="h-fit lg:sticky lg:top-4"
           t={{
-            back: t("details.back"),
-            title: t("details.title"),
-            description: t("details.description"),
-            name: t("details.name"),
-            email: t("details.email"),
-            phone: t("details.phone"),
-            submit: t("details.submit"),
-            slotConflict: t("details.slotConflict"),
-            slotConflictAction: t("details.slotConflictAction"),
-            submitError: t("details.submitError"),
-            requiredField: t("details.requiredField"),
-            customFieldPrefix: t("details.customFieldPrefix"),
+            title: t("summary.title"),
+            service: t("summary.service"),
+            variant: t("summary.variant"),
+            staff: t("summary.staff"),
+            date: t("summary.date"),
+            price: t("summary.price"),
+            priceValue: t("summary.priceValue"),
             durationUnit: t("durationUnit"),
-            summaryTitle: t("details.summaryTitle"),
-            summaryService: t("details.summaryService"),
-            summaryVariant: t("details.summaryVariant"),
-            summaryStaff: t("details.summaryStaff"),
-            summaryDate: t("details.summaryDate"),
-            submitting: t("details.submitting"),
+            notSelected: t("summary.notSelected"),
             noStaff: t("common.noStaff"),
           }}
         />
-      )}
+      </div>
     </PublicShell>
   )
 }

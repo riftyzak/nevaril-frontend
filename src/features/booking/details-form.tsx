@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation } from "@tanstack/react-query"
-import { formatInTimeZone } from "date-fns-tz"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
@@ -23,8 +22,6 @@ import { type AppLocale } from "@/i18n/locales"
 import { createBooking } from "@/lib/api"
 import { type ServiceVariant } from "@/lib/api/types"
 import { useGtm } from "@/lib/gtm/useGtm"
-import { useService } from "@/lib/query/hooks/use-service"
-import { useStaff } from "@/lib/query/hooks/use-staff"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
 import { tenantUrl } from "@/lib/tenant/tenant-url"
 
@@ -50,14 +47,7 @@ interface DetailsFormProps {
     submitError: string
     requiredField: string
     customFieldPrefix: string
-    durationUnit: string
-    summaryTitle: string
-    summaryService: string
-    summaryVariant: string
-    summaryStaff: string
-    summaryDate: string
     submitting: string
-    noStaff: string
   }
 }
 
@@ -82,8 +72,6 @@ export function DetailsForm({
   const [submitError, setSubmitError] = useState<string | null>(null)
   const { pushEvent } = useGtm()
   const tenantConfigQuery = useTenantConfig(tenantSlug)
-  const serviceQuery = useService(tenantSlug, serviceId)
-  const staffQuery = useStaff(tenantSlug)
 
   const customFields = useMemo(
     () => tenantConfigQuery.data?.customFields ?? [],
@@ -160,7 +148,9 @@ export function DetailsForm({
       router.push(
         `${tenantUrl({ locale, tenantSlug, path: "/book/confirmation" })}?token=${encodeURIComponent(
           booking.bookingToken
-        )}&serviceId=${booking.serviceId}${uiQuery ? `&${uiQuery}` : ""}`
+        )}&serviceId=${booking.serviceId}&variant=${variant}${staffId ? `&staffId=${encodeURIComponent(staffId)}` : ""}${
+          date ? `&date=${encodeURIComponent(date)}` : ""
+        }&startAt=${encodeURIComponent(startAt)}${uiQuery ? `&${uiQuery}` : ""}`
       )
     },
     onError: (error) => {
@@ -173,126 +163,98 @@ export function DetailsForm({
     },
   })
 
-  const staffName = staffQuery.data?.find((staff) => staff.id === staffId)?.fullName
-
   return (
-    <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
-      <div className="grid gap-4">
-        <Link href={slotHref} className="text-sm text-muted-foreground underline-offset-4 hover:underline">
-          {t.back}
-        </Link>
+    <div className="grid gap-4">
+      <Link href={slotHref} className="text-sm text-muted-foreground underline-offset-4 hover:underline">
+        {t.back}
+      </Link>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t.title}</CardTitle>
-            <CardDescription>{t.description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form
-              className="grid gap-4"
-              onSubmit={form.handleSubmit((values) => {
-                pushEvent("submit_booking", {
-                  tenantSlug,
-                  serviceId,
-                  duration: variant,
-                })
-                mutation.mutate(values)
-              })}
-            >
-              <div className="grid gap-2">
-                <Label htmlFor="booking-name">{t.name}</Label>
-                <Input id="booking-name" data-testid="booking-name" {...form.register("name")} />
-                {form.formState.errors.name ? (
-                  <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>
-                ) : null}
-              </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t.title}</CardTitle>
+          <CardDescription>{t.description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            className="grid gap-4"
+            onSubmit={form.handleSubmit((values) => {
+              pushEvent("submit_booking", {
+                tenantSlug,
+                serviceId,
+                duration: variant,
+              })
+              mutation.mutate(values)
+            })}
+          >
+            <div className="grid gap-2">
+              <Label htmlFor="booking-name">{t.name}</Label>
+              <Input id="booking-name" data-testid="booking-name" {...form.register("name")} />
+              {form.formState.errors.name ? (
+                <p className="text-xs text-destructive">{form.formState.errors.name.message}</p>
+              ) : null}
+            </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="booking-email">{t.email}</Label>
-                <Input id="booking-email" data-testid="booking-email" type="email" {...form.register("email")} />
-                {form.formState.errors.email ? (
-                  <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
-                ) : null}
-              </div>
+            <div className="grid gap-2">
+              <Label htmlFor="booking-email">{t.email}</Label>
+              <Input id="booking-email" data-testid="booking-email" type="email" {...form.register("email")} />
+              {form.formState.errors.email ? (
+                <p className="text-xs text-destructive">{form.formState.errors.email.message}</p>
+              ) : null}
+            </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="booking-phone">{t.phone}</Label>
-                <Input id="booking-phone" data-testid="booking-phone" {...form.register("phone")} />
-                {form.formState.errors.phone ? (
-                  <p className="text-xs text-destructive">{form.formState.errors.phone.message}</p>
-                ) : null}
-              </div>
+            <div className="grid gap-2">
+              <Label htmlFor="booking-phone">{t.phone}</Label>
+              <Input id="booking-phone" data-testid="booking-phone" {...form.register("phone")} />
+              {form.formState.errors.phone ? (
+                <p className="text-xs text-destructive">{form.formState.errors.phone.message}</p>
+              ) : null}
+            </div>
 
-              {customFields.map((field) => {
-                const fieldError = form.formState.errors[field.id]
-                const inputId = `custom-${field.id}`
+            {customFields.map((field) => {
+              const fieldError = form.formState.errors[field.id]
+              const inputId = `custom-${field.id}`
 
-                return (
-                  <div className="grid gap-2" key={field.id}>
-                    <Label htmlFor={inputId}>{field.label}</Label>
-                    {field.type === "textarea" ? (
-                      <textarea
-                        id={inputId}
-                        {...form.register(field.id)}
-                        placeholder={field.placeholder}
-                        className="min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      />
-                    ) : (
-                      <Input
-                        id={inputId}
-                        {...form.register(field.id)}
-                        placeholder={field.placeholder}
-                      />
-                    )}
-                    {fieldError ? (
-                      <p className="text-xs text-destructive">
-                        {(fieldError as { message?: string }).message ?? t.requiredField}
-                      </p>
-                    ) : null}
-                  </div>
-                )
-              })}
-
-              {submitError ? (
-                <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-                  <p>{submitError}</p>
-                  {submitError === t.slotConflict ? (
-                    <Link href={slotHref} className="mt-1 inline-block underline-offset-4 hover:underline">
-                      {t.slotConflictAction}
-                    </Link>
+              return (
+                <div className="grid gap-2" key={field.id}>
+                  <Label htmlFor={inputId}>{field.label}</Label>
+                  {field.type === "textarea" ? (
+                    <textarea
+                      id={inputId}
+                      {...form.register(field.id)}
+                      placeholder={field.placeholder}
+                      className="min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    />
+                  ) : (
+                    <Input
+                      id={inputId}
+                      {...form.register(field.id)}
+                      placeholder={field.placeholder}
+                    />
+                  )}
+                  {fieldError ? (
+                    <p className="text-xs text-destructive">
+                      {(fieldError as { message?: string }).message ?? t.requiredField}
+                    </p>
                   ) : null}
                 </div>
-              ) : null}
+              )
+            })}
 
-              <Button type="submit" data-testid="booking-submit" disabled={mutation.isPending}>
-                {mutation.isPending ? t.submitting : t.submit}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+            {submitError ? (
+              <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                <p>{submitError}</p>
+                {submitError === t.slotConflict ? (
+                  <Link href={slotHref} className="mt-1 inline-block underline-offset-4 hover:underline">
+                    {t.slotConflictAction}
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
 
-      <Card className="h-fit">
-        <CardHeader>
-          <CardTitle>{t.summaryTitle}</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-2 text-sm">
-          <p>
-            <span className="text-muted-foreground">{t.summaryService}: </span>
-            {serviceQuery.data?.name ?? serviceId}
-          </p>
-          <p>
-            <span className="text-muted-foreground">{t.summaryVariant}: </span>
-            {variant} {t.durationUnit}
-          </p>
-          <p>
-            <span className="text-muted-foreground">{t.summaryStaff}: </span>
-            {staffName ?? t.noStaff}
-          </p>
-          <p>
-            <span className="text-muted-foreground">{t.summaryDate}: </span>
-            {formatInTimeZone(new Date(startAt), tenantConfigQuery.data?.timezone ?? "Europe/Prague", "yyyy-MM-dd HH:mm")}
-          </p>
+            <Button type="submit" data-testid="booking-submit" disabled={mutation.isPending}>
+              {mutation.isPending ? t.submitting : t.submit}
+            </Button>
+          </form>
         </CardContent>
       </Card>
     </div>
