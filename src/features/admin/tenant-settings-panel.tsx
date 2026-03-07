@@ -70,6 +70,17 @@ function buildPatch(current: TenantConfig, draft: TenantSettingsDraft) {
   return patch
 }
 
+function createNextCustomFieldId(fields: TenantConfig["customFields"]) {
+  const existingIds = new Set(fields.map((field) => field.id))
+  let index = fields.length + 1
+
+  while (existingIds.has(`field-${index}`)) {
+    index += 1
+  }
+
+  return `field-${index}`
+}
+
 function SectionShell({
   title,
   description,
@@ -369,11 +380,219 @@ export function TenantSettingsPanel({ tenantSlug }: Readonly<TenantSettingsPanel
         </CardContent>
       </Card>
 
-      <SectionShell
-        title={t("sections.customFields.title")}
-        description={t("sections.customFields.description")}
-        placeholder={t("sections.customFields.placeholder")}
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("sections.customFields.title")}</CardTitle>
+          <CardDescription>{t("sections.customFields.description")}</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid gap-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-sm text-muted-foreground">{t("customFields.helper")}</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  updateDraft((current) => ({
+                    ...current,
+                    customFields: [
+                      ...current.customFields,
+                      {
+                        id: createNextCustomFieldId(current.customFields),
+                        label: "",
+                        type: "text",
+                        required: false,
+                        placeholder: "",
+                      },
+                    ],
+                  }))
+                }
+              >
+                {t("customFields.add")}
+              </Button>
+            </div>
+
+            {draft.customFields.length ? (
+              draft.customFields.map((field, index) => (
+                <div key={field.id} className="grid gap-4 rounded-xl border border-border p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="font-medium">{field.label || t("customFields.untitled", { index: index + 1 })}</p>
+                      <p className="text-sm text-muted-foreground">{field.id}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={index === 0}
+                        onClick={() =>
+                          updateDraft((current) => {
+                            const nextFields = [...current.customFields]
+                            ;[nextFields[index - 1], nextFields[index]] = [nextFields[index], nextFields[index - 1]]
+                            return {
+                              ...current,
+                              customFields: nextFields,
+                            }
+                          })
+                        }
+                      >
+                        {t("customFields.moveUp")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={index === draft.customFields.length - 1}
+                        onClick={() =>
+                          updateDraft((current) => {
+                            const nextFields = [...current.customFields]
+                            ;[nextFields[index], nextFields[index + 1]] = [nextFields[index + 1], nextFields[index]]
+                            return {
+                              ...current,
+                              customFields: nextFields,
+                            }
+                          })
+                        }
+                      >
+                        {t("customFields.moveDown")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          updateDraft((current) => ({
+                            ...current,
+                            customFields: current.customFields.filter((item) => item.id !== field.id),
+                          }))
+                        }
+                      >
+                        {t("customFields.remove")}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-2">
+                      <Label htmlFor={`field-label-${field.id}`}>{t("customFields.label")}</Label>
+                      <Input
+                        id={`field-label-${field.id}`}
+                        value={field.label}
+                        onChange={(event) =>
+                          updateDraft((current) => ({
+                            ...current,
+                            customFields: current.customFields.map((item) =>
+                              item.id === field.id ? { ...item, label: event.target.value } : item
+                            ),
+                          }))
+                        }
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor={`field-type-${field.id}`}>{t("customFields.type")}</Label>
+                      <select
+                        id={`field-type-${field.id}`}
+                        value={field.type}
+                        onChange={(event) =>
+                          updateDraft((current) => ({
+                            ...current,
+                            customFields: current.customFields.map((item) =>
+                              item.id === field.id
+                                ? { ...item, type: event.target.value === "textarea" ? "textarea" : "text" }
+                                : item
+                            ),
+                          }))
+                        }
+                        className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                      >
+                        <option value="text">{t("customFields.typeText")}</option>
+                        <option value="textarea">{t("customFields.typeTextarea")}</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_160px]">
+                    <div className="grid gap-2">
+                      <Label htmlFor={`field-placeholder-${field.id}`}>{t("customFields.placeholderLabel")}</Label>
+                      <Input
+                        id={`field-placeholder-${field.id}`}
+                        value={field.placeholder ?? ""}
+                        onChange={(event) =>
+                          updateDraft((current) => ({
+                            ...current,
+                            customFields: current.customFields.map((item) =>
+                              item.id === field.id ? { ...item, placeholder: event.target.value } : item
+                            ),
+                          }))
+                        }
+                      />
+                    </div>
+                    <label className="flex items-center gap-3 rounded-xl border border-border px-4 py-3">
+                      <input
+                        type="checkbox"
+                        checked={field.required}
+                        onChange={(event) =>
+                          updateDraft((current) => ({
+                            ...current,
+                            customFields: current.customFields.map((item) =>
+                              item.id === field.id ? { ...item, required: event.target.checked } : item
+                            ),
+                          }))
+                        }
+                        className="size-4"
+                      />
+                      <span className="text-sm font-medium">{t("customFields.required")}</span>
+                    </label>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-lg border border-dashed border-border bg-muted/40 px-4 py-5 text-sm text-muted-foreground">
+                {t("customFields.empty")}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-xl border border-border bg-muted/30 p-5">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              {t("customFields.previewLabel")}
+            </p>
+            <div className="mt-4 grid gap-3 rounded-xl border border-border bg-background p-4 shadow-sm">
+              <div className="grid gap-2">
+                <Label>{t("customFields.baseName")}</Label>
+                <Input value="Anna Novakova" readOnly />
+              </div>
+              <div className="grid gap-2">
+                <Label>{t("customFields.baseEmail")}</Label>
+                <Input value="anna@example.com" readOnly />
+              </div>
+              <div className="grid gap-2">
+                <Label>{t("customFields.basePhone")}</Label>
+                <Input value="+420777000111" readOnly />
+              </div>
+              {draft.customFields.map((field) => (
+                <div className="grid gap-2" key={`preview-${field.id}`}>
+                  <Label>
+                    {field.label || t("customFields.placeholderField")}
+                    {field.required ? " *" : ""}
+                  </Label>
+                  {field.type === "textarea" ? (
+                    <textarea
+                      readOnly
+                      placeholder={field.placeholder}
+                      className="min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    />
+                  ) : (
+                    <Input readOnly placeholder={field.placeholder} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
       <SectionShell
         title={t("sections.share.title")}
         description={t("sections.share.description")}

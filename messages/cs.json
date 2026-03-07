@@ -517,6 +517,26 @@
         "ownDescription": "Staff vidí pouze zákazníky navázané na své termíny.",
         "allReadonlyTitle": "Všichni zákazníci jen pro čtení",
         "allReadonlyDescription": "Staff může otevřít celý seznam zákazníků, ale bez plné správy."
+      },
+      "customFields": {
+        "helper": "Přidejte a seřaďte doplňující otázky zobrazené v booking formuláři.",
+        "add": "Přidat pole",
+        "untitled": "Pole {index}",
+        "moveUp": "Nahoru",
+        "moveDown": "Dolů",
+        "remove": "Odebrat",
+        "label": "Popisek pole",
+        "type": "Typ pole",
+        "typeText": "Jednořádkové",
+        "typeTextarea": "Víceřádkové",
+        "placeholderLabel": "Placeholder",
+        "required": "Povinné",
+        "empty": "Zatím nejsou nastavená žádná vlastní pole.",
+        "previewLabel": "Náhled booking formuláře",
+        "baseName": "Jméno zákazníka",
+        "baseEmail": "Email",
+        "basePhone": "Telefon",
+        "placeholderField": "Nepojmenované pole"
       }
     }
   },

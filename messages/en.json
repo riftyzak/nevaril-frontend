@@ -517,6 +517,26 @@
         "ownDescription": "Staff sees only customers connected to their own appointments.",
         "allReadonlyTitle": "All customers read-only",
         "allReadonlyDescription": "Staff can browse the full customer list but cannot own the data."
+      },
+      "customFields": {
+        "helper": "Add and reorder the extra questions shown in the booking form.",
+        "add": "Add field",
+        "untitled": "Field {index}",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "remove": "Remove",
+        "label": "Field label",
+        "type": "Field type",
+        "typeText": "Single line",
+        "typeTextarea": "Paragraph",
+        "placeholderLabel": "Placeholder",
+        "required": "Required",
+        "empty": "No custom fields configured yet.",
+        "previewLabel": "Booking form preview",
+        "baseName": "Customer name",
+        "baseEmail": "Email",
+        "basePhone": "Phone",
+        "placeholderField": "Untitled field"
       }
     }
   },
