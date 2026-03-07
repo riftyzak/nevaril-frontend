@@ -341,6 +341,32 @@
         "toastEventUpdateFailed": "Uloženie udalosti zlyhalo",
         "toastEventDeleted": "Udalosť zmazaná",
         "toastEventDeleteFailed": "Zmazanie udalosti zlyhalo"
+      },
+      "create": {
+        "booking": "Nová rezervácia",
+        "block": "Nový blok",
+        "timeOff": "Nové voľno",
+        "bookingTitle": "Vytvoriť rezerváciu",
+        "blockTitle": "Vytvoriť blok",
+        "timeOffTitle": "Vytvoriť voľno",
+        "description": "Rýchle vytvorenie priamo z kalendára.",
+        "start": "Začiatok",
+        "end": "Koniec",
+        "staff": "Pracovník",
+        "service": "Služba",
+        "duration": "Dĺžka",
+        "customerName": "Meno zákazníka",
+        "customerEmail": "E-mail",
+        "customerPhone": "Telefón",
+        "titleLabel": "Názov",
+        "note": "Poznámka",
+        "submit": "Vytvoriť",
+        "defaultBlockedTitle": "Blok",
+        "defaultTimeOffTitle": "Voľno",
+        "toastBookingCreated": "Rezervácia vytvorená",
+        "toastBookingCreateFailed": "Vytvorenie rezervácie zlyhalo",
+        "toastEventCreated": "Udalosť vytvorená",
+        "toastEventCreateFailed": "Vytvorenie udalosti zlyhalo"
       }
     },
     "bookings": {

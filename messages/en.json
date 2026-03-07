@@ -341,6 +341,32 @@
         "toastEventUpdateFailed": "Event update failed",
         "toastEventDeleted": "Event deleted",
         "toastEventDeleteFailed": "Event delete failed"
+      },
+      "create": {
+        "booking": "New booking",
+        "block": "New block",
+        "timeOff": "New time-off",
+        "bookingTitle": "Create booking",
+        "blockTitle": "Create block",
+        "timeOffTitle": "Create time-off",
+        "description": "Quick create directly from the calendar.",
+        "start": "Start",
+        "end": "End",
+        "staff": "Staff",
+        "service": "Service",
+        "duration": "Duration",
+        "customerName": "Customer name",
+        "customerEmail": "Email",
+        "customerPhone": "Phone",
+        "titleLabel": "Title",
+        "note": "Note",
+        "submit": "Create",
+        "defaultBlockedTitle": "Blocked",
+        "defaultTimeOffTitle": "Time-off",
+        "toastBookingCreated": "Booking created",
+        "toastBookingCreateFailed": "Booking creation failed",
+        "toastEventCreated": "Event created",
+        "toastEventCreateFailed": "Event creation failed"
       }
     },
     "bookings": {

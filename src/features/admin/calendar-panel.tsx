@@ -18,7 +18,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { listBookings, listCalendarEvents, listServices, listStaff, updateBooking, cancelBooking, updateCalendarEvent, deleteCalendarEvent } from "@/lib/api"
+import {
+  cancelBooking,
+  createBooking,
+  createCalendarEvent,
+  deleteCalendarEvent,
+  listBookings,
+  listCalendarEvents,
+  listServices,
+  listStaff,
+  updateBooking,
+  updateCalendarEvent,
+} from "@/lib/api"
 import { canModifyBooking } from "@/lib/booking/policy"
 import type { Booking, CalendarEvent, Staff } from "@/lib/api/types"
 import type { MockSession } from "@/lib/auth/types"
@@ -26,8 +37,10 @@ import type { AppLocale } from "@/i18n/locales"
 import { queryKeys } from "@/lib/query/keys"
 
 import {
+  addDuration,
   buildTimeLabels,
   clampItemToVisibleHours,
+  createEmptySlotStart,
   formatItemTimeLabel,
   formatWeekRangeLabel,
   getInitialWeekStart,
@@ -50,6 +63,8 @@ interface CalendarPanelProps {
 type SelectedItemRef =
   | { type: "booking"; id: string }
   | { type: CalendarEvent["type"]; id: string }
+
+type CreateDialogMode = "booking" | CalendarEvent["type"]
 
 function filterScopedBookings(bookings: Booking[], session: MockSession) {
   return session.role === "owner"
@@ -97,6 +112,17 @@ export function AdminCalendarPanel({
   const [eventStartAt, setEventStartAt] = useState("")
   const [eventEndAt, setEventEndAt] = useState("")
   const [eventNote, setEventNote] = useState("")
+  const [createMode, setCreateMode] = useState<CreateDialogMode | null>(null)
+  const [createStaffId, setCreateStaffId] = useState("")
+  const [createStartAt, setCreateStartAt] = useState("")
+  const [createEndAt, setCreateEndAt] = useState("")
+  const [createTitle, setCreateTitle] = useState("")
+  const [createNote, setCreateNote] = useState("")
+  const [createServiceId, setCreateServiceId] = useState("")
+  const [createVariant, setCreateVariant] = useState<30 | 60 | 90>(60)
+  const [createCustomerName, setCreateCustomerName] = useState("")
+  const [createCustomerEmail, setCreateCustomerEmail] = useState("")
+  const [createCustomerPhone, setCreateCustomerPhone] = useState("")
 
   const weekRange = useMemo(() => getWeekRange(weekStart, tz), [weekStart, tz])
   const weekDays = useMemo(() => getWeekDays(weekStart, locale, tz), [locale, tz, weekStart])
@@ -205,6 +231,58 @@ export function AdminCalendarPanel({
   const policyAllowsBookingChange = Boolean(
     selectedBooking && canModifyBooking(new Date(), selectedBooking.startAt, tz, 24)
   )
+  const createService = servicesQuery.data?.find((service) => service.id === createServiceId)
+
+  function getDefaultCreateStaffId() {
+    if (session.role === "staff") return session.staffId ?? ""
+    if (selectedStaffId !== "all") return selectedStaffId
+    return staffOptions[0]?.id ?? ""
+  }
+
+  function resetCreateDialog() {
+    setCreateMode(null)
+    setCreateStaffId("")
+    setCreateStartAt("")
+    setCreateEndAt("")
+    setCreateTitle("")
+    setCreateNote("")
+    setCreateServiceId("")
+    setCreateVariant(60)
+    setCreateCustomerName("")
+    setCreateCustomerEmail("")
+    setCreateCustomerPhone("")
+  }
+
+  function openCreateDialog(mode: CreateDialogMode, startAt?: string) {
+    const nextStartAt =
+      startAt ?? createEmptySlotStart(weekStart, 4, tz)
+    const defaultStaffId = getDefaultCreateStaffId()
+    const defaultServiceId = servicesQuery.data?.[0]?.id ?? ""
+
+    setCreateMode(mode)
+    setCreateStaffId(defaultStaffId)
+    setCreateStartAt(formatInTimeZone(new Date(nextStartAt), tz, "yyyy-MM-dd'T'HH:mm"))
+    setCreateEndAt(
+      formatInTimeZone(
+        new Date(addDuration(nextStartAt, mode === "booking" ? 60 : 120)),
+        tz,
+        "yyyy-MM-dd'T'HH:mm"
+      )
+    )
+    setCreateTitle(
+      mode === "blocked"
+        ? t("calendar.create.defaultBlockedTitle")
+        : mode === "time_off"
+          ? t("calendar.create.defaultTimeOffTitle")
+          : ""
+    )
+    setCreateNote("")
+    setCreateServiceId(defaultServiceId)
+    setCreateVariant(60)
+    setCreateCustomerName("")
+    setCreateCustomerEmail("")
+    setCreateCustomerPhone("")
+  }
 
   function openItemPanel(item: (typeof calendarItems)[number]) {
     setSelectedItem({ id: item.id, type: item.type })
@@ -309,6 +387,55 @@ export function AdminCalendarPanel({
     onError: () => toast.error(t("calendar.detail.toastEventDeleteFailed")),
   })
 
+  const createBookingMutation = useMutation({
+    mutationFn: async () => {
+      const result = await createBooking({
+        tenantSlug,
+        serviceId: createServiceId,
+        serviceVariant: createVariant,
+        staffId: createStaffId || undefined,
+        startAt: new Date(createStartAt).toISOString(),
+        customerId: `lead-${Date.now()}`,
+        customerName: createCustomerName,
+        customerEmail: createCustomerEmail,
+        customerPhone: createCustomerPhone,
+      })
+      if (!result.ok) throw new Error(result.error.message)
+      return result.data
+    },
+    onSuccess: async () => {
+      toast.success(t("calendar.create.toastBookingCreated"))
+      await queryClient.invalidateQueries({ queryKey: ["bookings", tenantSlug] })
+      resetCreateDialog()
+    },
+    onError: () => toast.error(t("calendar.create.toastBookingCreateFailed")),
+  })
+
+  const createEventMutation = useMutation({
+    mutationFn: async () => {
+      if (createMode !== "blocked" && createMode !== "time_off") {
+        throw new Error("Missing calendar event type")
+      }
+      const result = await createCalendarEvent({
+        tenantSlug,
+        staffId: createStaffId || undefined,
+        type: createMode,
+        title: createTitle,
+        startAt: new Date(createStartAt).toISOString(),
+        endAt: new Date(createEndAt).toISOString(),
+        note: createNote,
+      })
+      if (!result.ok) throw new Error(result.error.message)
+      return result.data
+    },
+    onSuccess: async () => {
+      toast.success(t("calendar.create.toastEventCreated"))
+      await queryClient.invalidateQueries({ queryKey: ["calendar-events", tenantSlug] })
+      resetCreateDialog()
+    },
+    onError: () => toast.error(t("calendar.create.toastEventCreateFailed")),
+  })
+
   const isLoading =
     bookingsQuery.isLoading || staffQuery.isLoading || servicesQuery.isLoading || eventsQuery.isLoading
   const isError =
@@ -350,6 +477,31 @@ export function AdminCalendarPanel({
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  data-testid="calendar-create-block"
+                  onClick={() => openCreateDialog("blocked")}
+                >
+                  {t("calendar.create.block")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  data-testid="calendar-create-time-off"
+                  onClick={() => openCreateDialog("time_off")}
+                >
+                  {t("calendar.create.timeOff")}
+                </Button>
+                <Button
+                  type="button"
+                  data-testid="calendar-create-booking"
+                  onClick={() => openCreateDialog("booking")}
+                >
+                  {t("calendar.create.booking")}
+                </Button>
               </div>
             </div>
           </CardHeader>
@@ -404,6 +556,25 @@ export function AdminCalendarPanel({
                           <div key={label} className="border-b border-border/80" style={{ height: CALENDAR_ROW_HEIGHT }} />
                         ))}
 
+                        <div className="absolute inset-0 grid">
+                          {timeLabels.slice(0, -1).map((label, index) => (
+                            <button
+                              key={`${day.dateKey}-${label}`}
+                              type="button"
+                              className="border-b border-transparent text-left hover:bg-primary/4"
+                              style={{ height: CALENDAR_ROW_HEIGHT }}
+                              onClick={() =>
+                                openCreateDialog(
+                                  "booking",
+                                  createEmptySlotStart(day.dateKey, index, tz)
+                                )
+                              }
+                            >
+                              <span className="sr-only">{label}</span>
+                            </button>
+                          ))}
+                        </div>
+
                         <div className="absolute inset-0 p-1">
                           {(itemsByDay[day.dateKey] ?? []).map((item) => {
                             const visibleItem = clampItemToVisibleHours(item, day.dateKey, tz)
@@ -421,7 +592,7 @@ export function AdminCalendarPanel({
                                 key={item.id}
                                 type="button"
                                 data-testid={`calendar-item-${item.id}`}
-                                className={`absolute left-1 right-1 rounded-md border px-2 py-1 text-left shadow-sm ${itemClassName(
+                                className={`absolute z-10 left-1 right-1 rounded-md border px-2 py-1 text-left shadow-sm ${itemClassName(
                                   item.type
                                 )}`}
                                 style={{ top, height }}
@@ -642,6 +813,210 @@ export function AdminCalendarPanel({
               </DialogFooter>
             </div>
           ) : null}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={Boolean(createMode)} onOpenChange={(open) => (!open ? resetCreateDialog() : null)}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>
+              {createMode === "booking"
+                ? t("calendar.create.bookingTitle")
+                : createMode === "blocked"
+                  ? t("calendar.create.blockTitle")
+                  : t("calendar.create.timeOffTitle")}
+            </DialogTitle>
+            <DialogDescription>{t("calendar.create.description")}</DialogDescription>
+          </DialogHeader>
+
+          {createMode ? (
+            <div className="grid gap-4">
+              <div className="grid gap-2 md:grid-cols-2">
+                <div className="grid gap-2">
+                  <label className="text-sm font-medium" htmlFor="calendar-create-start">
+                    {t("calendar.create.start")}
+                  </label>
+                  <Input
+                    id="calendar-create-start"
+                    type="datetime-local"
+                    value={createStartAt}
+                    onChange={(event) => setCreateStartAt(event.target.value)}
+                  />
+                </div>
+
+                {createMode === "booking" ? null : (
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium" htmlFor="calendar-create-end">
+                      {t("calendar.create.end")}
+                    </label>
+                    <Input
+                      id="calendar-create-end"
+                      type="datetime-local"
+                      value={createEndAt}
+                      onChange={(event) => setCreateEndAt(event.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid gap-2">
+                <label className="text-sm font-medium" htmlFor="calendar-create-staff">
+                  {t("calendar.create.staff")}
+                </label>
+                <select
+                  id="calendar-create-staff"
+                  value={createStaffId}
+                  onChange={(event) => setCreateStaffId(event.target.value)}
+                  disabled={session.role === "staff"}
+                  className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                >
+                  {staffOptions.map((staff) => (
+                    <option key={staff.id} value={staff.id}>
+                      {staff.fullName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {createMode === "booking" ? (
+                <>
+                  <div className="grid gap-2 md:grid-cols-[1fr_140px]">
+                    <div className="grid gap-2">
+                      <label className="text-sm font-medium" htmlFor="calendar-create-service">
+                        {t("calendar.create.service")}
+                      </label>
+                      <select
+                        id="calendar-create-service"
+                        value={createServiceId}
+                        onChange={(event) => {
+                          const nextServiceId = event.target.value
+                          const nextService = servicesQuery.data?.find((service) => service.id === nextServiceId)
+                          const nextVariant = (nextService?.durationOptions[0] ?? 60) as 30 | 60 | 90
+                          setCreateServiceId(nextServiceId)
+                          setCreateVariant(nextVariant)
+                        }}
+                        className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                      >
+                        {(servicesQuery.data ?? []).map((service) => (
+                          <option key={service.id} value={service.id}>
+                            {service.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="grid gap-2">
+                      <label className="text-sm font-medium" htmlFor="calendar-create-variant">
+                        {t("calendar.create.duration")}
+                      </label>
+                      <select
+                        id="calendar-create-variant"
+                        value={createVariant}
+                        onChange={(event) => setCreateVariant(Number(event.target.value) as 30 | 60 | 90)}
+                        className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                      >
+                        {(createService?.durationOptions ?? [30, 60, 90]).map((variant) => (
+                          <option key={variant} value={variant}>
+                            {variant} min
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2 md:grid-cols-2">
+                    <div className="grid gap-2">
+                      <label className="text-sm font-medium" htmlFor="calendar-create-name">
+                        {t("calendar.create.customerName")}
+                      </label>
+                      <Input
+                        id="calendar-create-name"
+                        value={createCustomerName}
+                        onChange={(event) => setCreateCustomerName(event.target.value)}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <label className="text-sm font-medium" htmlFor="calendar-create-phone">
+                        {t("calendar.create.customerPhone")}
+                      </label>
+                      <Input
+                        id="calendar-create-phone"
+                        value={createCustomerPhone}
+                        onChange={(event) => setCreateCustomerPhone(event.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium" htmlFor="calendar-create-email">
+                      {t("calendar.create.customerEmail")}
+                    </label>
+                    <Input
+                      id="calendar-create-email"
+                      type="email"
+                      value={createCustomerEmail}
+                      onChange={(event) => setCreateCustomerEmail(event.target.value)}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium" htmlFor="calendar-create-title">
+                      {t("calendar.create.titleLabel")}
+                    </label>
+                    <Input
+                      id="calendar-create-title"
+                      value={createTitle}
+                      onChange={(event) => setCreateTitle(event.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <label className="text-sm font-medium" htmlFor="calendar-create-note">
+                      {t("calendar.create.note")}
+                    </label>
+                    <textarea
+                      id="calendar-create-note"
+                      value={createNote}
+                      onChange={(event) => setCreateNote(event.target.value)}
+                      className="min-h-28 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          ) : null}
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => resetCreateDialog()}>
+              {t("common.back")}
+            </Button>
+            <Button
+              type="button"
+              data-testid="calendar-create-submit"
+              disabled={
+                createMode === "booking"
+                  ? !createStartAt ||
+                    !createServiceId ||
+                    !createCustomerName ||
+                    !createCustomerEmail ||
+                    !createCustomerPhone ||
+                    createBookingMutation.isPending
+                  : !createStartAt ||
+                    !createEndAt ||
+                    !createTitle ||
+                    !createStaffId ||
+                    createEventMutation.isPending
+              }
+              onClick={() => {
+                if (createMode === "booking") {
+                  createBookingMutation.mutate()
+                  return
+                }
+                createEventMutation.mutate()
+              }}
+            >
+              {t("calendar.create.submit")}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
