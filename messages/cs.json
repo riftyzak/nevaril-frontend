@@ -450,6 +450,50 @@
       "rolesDescription": "Owner-only správa rolí placeholder.",
       "tenantSettingsTitle": "Nastavení tenanta",
       "tenantSettingsDescription": "Owner-only nastavení tenanta placeholder."
+    },
+    "tenantSettings": {
+      "title": "Nastavení provozovny",
+      "description": "Nakonfigurujte profil provozovny, booking výchozí chování a onboarding na jednom místě.",
+      "loading": "Načítám nastavení provozovny...",
+      "errorTitle": "Nastavení provozovny není dostupné",
+      "errorBody": "Nastavení provozovny se z mock API nepodařilo načíst.",
+      "retry": "Zkusit znovu",
+      "save": "Uložit změny",
+      "saving": "Ukládám...",
+      "saved": "Nastavení provozovny uloženo",
+      "saveError": "Nastavení provozovny se nepodařilo uložit",
+      "discard": "Zahodit",
+      "saveBar": {
+        "title": "Neuložené změny",
+        "description": "Zkontrolujte upravenou konfiguraci provozovny a uložte ji."
+      },
+      "sections": {
+        "profile": {
+          "title": "Základní profil",
+          "description": "Název provozovny, logo a náhled brandu.",
+          "placeholder": "Editor základního profilu doplním v dalším kroku."
+        },
+        "booking": {
+          "title": "Booking chování",
+          "description": "Volba pracovníka, storno politika a booking výchozí nastavení.",
+          "placeholder": "Ovládání booking politiky doplním v dalším kroku."
+        },
+        "customFields": {
+          "title": "Vlastní pole",
+          "description": "Nastavte doplňující otázky zobrazené v booking formuláři.",
+          "placeholder": "Builder vlastních polí doplním v samostatném kroku."
+        },
+        "customers": {
+          "title": "Viditelnost zákazníků",
+          "description": "Nastavte, zda staff vidí jen své zákazníky, nebo celý seznam pouze pro čtení.",
+          "placeholder": "Ovládání viditelnosti zákazníků doplním v dalším kroku."
+        },
+        "share": {
+          "title": "Booking a sdílení",
+          "description": "Připravte výchozí nastavení pro booking odkazy, embed a QR sdílení.",
+          "placeholder": "Embed defaults a preview doplním v dalším kroku."
+        }
+      }
     }
   },
   "planLocked": {

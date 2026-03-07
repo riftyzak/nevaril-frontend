@@ -450,6 +450,50 @@
       "rolesDescription": "Owner-only správa rolí placeholder.",
       "tenantSettingsTitle": "Nastavenia tenanta",
       "tenantSettingsDescription": "Owner-only nastavenia tenanta placeholder."
+    },
+    "tenantSettings": {
+      "title": "Nastavenia prevádzky",
+      "description": "Nakonfigurujte profil prevádzky, booking predvolené správanie a onboarding na jednom mieste.",
+      "loading": "Načítavam nastavenia prevádzky...",
+      "errorTitle": "Nastavenia prevádzky nie sú dostupné",
+      "errorBody": "Nastavenia prevádzky sa z mock API nepodarilo načítať.",
+      "retry": "Skúsiť znova",
+      "save": "Uložiť zmeny",
+      "saving": "Ukladám...",
+      "saved": "Nastavenia prevádzky uložené",
+      "saveError": "Nastavenia prevádzky sa nepodarilo uložiť",
+      "discard": "Zahodiť",
+      "saveBar": {
+        "title": "Neuložené zmeny",
+        "description": "Skontrolujte upravenú konfiguráciu prevádzky a uložte ju."
+      },
+      "sections": {
+        "profile": {
+          "title": "Základný profil",
+          "description": "Názov prevádzky, logo a náhľad brandu.",
+          "placeholder": "Editor základného profilu doplním v ďalšom kroku."
+        },
+        "booking": {
+          "title": "Booking správanie",
+          "description": "Voľba pracovníka, storno politika a booking predvolené nastavenie.",
+          "placeholder": "Ovládanie booking politiky doplním v ďalšom kroku."
+        },
+        "customFields": {
+          "title": "Vlastné polia",
+          "description": "Nastavte doplňujúce otázky zobrazené v booking formulári.",
+          "placeholder": "Builder vlastných polí doplním v samostatnom kroku."
+        },
+        "customers": {
+          "title": "Viditeľnosť zákazníkov",
+          "description": "Nastavte, či staff vidí len svojich zákazníkov, alebo celý zoznam iba na čítanie.",
+          "placeholder": "Ovládanie viditeľnosti zákazníkov doplním v ďalšom kroku."
+        },
+        "share": {
+          "title": "Booking a zdieľanie",
+          "description": "Pripravte predvolené nastavenie pre booking odkazy, embed a QR zdieľanie.",
+          "placeholder": "Embed defaults a preview doplním v ďalšom kroku."
+        }
+      }
     }
   },
   "planLocked": {

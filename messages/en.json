@@ -450,6 +450,50 @@
       "rolesDescription": "Owner-only roles management placeholder.",
       "tenantSettingsTitle": "Tenant settings",
       "tenantSettingsDescription": "Owner-only tenant settings placeholder."
+    },
+    "tenantSettings": {
+      "title": "Tenant settings",
+      "description": "Configure your business profile, booking defaults, and onboarding settings in one place.",
+      "loading": "Loading tenant settings...",
+      "errorTitle": "Tenant settings unavailable",
+      "errorBody": "Tenant settings could not be loaded from the mock API.",
+      "retry": "Retry",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "saved": "Tenant settings saved",
+      "saveError": "Tenant settings could not be saved",
+      "discard": "Discard",
+      "saveBar": {
+        "title": "Unsaved changes",
+        "description": "Review the updated tenant configuration and save when ready."
+      },
+      "sections": {
+        "profile": {
+          "title": "Business profile",
+          "description": "Business name, logo and brand preview.",
+          "placeholder": "Business profile editor will be wired in the next step."
+        },
+        "booking": {
+          "title": "Booking behavior",
+          "description": "Staff selection, cancellation policy and booking defaults.",
+          "placeholder": "Booking policy controls will be wired in the next step."
+        },
+        "customFields": {
+          "title": "Custom fields",
+          "description": "Configure extra questions shown in the booking form.",
+          "placeholder": "Custom field builder will be wired in a dedicated step."
+        },
+        "customers": {
+          "title": "Customer visibility",
+          "description": "Set whether staff can read only their own customers or the full list in read-only mode.",
+          "placeholder": "Customer visibility controls will be wired in the next step."
+        },
+        "share": {
+          "title": "Booking and sharing defaults",
+          "description": "Prepare defaults for booking links, embeds and QR sharing.",
+          "placeholder": "Embed defaults and preview will be wired in the next step."
+        }
+      }
     }
   },
   "planLocked": {
