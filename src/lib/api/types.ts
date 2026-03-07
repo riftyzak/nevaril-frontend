@@ -8,17 +8,27 @@ export interface TenantCustomField {
   placeholder?: string
 }
 
+export interface TenantEmbedDefaults {
+  widgetPrimary?: string
+  widgetRadius?: string
+  defaultServiceId?: string | null
+}
+
 export interface TenantConfig {
   tenantSlug: string
   tenantName: string
+  logoUrl?: string
   timezone: string
   localeDefault: "cs" | "sk" | "en"
   plan: TenantPlan
   currency: string
   staffSelectionEnabled: boolean
+  cancellationPolicyText: string
+  cancellationPolicyHours: number
   customFields: TenantCustomField[]
   customerReadMode: "served-only" | "all-readonly"
   customersVisibility: "own" | "all_readonly"
+  embedDefaults: TenantEmbedDefaults
   updatedAt: string
 }
 
@@ -338,4 +348,23 @@ export interface UpdateTenantPlanInput {
   tenantSlug: string
   expectedUpdatedAt: string
   plan: TenantPlan
+}
+
+export interface UpdateTenantConfigInput {
+  tenantSlug: string
+  expectedUpdatedAt: string
+  patch: Partial<
+    Pick<
+      TenantConfig,
+      | "tenantName"
+      | "logoUrl"
+      | "staffSelectionEnabled"
+      | "cancellationPolicyText"
+      | "cancellationPolicyHours"
+      | "customFields"
+      | "customersVisibility"
+      | "customerReadMode"
+      | "embedDefaults"
+    >
+  >
 }

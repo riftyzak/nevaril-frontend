@@ -1,6 +1,6 @@
 import type { MockDatabase, ServiceVariant, TenantData } from "@/lib/api/types"
 
-export const DB_VERSION = 6
+export const DB_VERSION = 7
 
 const BASE_TIMESTAMP = "2026-01-10T10:00:00.000Z"
 
@@ -156,11 +156,18 @@ function makeTenantData(tenantSlug: "barber" | "carservice"): TenantData {
     config: {
       tenantSlug,
       tenantName: isBarber ? "Brass Barber" : "Brass Car Service",
+      logoUrl: isBarber
+        ? "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=120&q=80"
+        : "https://images.unsplash.com/photo-1613214150384-3b62017b4b68?auto=format&fit=crop&w=120&q=80",
       timezone: "Europe/Prague",
       localeDefault: "cs",
       plan: isBarber ? "business" : "lite",
       currency: "CZK",
       staffSelectionEnabled: true,
+      cancellationPolicyText: isBarber
+        ? "Změny a zrušení přijímáme nejpozději 24h před termínem."
+        : "Změny a zrušení přijímáme nejpozději 24h před termínem.",
+      cancellationPolicyHours: 24,
       customFields: isBarber
         ? [
             {
@@ -186,9 +193,14 @@ function makeTenantData(tenantSlug: "barber" | "carservice"): TenantData {
               required: false,
               placeholder: "Co je potreba zkontrolovat",
             },
-          ],
-      customerReadMode: "all-readonly",
+      ],
+      customerReadMode: isBarber ? "served-only" : "all-readonly",
       customersVisibility: isBarber ? "own" : "all_readonly",
+      embedDefaults: {
+        widgetPrimary: isBarber ? "#1d4ed8" : "#0f766e",
+        widgetRadius: "12px",
+        defaultServiceId: services[0].id,
+      },
       updatedAt: BASE_TIMESTAMP,
     },
     services,

@@ -27,6 +27,7 @@ import type {
   TenantData,
   UpdateBookingInput,
   UpdateCalendarEventInput,
+  UpdateTenantConfigInput,
   UpdateServiceInput,
   UpdateStaffNotesInput,
   UpdateLoyaltyConfigInput,
@@ -38,6 +39,7 @@ import type {
 } from "@/lib/api/types"
 import { canModifyBooking } from "@/lib/booking/policy"
 import { getDb, mutateDb } from "@/lib/mock/storage"
+import { getWidgetThemeOverrides } from "@/lib/theme/widget-theme"
 
 const TZ_DEFAULT = "Europe/Prague"
 
@@ -118,6 +120,26 @@ function overlapsRange(
   return item.startAt < range.endAt && range.startAt < item.endAt
 }
 
+function customerReadModeFromVisibility(
+  visibility: TenantConfig["customersVisibility"]
+): TenantConfig["customerReadMode"] {
+  return visibility === "own" ? "served-only" : "all-readonly"
+}
+
+function sanitizeCustomFields(fields: TenantConfig["customFields"] | undefined) {
+  if (!fields) return undefined
+
+  return fields
+    .map((field, index) => ({
+      id: field.id.trim() || `field-${index + 1}`,
+      label: field.label.trim(),
+      type: field.type === "textarea" ? ("textarea" as const) : ("text" as const),
+      required: Boolean(field.required),
+      placeholder: field.placeholder?.trim() || undefined,
+    }))
+    .filter((field) => field.label.length > 0)
+}
+
 function createAvailabilitySlots(input: {
   tenantSlug: string
   serviceId: string
@@ -188,6 +210,87 @@ export async function updateTenantPlan(input: UpdateTenantPlanInput): Promise<Ap
   const updated: TenantConfig = {
     ...tenantResult.data.config,
     plan: input.plan,
+    updatedAt: nowIso(),
+  }
+
+  mutateDb((current) => {
+    const tenant = current.tenants[input.tenantSlug]
+    return {
+      ...current,
+      tenants: {
+        ...current.tenants,
+        [input.tenantSlug]: {
+          ...tenant,
+          config: updated,
+        },
+      },
+    }
+  })
+
+  return ok(updated)
+}
+
+export async function updateTenantConfig(
+  input: UpdateTenantConfigInput
+): Promise<ApiResult<TenantConfig>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(input.tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  const currentConfig = tenantResult.data.config
+  if (currentConfig.updatedAt !== input.expectedUpdatedAt) {
+    return fail(
+      apiError("CONFLICT", "Tenant config was modified by another request", 409, {
+        expectedUpdatedAt: input.expectedUpdatedAt,
+        actualUpdatedAt: currentConfig.updatedAt,
+      })
+    )
+  }
+
+  const widgetTheme = getWidgetThemeOverrides({
+    primary: input.patch.embedDefaults?.widgetPrimary,
+    radius: input.patch.embedDefaults?.widgetRadius?.replace("px", ""),
+    logoUrl: input.patch.logoUrl,
+  })
+  const nextVisibility = input.patch.customersVisibility ?? currentConfig.customersVisibility
+  const sanitizedCustomFields =
+    sanitizeCustomFields(input.patch.customFields) ?? currentConfig.customFields
+
+  const updated: TenantConfig = {
+    ...currentConfig,
+    ...input.patch,
+    tenantName: input.patch.tenantName?.trim() || currentConfig.tenantName,
+    logoUrl:
+      input.patch.logoUrl !== undefined
+        ? widgetTheme.logoUrl
+        : currentConfig.logoUrl,
+    cancellationPolicyText:
+      input.patch.cancellationPolicyText?.trim() || currentConfig.cancellationPolicyText,
+    cancellationPolicyHours:
+      input.patch.cancellationPolicyHours !== undefined
+        ? Math.max(0, Math.round(input.patch.cancellationPolicyHours))
+        : currentConfig.cancellationPolicyHours,
+    customFields: sanitizedCustomFields,
+    customersVisibility: nextVisibility,
+    customerReadMode: customerReadModeFromVisibility(nextVisibility),
+    embedDefaults: {
+      ...currentConfig.embedDefaults,
+      ...input.patch.embedDefaults,
+      widgetPrimary:
+        input.patch.embedDefaults?.widgetPrimary !== undefined
+          ? widgetTheme.primary
+          : currentConfig.embedDefaults.widgetPrimary,
+      widgetRadius:
+        input.patch.embedDefaults?.widgetRadius !== undefined
+          ? widgetTheme.radius
+          : currentConfig.embedDefaults.widgetRadius,
+      defaultServiceId:
+        input.patch.embedDefaults?.defaultServiceId !== undefined
+          ? input.patch.embedDefaults.defaultServiceId
+          : currentConfig.embedDefaults.defaultServiceId,
+    },
     updatedAt: nowIso(),
   }
 
