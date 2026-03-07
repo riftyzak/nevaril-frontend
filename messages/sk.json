@@ -299,7 +299,20 @@
       "staffAvailability": "Dostupnosť/voľno pracovníkov",
       "availabilityBlocks": "Bloky dostupnosti",
       "timeOff": "Voľno",
-      "toastUpdated": "Dostupnosť bola uložená"
+      "toastUpdated": "Dostupnosť bola uložená",
+      "title": "Kalendár",
+      "description": "Týždenný prehľad rezervácií a blokácií pracovníkov.",
+      "previousWeek": "Predchádzajúci týždeň",
+      "today": "Dnes",
+      "nextWeek": "Ďalší týždeň",
+      "staffFilter": "Pracovník",
+      "allStaff": "Všetci pracovníci",
+      "legendBookings": "Rezervácie",
+      "legendBlocked": "Blokované",
+      "legendTimeOff": "Voľno",
+      "loading": "Načítanie kalendára...",
+      "loadFailed": "Kalendár sa nepodarilo načítať.",
+      "emptyWeek": "V tomto týždni nie sú žiadne udalosti."
     },
     "bookings": {
       "title": "Rezervácie",

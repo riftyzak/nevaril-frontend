@@ -299,7 +299,20 @@
       "staffAvailability": "Staff availability/time-off",
       "availabilityBlocks": "Availability blocks",
       "timeOff": "Time-off",
-      "toastUpdated": "Availability updated"
+      "toastUpdated": "Availability updated",
+      "title": "Calendar",
+      "description": "Weekly overview of bookings and staff blocks.",
+      "previousWeek": "Previous week",
+      "today": "Today",
+      "nextWeek": "Next week",
+      "staffFilter": "Staff",
+      "allStaff": "All staff",
+      "legendBookings": "Bookings",
+      "legendBlocked": "Blocked",
+      "legendTimeOff": "Time-off",
+      "loading": "Loading calendar...",
+      "loadFailed": "Calendar failed to load.",
+      "emptyWeek": "No events in this week."
     },
     "bookings": {
       "title": "Bookings",

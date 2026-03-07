@@ -28,6 +28,7 @@ import { canModifyBooking } from "@/lib/booking/policy"
 import type { AppLocale } from "@/i18n/locales"
 import { queryKeys } from "@/lib/query/keys"
 import { adminAppPath } from "@/lib/tenant/tenant-url"
+import { AdminCalendarPanel } from "@/features/admin/calendar-panel"
 
 interface AdminBaseProps {
   locale: AppLocale
@@ -97,105 +98,8 @@ export function DashboardPanel({ tz, tenantSlug, session }: AdminBaseProps) {
   )
 }
 
-export function CalendarPanel({ tenantSlug, session, tz }: AdminBaseProps) {
-  const t = useTranslations("adminCore")
-  const queryClient = useQueryClient()
-  const bookingsQuery = useQuery({
-    queryKey: ["bookings", tenantSlug],
-    queryFn: async () => {
-      const result = await listBookings(tenantSlug)
-      if (!result.ok) throw new Error(result.error.message)
-      return result.data
-    },
-  })
-  const staffQuery = useQuery({
-    queryKey: queryKeys.staff(tenantSlug),
-    queryFn: async () => {
-      const result = await listStaff(tenantSlug)
-      if (!result.ok) throw new Error(result.error.message)
-      return result.data
-    },
-  })
-
-  const activeStaff = useMemo(
-    () =>
-      session.role === "staff"
-        ? staffQuery.data?.find((item) => item.id === session.staffId)
-        : staffQuery.data?.[0],
-    [session.role, session.staffId, staffQuery.data]
-  )
-  const [availabilityNote, setAvailabilityNote] = useState("")
-  const [timeOffNote, setTimeOffNote] = useState("")
-
-  const notesMutation = useMutation({
-    mutationFn: async () => {
-      if (!activeStaff) throw new Error("Missing staff")
-      const result = await updateStaffNotes({
-        tenantSlug,
-        staffId: activeStaff.id,
-        expectedUpdatedAt: activeStaff.updatedAt,
-        patch: {
-          availabilityNote,
-          timeOffNote,
-        },
-      })
-      if (!result.ok) throw new Error(result.error.message)
-      return result.data
-    },
-    onSuccess: async () => {
-      toast.success(t("calendar.toastUpdated"))
-      await queryClient.invalidateQueries({ queryKey: queryKeys.staff(tenantSlug) })
-    },
-  })
-
-  const bookings = filterBookingsByScope(bookingsQuery.data ?? [], session)
-
-  return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("calendar.bookingsByDay")}</CardTitle>
-          <CardDescription>{t("calendar.placeholder")}</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-2 text-sm">
-          {bookings.slice(0, 10).map((booking) => (
-            <div key={booking.id} className="rounded-md border border-border p-2">
-              {formatInTimeZone(new Date(booking.startAt), tz, "yyyy-MM-dd HH:mm")} ({booking.status})
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{session.role === "staff" ? t("calendar.ownAvailability") : t("calendar.staffAvailability")}</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-3">
-          <div className="grid gap-2">
-            <Label htmlFor="availability-note">{t("calendar.availabilityBlocks")}</Label>
-            <textarea
-              id="availability-note"
-              defaultValue={activeStaff?.availabilityNote ?? ""}
-              onChange={(event) => setAvailabilityNote(event.target.value)}
-              className="min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="time-off-note">{t("calendar.timeOff")}</Label>
-            <textarea
-              id="time-off-note"
-              defaultValue={activeStaff?.timeOffNote ?? ""}
-              onChange={(event) => setTimeOffNote(event.target.value)}
-              className="min-h-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
-            />
-          </div>
-          <Button type="button" onClick={() => notesMutation.mutate()} disabled={!activeStaff || notesMutation.isPending}>
-            {t("common.save")}
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
-  )
+export function CalendarPanel({ locale, tenantSlug, session, tz }: AdminBaseProps) {
+  return <AdminCalendarPanel locale={locale} tenantSlug={tenantSlug} session={session} tz={tz} />
 }
 
 export function BookingsListPanel({ locale, tenantSlug, session, tz }: AdminBaseProps) {
