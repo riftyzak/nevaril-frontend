@@ -4,15 +4,28 @@ async function resetE2E(page, options = {}) {
   const role = options.role ?? "owner"
   const staff = options.staff ?? "st-1"
   const tenant = options.tenant ?? "barber"
+
   await page.goto(`/cs/t/${tenant}/book?__e2e=reset&__role=${role}&__staff=${staff}`)
-  await expect(page).toHaveURL(new RegExp(`/cs/t/${tenant}/book`))
+
+  await expect
+    .poll(async () => new URL(page.url()).searchParams.get("__e2e"))
+    .toBe(null)
+
+  await expect
+    .poll(async () => await page.evaluate(() => document.cookie))
+    .toContain("nevaril_mock_session=")
+
+  await expect(page).toHaveURL(new RegExp(`/cs/t/${tenant}/book(?:\\?.*)?$`))
 }
 
 test("booking happy path", async ({ page }) => {
   await resetE2E(page, { role: "owner" })
 
   await page.getByTestId("service-open-svc-cut").click()
+  await expect(page).toHaveURL(/\/cs\/t\/barber\/book\/svc-cut(?:\?|$)/)
+
   await page.getByTestId("variant-option-60").click()
+  await page.locator('a[href*="/book/svc-cut/slot"]').click()
   await page.locator('[data-testid^="slot-option-"]').first().click()
 
   await page.getByTestId("booking-name").fill("E2E User")
@@ -28,6 +41,10 @@ test("manage reschedule from confirmation", async ({ page }) => {
   await resetE2E(page, { role: "owner" })
 
   await page.getByTestId("service-open-svc-cut").click()
+  await expect(page).toHaveURL(/\/cs\/t\/barber\/book\/svc-cut(?:\?|$)/)
+
+  await page.locator('a[href*="/book/svc-cut/slot"]').click()
+  await page.getByRole("button", { name: "Další" }).click()
   await page.locator('[data-testid^="slot-option-"]').first().click()
   await page.getByTestId("booking-name").fill("Manage User")
   await page.getByTestId("booking-email").fill("manage@example.com")
@@ -36,16 +53,20 @@ test("manage reschedule from confirmation", async ({ page }) => {
   await page.getByTestId("manage-booking-link").click()
 
   await expect(page).toHaveURL(/\/cs\/m\//)
+  const dateRow = page.locator("p").filter({ hasText: "Datum a čas:" })
+  const statusRow = page.locator("p").filter({ hasText: "Stav:" })
+  const originalDate = await dateRow.textContent()
+
   await page.getByTestId("manage-reschedule-link").click()
   const targetSlot = page.locator('[data-testid^="slot-option-"]').nth(1)
-  const targetLabel = await targetSlot.textContent()
   await targetSlot.click()
   await page.getByTestId("manage-confirm-reschedule").click()
 
   await expect(page).toHaveURL(/\/cs\/m\//)
-  if (targetLabel) {
-    await expect(page.locator("body")).toContainText(targetLabel.trim())
-  }
+  await expect
+    .poll(async () => await dateRow.textContent())
+    .not.toBe(originalDate)
+  await expect(statusRow).toContainText("rescheduled")
 })
 
 test("owner create/edit service persists after reload", async ({ page }) => {

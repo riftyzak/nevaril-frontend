@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { formatInTimeZone } from "date-fns-tz"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
@@ -82,6 +82,7 @@ export function Confirmation({
   t,
 }: Readonly<ConfirmationProps>) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null)
   const { pushEvent } = useGtm()
@@ -175,13 +176,14 @@ export function Confirmation({
       }
       return result.data
     },
-    onSuccess: (updatedBooking) => {
+    onSuccess: async (updatedBooking) => {
       pushEvent("reschedule_booking", {
         bookingId: updatedBooking.id,
         from: bookingQuery.data?.startAt,
         to: updatedBooking.startAt,
       })
       setSubmitSuccess(t.rescheduleSuccess)
+      await queryClient.invalidateQueries({ queryKey: ["booking-token", token] })
       router.push(localePath({ locale, path: `/m/${token}` }))
     },
     onError: (error) => {
