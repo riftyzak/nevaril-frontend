@@ -38,6 +38,7 @@ export function ServiceCatalog({ locale, tenantSlug, uiQuery, t }: Readonly<Serv
   const searchParams = useSearchParams()
   const { pushEvent, pushEventOnce } = useGtm()
   const servicesQuery = useServices(tenantSlug)
+  const searchParamsString = searchParams?.toString?.() ?? ""
 
   const filtered = useMemo(() => {
     const value = query.trim().toLowerCase()
@@ -63,9 +64,9 @@ export function ServiceCatalog({ locale, tenantSlug, uiQuery, t }: Readonly<Serv
       {
         tenantSlug,
       },
-      `view_form:${pathname}:${searchParams.toString()}`
+      `view_form:${pathname}:${searchParamsString}`
     )
-  }, [pathname, pushEventOnce, searchParams, tenantSlug])
+  }, [pathname, pushEventOnce, searchParamsString, tenantSlug])
 
   return (
     <div className="grid gap-4">
