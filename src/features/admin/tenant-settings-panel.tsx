@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useMemo, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import Image from "next/image"
@@ -10,12 +11,16 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import type { AppLocale } from "@/i18n/locales"
 import { updateTenantConfig } from "@/lib/api"
 import type { TenantConfig } from "@/lib/api/types"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
+import { useServices } from "@/lib/query/hooks/use-services"
 import { queryKeys } from "@/lib/query/keys"
+import { adminAppPath, tenantUrl } from "@/lib/tenant/tenant-url"
 
 interface TenantSettingsPanelProps {
+  locale: AppLocale
   tenantSlug: string
 }
 
@@ -81,34 +86,11 @@ function createNextCustomFieldId(fields: TenantConfig["customFields"]) {
   return `field-${index}`
 }
 
-function SectionShell({
-  title,
-  description,
-  placeholder,
-}: Readonly<{
-  title: string
-  description: string
-  placeholder: string
-}>) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-lg border border-dashed border-border bg-muted/40 px-4 py-5 text-sm text-muted-foreground">
-          {placeholder}
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-export function TenantSettingsPanel({ tenantSlug }: Readonly<TenantSettingsPanelProps>) {
+export function TenantSettingsPanel({ locale, tenantSlug }: Readonly<TenantSettingsPanelProps>) {
   const t = useTranslations("adminCore.tenantSettings")
   const queryClient = useQueryClient()
   const configQuery = useTenantConfig(tenantSlug)
+  const servicesQuery = useServices(tenantSlug)
   const [localDraft, setLocalDraft] = useState<TenantSettingsDraft | null>(null)
 
   const draft = useMemo(() => {
@@ -184,6 +166,14 @@ export function TenantSettingsPanel({ tenantSlug }: Readonly<TenantSettingsPanel
       </Card>
     )
   }
+
+  const defaultService = servicesQuery.data?.find((service) => service.id === draft.embedDefaults.defaultServiceId)
+  const bookingEntryHref = tenantUrl({
+    locale,
+    tenantSlug,
+    path: draft.embedDefaults.defaultServiceId ? `/book/${draft.embedDefaults.defaultServiceId}` : "/book",
+  })
+  const embedSettingsHref = adminAppPath({ locale, tenantSlug, path: "/embed" })
 
   return (
     <div className="grid gap-6 pb-28">
@@ -593,11 +583,121 @@ export function TenantSettingsPanel({ tenantSlug }: Readonly<TenantSettingsPanel
           </div>
         </CardContent>
       </Card>
-      <SectionShell
-        title={t("sections.share.title")}
-        description={t("sections.share.description")}
-        placeholder={t("sections.share.placeholder")}
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("sections.share.title")}</CardTitle>
+          <CardDescription>{t("sections.share.description")}</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid gap-4">
+            <div className="grid gap-2 sm:max-w-60">
+              <Label htmlFor="embed-default-service">{t("share.defaultService")}</Label>
+              <select
+                id="embed-default-service"
+                value={draft.embedDefaults.defaultServiceId ?? ""}
+                onChange={(event) =>
+                  updateDraft((current) => ({
+                    ...current,
+                    embedDefaults: {
+                      ...current.embedDefaults,
+                      defaultServiceId: event.target.value || null,
+                    },
+                  }))
+                }
+                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="">{t("share.allServices")}</option>
+                {(servicesQuery.data ?? []).map((service) => (
+                  <option key={service.id} value={service.id}>
+                    {service.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="embed-primary-default">{t("share.widgetPrimary")}</Label>
+                <Input
+                  id="embed-primary-default"
+                  value={draft.embedDefaults.widgetPrimary ?? ""}
+                  onChange={(event) =>
+                    updateDraft((current) => ({
+                      ...current,
+                      embedDefaults: {
+                        ...current.embedDefaults,
+                        widgetPrimary: event.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="#1d4ed8"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="embed-radius-default">{t("share.widgetRadius")}</Label>
+                <Input
+                  id="embed-radius-default"
+                  value={draft.embedDefaults.widgetRadius ?? ""}
+                  onChange={(event) =>
+                    updateDraft((current) => ({
+                      ...current,
+                      embedDefaults: {
+                        ...current.embedDefaults,
+                        widgetRadius: event.target.value,
+                      },
+                    }))
+                  }
+                  placeholder="12px"
+                />
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border p-4 text-sm text-muted-foreground">
+              <p>{t("share.helper")}</p>
+              <Link href={embedSettingsHref} className="mt-3 inline-flex text-primary underline-offset-4 hover:underline">
+                {t("share.openEmbed")}
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border bg-muted/30 p-5">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              {t("share.previewLabel")}
+            </p>
+            <div className="mt-4 grid gap-3 rounded-xl border border-border bg-background p-4 shadow-sm">
+              <div className="grid gap-1">
+                <p className="text-sm font-medium">{t("share.bookingEntryPreview")}</p>
+                <code className="rounded-md bg-muted px-2 py-1 text-xs text-foreground">{bookingEntryHref}</code>
+              </div>
+              <div className="grid gap-1">
+                <p className="text-sm font-medium">{t("share.selectedService")}</p>
+                <p className="text-sm text-muted-foreground">{defaultService?.name ?? t("share.allServices")}</p>
+              </div>
+              <div className="rounded-xl border border-border p-4">
+                <p className="text-sm font-medium">{t("share.widgetPreview")}</p>
+                <div className="mt-3 rounded-xl border border-border bg-background p-4">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="size-4 rounded-full border border-border"
+                      style={{ backgroundColor: draft.embedDefaults.widgetPrimary || "#1d4ed8" }}
+                    />
+                    <div>
+                      <p className="font-medium">{draft.tenantName}</p>
+                      <p className="text-sm text-muted-foreground">{t("share.widgetCaption")}</p>
+                    </div>
+                  </div>
+                  <div
+                    className="mt-4 border border-border bg-muted/40 p-3 text-sm"
+                    style={{ borderRadius: draft.embedDefaults.widgetRadius || "12px" }}
+                  >
+                    {t("share.widgetButton")}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {isDirty ? (
         <div

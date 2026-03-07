@@ -537,6 +537,20 @@
         "baseEmail": "Email",
         "basePhone": "Phone",
         "placeholderField": "Untitled field"
+      },
+      "share": {
+        "defaultService": "Default service deep link",
+        "allServices": "All services",
+        "widgetPrimary": "Widget primary color",
+        "widgetRadius": "Widget corner radius",
+        "helper": "These values prefill the dedicated embed page and become the default for QR/snippet generation.",
+        "openEmbed": "Open embed generator",
+        "previewLabel": "Share preview",
+        "bookingEntryPreview": "Booking entry link",
+        "selectedService": "Preselected service",
+        "widgetPreview": "Widget sample",
+        "widgetCaption": "Preview of embed defaults",
+        "widgetButton": "Book now"
       }
     }
   },

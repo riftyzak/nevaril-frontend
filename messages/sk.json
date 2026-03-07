@@ -537,6 +537,20 @@
         "baseEmail": "Email",
         "basePhone": "Telefón",
         "placeholderField": "Nepomenované pole"
+      },
+      "share": {
+        "defaultService": "Predvolený odkaz na službu",
+        "allServices": "Všetky služby",
+        "widgetPrimary": "Primárna farba widgetu",
+        "widgetRadius": "Zaoblenie widgetu",
+        "helper": "Tieto hodnoty predvyplnia samostatnú embed stránku a stanú sa predvoleným nastavením pre QR/snippet generátor.",
+        "openEmbed": "Otvoriť embed generátor",
+        "previewLabel": "Náhľad zdieľania",
+        "bookingEntryPreview": "Booking vstupný odkaz",
+        "selectedService": "Predvybraná služba",
+        "widgetPreview": "Ukážka widgetu",
+        "widgetCaption": "Náhľad embed defaults",
+        "widgetButton": "Rezervovať"
       }
     }
   },

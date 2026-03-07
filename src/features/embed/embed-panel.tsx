@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { AppLocale } from "@/i18n/locales"
 import { useServices } from "@/lib/query/hooks/use-services"
+import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
 import type { TenantSource } from "@/lib/tenant/resolveTenant"
 import { publicTenantAbsoluteUrl } from "@/lib/tenant/tenant-url"
 
@@ -46,10 +47,15 @@ export function EmbedPanel({
   t,
 }: Readonly<EmbedPanelProps>) {
   const servicesQuery = useServices(tenantSlug)
-  const [serviceId, setServiceId] = useState("")
-  const [primary, setPrimary] = useState("")
-  const [radius, setRadius] = useState("")
-  const [logoUrl, setLogoUrl] = useState("")
+  const tenantConfigQuery = useTenantConfig(tenantSlug)
+  const [serviceId, setServiceId] = useState<string | null>(null)
+  const [primary, setPrimary] = useState<string | null>(null)
+  const [radius, setRadius] = useState<string | null>(null)
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const effectiveServiceId = serviceId ?? tenantConfigQuery.data?.embedDefaults.defaultServiceId ?? ""
+  const effectivePrimary = primary ?? tenantConfigQuery.data?.embedDefaults.widgetPrimary ?? ""
+  const effectiveRadius = radius ?? tenantConfigQuery.data?.embedDefaults.widgetRadius ?? ""
+  const effectiveLogoUrl = logoUrl ?? tenantConfigQuery.data?.logoUrl ?? ""
 
   const baseBookingUrl = useMemo(
     () =>
@@ -65,7 +71,7 @@ export function EmbedPanel({
   )
 
   const serviceDeepLink = useMemo(() => {
-    if (!serviceId) return ""
+    if (!effectiveServiceId) return ""
     const params = new URLSearchParams({ prefill: "1" })
     const base = publicTenantAbsoluteUrl({
       locale,
@@ -73,16 +79,16 @@ export function EmbedPanel({
       source,
       host,
       protocol,
-      path: `/book/${serviceId}`,
+      path: `/book/${effectiveServiceId}`,
     })
     return `${base}?${params.toString()}`
-  }, [host, locale, protocol, serviceId, source, tenantSlug])
+  }, [effectiveServiceId, host, locale, protocol, source, tenantSlug])
 
   const widgetSrc = useMemo(() => {
     const params = new URLSearchParams({ widget: "1" })
-    if (primary.trim()) params.set("primary", primary.trim())
-    if (radius.trim()) params.set("radius", radius.trim())
-    if (logoUrl.trim()) params.set("logoUrl", logoUrl.trim())
+    if (effectivePrimary.trim()) params.set("primary", effectivePrimary.trim())
+    if (effectiveRadius.trim()) params.set("radius", effectiveRadius.trim())
+    if (effectiveLogoUrl.trim()) params.set("logoUrl", effectiveLogoUrl.trim())
     const base = publicTenantAbsoluteUrl({
       locale,
       tenantSlug,
@@ -92,7 +98,7 @@ export function EmbedPanel({
       path: "/book",
     })
     return `${base}?${params.toString()}`
-  }, [host, locale, logoUrl, primary, protocol, radius, source, tenantSlug])
+  }, [effectiveLogoUrl, effectivePrimary, effectiveRadius, host, locale, protocol, source, tenantSlug])
 
   const snippet = `<iframe src="${widgetSrc}" width="100%" height="720" frameBorder="0" loading="lazy"></iframe>`
 
@@ -128,14 +134,14 @@ export function EmbedPanel({
         </CardHeader>
         <CardContent className="grid gap-4 lg:grid-cols-2">
           <div className="grid gap-3">
-            <Label htmlFor="embed-service">{t.chooseService}</Label>
-            <select
-              id="embed-service"
-              value={serviceId}
-              onChange={(event) => setServiceId(event.target.value)}
-              className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-            >
-              <option value="">-</option>
+              <Label htmlFor="embed-service">{t.chooseService}</Label>
+              <select
+                id="embed-service"
+                value={effectiveServiceId}
+                onChange={(event) => setServiceId(event.target.value)}
+                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="">-</option>
               {(servicesQuery.data ?? []).map((service) => (
                 <option key={service.id} value={service.id}>
                   {service.name}
@@ -162,15 +168,15 @@ export function EmbedPanel({
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="grid gap-2">
               <Label htmlFor="embed-primary">{t.primary}</Label>
-              <Input id="embed-primary" value={primary} onChange={(event) => setPrimary(event.target.value)} />
+              <Input id="embed-primary" value={effectivePrimary} onChange={(event) => setPrimary(event.target.value)} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="embed-radius">{t.radius}</Label>
-              <Input id="embed-radius" value={radius} onChange={(event) => setRadius(event.target.value)} />
+              <Input id="embed-radius" value={effectiveRadius} onChange={(event) => setRadius(event.target.value)} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="embed-logo">{t.logoUrl}</Label>
-              <Input id="embed-logo" value={logoUrl} onChange={(event) => setLogoUrl(event.target.value)} />
+              <Input id="embed-logo" value={effectiveLogoUrl} onChange={(event) => setLogoUrl(event.target.value)} />
             </div>
           </div>
           <Label htmlFor="embed-snippet">{t.iframeSnippet}</Label>

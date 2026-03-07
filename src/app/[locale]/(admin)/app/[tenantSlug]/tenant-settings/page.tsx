@@ -18,7 +18,7 @@ export default async function AdminTenantSettingsPage({
 
   return (
     <AdminShell locale={locale} navItems={navItems} session={session} tenantSettings={tenantSettings}>
-      <TenantSettingsPanel tenantSlug={tenantSlug} />
+      <TenantSettingsPanel locale={locale} tenantSlug={tenantSlug} />
     </AdminShell>
   )
 }
