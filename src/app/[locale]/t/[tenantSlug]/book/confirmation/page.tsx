@@ -42,6 +42,7 @@ export default async function ConfirmationPage({
     <PublicShell
       homeHref={tenantUrl({ locale, tenantSlug })}
       locale={locale}
+      tenantSlug={tenantSlug}
       widgetMode={state.widget}
       themeOverrides={{
         primary: state.primary,

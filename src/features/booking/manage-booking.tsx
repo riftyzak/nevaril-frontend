@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { formatInTimeZone } from "date-fns-tz"
+import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -69,6 +70,7 @@ export function ManageBooking({
   tenantSlugHint,
   t,
 }: Readonly<ManageBookingProps>) {
+  const tm = useTranslations("booking.manage")
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
   const [actionSuccess, setActionSuccess] = useState<string | null>(null)
@@ -90,6 +92,10 @@ export function ManageBooking({
   const serviceQuery = useService(tenantSlug, bookingQuery.data?.serviceId ?? "")
   const staffQuery = useStaff(tenantSlug)
   const timezone = tenantConfigQuery.data?.timezone ?? bookingQuery.data?.timezone ?? "Europe/Prague"
+  const policyHours = tenantConfigQuery.data?.cancellationPolicyHours ?? 24
+  const policyBannerText = tm("policyBannerRule", { hours: policyHours })
+  const policyBlockedText = tm("policyBlockedRule", { hours: policyHours })
+  const cancelForbiddenText = tm("cancelForbiddenRule", { hours: policyHours })
 
   useEffect(() => {
     const booking = bookingQuery.data
@@ -130,7 +136,7 @@ export function ManageBooking({
     onError: (error) => {
       const code = (error as Error & { code?: string }).code
       if (code === "FORBIDDEN") {
-        setActionError(t.cancelForbidden)
+        setActionError(cancelForbiddenText)
         return
       }
       if (code === "CONFLICT") {
@@ -159,7 +165,7 @@ export function ManageBooking({
 
   const booking = bookingQuery.data
   const staffName = staffQuery.data?.find((staff) => staff.id === booking.staffId)?.fullName
-  const canModify = canModifyBooking(new Date(), booking.startAt, timezone, 24)
+  const canModify = canModifyBooking(new Date(), booking.startAt, timezone, policyHours)
   const isCancelled = booking.status === "cancelled"
 
   const rescheduleHref = `${tenantUrl({
@@ -180,10 +186,10 @@ export function ManageBooking({
           <CardDescription>{t.description}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 text-sm">
-          <div className="rounded-md border border-border bg-muted/40 p-3">{t.policyBanner}</div>
+          <div className="rounded-md border border-border bg-muted/40 p-3">{policyBannerText}</div>
           {!canModify && !isCancelled ? (
             <div className="rounded-md border border-border bg-muted/40 p-3 text-muted-foreground">
-              {t.policyBlocked}
+              {policyBlockedText}
             </div>
           ) : null}
 

@@ -26,7 +26,7 @@ export default async function ManageBookingPage({
 
   return (
     <TenantProvider value={{ tenantSlug, locale, source }}>
-      <PublicShell homeHref={tenantUrl({ locale, tenantSlug })} locale={locale}>
+      <PublicShell homeHref={tenantUrl({ locale, tenantSlug })} locale={locale} tenantSlug={tenantSlug}>
         <ManageBooking
           locale={locale}
           bookingToken={bookingToken}

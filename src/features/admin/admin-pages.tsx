@@ -26,6 +26,7 @@ import { can } from "@/lib/auth/permissions"
 import type { MockSession, TenantPermissionSettings } from "@/lib/auth/types"
 import { canModifyBooking } from "@/lib/booking/policy"
 import type { AppLocale } from "@/i18n/locales"
+import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
 import { queryKeys } from "@/lib/query/keys"
 import { adminAppPath } from "@/lib/tenant/tenant-url"
 import { AdminCalendarPanel } from "@/features/admin/calendar-panel"
@@ -178,7 +179,9 @@ export function BookingDetailPanel({
 
   const booking = bookingQuery.data
   const manageAllowed = booking ? isOwnBooking(session, booking) : false
-  const policyAllowed = booking ? canModifyBooking(new Date(), booking.startAt, tz, 24) : false
+  const tenantConfigQuery = useTenantConfig(tenantSlug)
+  const policyHours = tenantConfigQuery.data?.cancellationPolicyHours ?? 24
+  const policyAllowed = booking ? canModifyBooking(new Date(), booking.startAt, tz, policyHours) : false
 
   const rescheduleMutation = useMutation({
     mutationFn: async () => {
@@ -255,7 +258,9 @@ export function BookingDetailPanel({
         </CardHeader>
         <CardContent className="grid gap-3">
           {!manageAllowed ? <p className="text-sm text-muted-foreground">{t("bookingDetail.ownOnly")}</p> : null}
-          {!policyAllowed ? <p className="text-sm text-muted-foreground">{t("bookingDetail.policy")}</p> : null}
+          {!policyAllowed ? (
+            <p className="text-sm text-muted-foreground">{t("bookingDetail.policyRule", { hours: policyHours })}</p>
+          ) : null}
           <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
             <Input type="datetime-local" value={newStartAt} onChange={(event) => setNewStartAt(event.target.value)} />
             <Button

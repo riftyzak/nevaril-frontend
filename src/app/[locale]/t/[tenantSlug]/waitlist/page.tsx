@@ -14,7 +14,7 @@ export default async function WaitlistPublicPage({
   const t = await getTranslations({ locale, namespace: "waitlist.public" })
 
   return (
-    <PublicShell homeHref={tenantUrl({ locale, tenantSlug })} locale={locale}>
+    <PublicShell homeHref={tenantUrl({ locale, tenantSlug })} locale={locale} tenantSlug={tenantSlug}>
       <PublicWaitlistForm
         tenantSlug={tenantSlug}
         t={{

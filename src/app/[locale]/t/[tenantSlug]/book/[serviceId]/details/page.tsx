@@ -25,6 +25,7 @@ export default async function DetailsPage({
     <PublicShell
       homeHref={tenantUrl({ locale, tenantSlug })}
       locale={locale}
+      tenantSlug={tenantSlug}
       widgetMode={state.widget}
       themeOverrides={{
         primary: state.primary,

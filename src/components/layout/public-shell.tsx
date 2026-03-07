@@ -1,52 +1,33 @@
 import Link from "next/link"
-import Image from "next/image"
 import type { CSSProperties, ReactNode } from "react"
 import { getTranslations } from "next-intl/server"
 
 import { DevMenu } from "@/components/dev/dev-menu"
+import { PublicBrand } from "@/components/layout/public-brand"
 import { LocaleSwitcher } from "@/components/locale-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { type AppLocale } from "@/i18n/locales"
 import type { WidgetThemeOverrides } from "@/lib/theme/widget-theme"
 
-function BrandMark({
-  brandName,
-  logoUrl,
-  compact = false,
-}: Readonly<{ brandName: string; logoUrl?: string; compact?: boolean }>) {
-  return (
-    <div className="flex items-center gap-2">
-      {logoUrl ? (
-        <Image
-          src={logoUrl}
-          alt={brandName}
-          width={compact ? 28 : 32}
-          height={compact ? 28 : 32}
-          unoptimized
-          className={`${compact ? "size-7" : "size-8"} rounded-md object-cover ring-1 ring-border`}
-        />
-      ) : (
-        <div className={`${compact ? "size-7" : "size-8"} rounded-md bg-primary/20 ring-1 ring-border`} />
-      )}
-      {!compact ? <p className="text-sm font-semibold tracking-tight">{brandName}</p> : null}
-    </div>
-  )
-}
-
 export async function PublicShell({
   children,
   homeHref,
   locale,
+  tenantSlug,
+  brandName,
   widgetMode = false,
   themeOverrides,
 }: Readonly<{
   children: ReactNode
   homeHref: string
   locale: AppLocale
+  tenantSlug?: string
+  brandName?: string
   widgetMode?: boolean
   themeOverrides?: WidgetThemeOverrides
 }>) {
   const t = await getTranslations({ locale, namespace: "shell.public" })
+  const effectiveBrandName = brandName ?? t("brandName")
 
   return (
     <div
@@ -68,9 +49,10 @@ export async function PublicShell({
             href={homeHref}
             className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            <BrandMark
-              brandName={t("brandName")}
-              logoUrl={themeOverrides?.logoUrl}
+            <PublicBrand
+              tenantSlug={tenantSlug}
+              brandNameFallback={effectiveBrandName}
+              logoUrlOverride={themeOverrides?.logoUrl}
               compact={widgetMode}
             />
           </Link>

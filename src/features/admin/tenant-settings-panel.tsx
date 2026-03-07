@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { useMemo, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 
@@ -225,11 +224,10 @@ export function TenantSettingsPanel({ locale, tenantSlug }: Readonly<TenantSetti
             </p>
             <div className="mt-4 flex items-center gap-4 rounded-xl border border-border bg-background p-4 shadow-sm">
               {draft.logoUrl ? (
-                <Image
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
                   src={draft.logoUrl}
                   alt={draft.tenantName}
-                  width={64}
-                  height={64}
                   className="size-16 rounded-xl object-cover"
                 />
               ) : (
@@ -702,7 +700,7 @@ export function TenantSettingsPanel({ locale, tenantSlug }: Readonly<TenantSetti
       {isDirty ? (
         <div
           data-testid="tenant-settings-save-bar"
-          className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 backdrop-blur"
+          className="fixed inset-x-0 bottom-0 z-[60] border-t border-border bg-background/95 backdrop-blur"
         >
           <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
             <div>

@@ -24,6 +24,7 @@ export default async function ServiceDetailPage({
     <PublicShell
       homeHref={tenantUrl({ locale, tenantSlug })}
       locale={locale}
+      tenantSlug={tenantSlug}
       widgetMode={state.widget}
       themeOverrides={{
         primary: state.primary,

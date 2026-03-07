@@ -34,6 +34,7 @@ import { canModifyBooking } from "@/lib/booking/policy"
 import type { Booking, CalendarEvent, Staff } from "@/lib/api/types"
 import type { MockSession } from "@/lib/auth/types"
 import type { AppLocale } from "@/i18n/locales"
+import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
 import { queryKeys } from "@/lib/query/keys"
 
 import {
@@ -103,6 +104,7 @@ export function AdminCalendarPanel({
 }: Readonly<CalendarPanelProps>) {
   const t = useTranslations("adminCore")
   const queryClient = useQueryClient()
+  const tenantConfigQuery = useTenantConfig(tenantSlug)
   const [weekStart, setWeekStart] = useState(() => getInitialWeekStart(tz))
   const [selectedStaffId, setSelectedStaffId] = useState(() =>
     session.role === "staff" ? (session.staffId ?? "") : "all"
@@ -229,8 +231,9 @@ export function AdminCalendarPanel({
     selectedEvent &&
       (session.role === "owner" || selectedEvent.staffId === session.staffId)
   )
+  const policyHours = tenantConfigQuery.data?.cancellationPolicyHours ?? 24
   const policyAllowsBookingChange = Boolean(
-    selectedBooking && canModifyBooking(new Date(), selectedBooking.startAt, tz, 24)
+    selectedBooking && canModifyBooking(new Date(), selectedBooking.startAt, tz, policyHours)
   )
   const createService = servicesQuery.data?.find((service) => service.id === createServiceId)
 
@@ -676,7 +679,9 @@ export function AdminCalendarPanel({
                       <p className="text-sm text-muted-foreground">{t("calendar.detail.ownOnly")}</p>
                     ) : null}
                     {!policyAllowsBookingChange ? (
-                      <p className="text-sm text-muted-foreground">{t("calendar.detail.policy")}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {t("calendar.detail.policyRule", { hours: policyHours })}
+                      </p>
                     ) : null}
 
                     <div className="grid gap-2">

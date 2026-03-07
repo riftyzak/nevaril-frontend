@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { formatInTimeZone } from "date-fns-tz"
+import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 
@@ -81,6 +82,7 @@ export function Confirmation({
   uiQuery,
   t,
 }: Readonly<ConfirmationProps>) {
+  const tc = useTranslations("booking.confirm")
   const router = useRouter()
   const queryClient = useQueryClient()
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -101,13 +103,15 @@ export function Confirmation({
 
   const serviceQuery = useService(tenantSlug, serviceId ?? bookingQuery.data?.serviceId ?? "")
   const timezone = tenantConfigQuery.data?.timezone ?? bookingQuery.data?.timezone ?? "Europe/Prague"
+  const policyHours = tenantConfigQuery.data?.cancellationPolicyHours ?? 24
+  const policyBlockedText = tc("reschedulePolicyRule", { hours: policyHours })
   const effectiveMode: ConfirmationMode =
     mode === "manage" && bookingId && startAt ? "manage" : "create"
 
   const canRescheduleByPolicy = useMemo(() => {
     if (!bookingQuery.data) return false
-    return canModifyBooking(new Date(), bookingQuery.data.startAt, timezone, 24)
-  }, [bookingQuery.data, timezone])
+    return canModifyBooking(new Date(), bookingQuery.data.startAt, timezone, policyHours)
+  }, [bookingQuery.data, policyHours, timezone])
 
   const slotBackHref = useMemo(() => {
     const resolvedServiceId = bookingQuery.data?.serviceId ?? serviceId
@@ -193,7 +197,7 @@ export function Confirmation({
         return
       }
       if (code === "FORBIDDEN") {
-        setSubmitError(t.reschedulePolicyBlocked)
+        setSubmitError(policyBlockedText)
         return
       }
       setSubmitError(t.rescheduleSubmitError)
@@ -287,7 +291,7 @@ export function Confirmation({
 
         {effectiveMode === "manage" && !canRescheduleByPolicy ? (
           <div className="rounded-md border border-border bg-muted/40 p-3 text-sm text-muted-foreground">
-            {t.reschedulePolicyBlocked}
+            {policyBlockedText}
           </div>
         ) : null}
 
