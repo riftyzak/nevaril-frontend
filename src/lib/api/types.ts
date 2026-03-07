@@ -61,6 +61,21 @@ export interface AvailabilitySlot {
   updatedAt: string
 }
 
+export type CalendarEventType = "blocked" | "time_off"
+
+export interface CalendarEvent {
+  id: string
+  tenantSlug: string
+  staffId: string | null
+  type: CalendarEventType
+  title: string
+  startAt: string
+  endAt: string
+  note?: string
+  createdAt: string
+  updatedAt: string
+}
+
 export type BookingStatus = "confirmed" | "cancelled" | "rescheduled" | "completed"
 
 export interface Booking {
@@ -177,6 +192,7 @@ export interface TenantData {
   config: TenantConfig
   services: Service[]
   staff: Staff[]
+  calendarEvents: CalendarEvent[]
   bookings: Booking[]
   customers: Customer[]
   waitlist: WaitlistEntry[]
@@ -210,6 +226,36 @@ export interface CreateBookingInput {
   customerPhone: string
   customFieldValues?: Record<string, string>
   startAt: string
+}
+
+export interface ListCalendarEventsInput {
+  tenantSlug: string
+  startAt: string
+  endAt: string
+  staffId?: string
+}
+
+export interface CreateCalendarEventInput {
+  tenantSlug: string
+  staffId?: string
+  type: CalendarEventType
+  title: string
+  startAt: string
+  endAt: string
+  note?: string
+}
+
+export interface UpdateCalendarEventInput {
+  tenantSlug: string
+  eventId: string
+  expectedUpdatedAt: string
+  patch: Partial<Pick<CalendarEvent, "staffId" | "type" | "title" | "startAt" | "endAt" | "note">>
+}
+
+export interface DeleteCalendarEventInput {
+  tenantSlug: string
+  eventId: string
+  expectedUpdatedAt: string
 }
 
 export interface UpdateBookingInput {

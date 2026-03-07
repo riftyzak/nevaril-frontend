@@ -1,6 +1,6 @@
 import type { MockDatabase, ServiceVariant, TenantData } from "@/lib/api/types"
 
-export const DB_VERSION = 5
+export const DB_VERSION = 6
 
 const BASE_TIMESTAMP = "2026-01-10T10:00:00.000Z"
 
@@ -125,6 +125,33 @@ function makeTenantData(tenantSlug: "barber" | "carservice"): TenantData {
     },
   ]
 
+  const calendarEvents = [
+    {
+      id: `${tenantSlug}-evt-block-1`,
+      tenantSlug,
+      staffId: "st-1",
+      type: "blocked" as const,
+      title: isBarber ? "Blok na údržbu" : "Blok servisu",
+      startAt: "2026-01-13T11:00:00.000Z",
+      endAt: "2026-01-13T12:30:00.000Z",
+      note: isBarber ? "Rezerva mezi směnami" : "Technická rezerva",
+      createdAt: BASE_TIMESTAMP,
+      updatedAt: BASE_TIMESTAMP,
+    },
+    {
+      id: `${tenantSlug}-evt-timeoff-1`,
+      tenantSlug,
+      staffId: "st-owner",
+      type: "time_off" as const,
+      title: isBarber ? "Osobní volno" : "Dopolední volno",
+      startAt: "2026-01-14T08:00:00.000Z",
+      endAt: "2026-01-14T11:00:00.000Z",
+      note: isBarber ? "Lékař" : "Soukromé vyřízení",
+      createdAt: BASE_TIMESTAMP,
+      updatedAt: BASE_TIMESTAMP,
+    },
+  ]
+
   return {
     config: {
       tenantSlug,
@@ -166,6 +193,7 @@ function makeTenantData(tenantSlug: "barber" | "carservice"): TenantData {
     },
     services,
     staff,
+    calendarEvents,
     bookings,
     customers,
     waitlist: [

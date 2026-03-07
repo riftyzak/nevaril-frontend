@@ -8,12 +8,16 @@ import type {
   AssignWaitlistToSlotInput,
   AvailabilitySlot,
   Booking,
+  CalendarEvent,
   CancelBookingInput,
+  CreateCalendarEventInput,
   CreateBookingInput,
   CreateWaitlistEntryInput,
   CreateVoucherOrderInput,
   Customer,
+  DeleteCalendarEventInput,
   GetAvailabilityInput,
+  ListCalendarEventsInput,
   LoyaltyConfig,
   NotificationTemplates,
   Service,
@@ -22,6 +26,7 @@ import type {
   TenantConfig,
   TenantData,
   UpdateBookingInput,
+  UpdateCalendarEventInput,
   UpdateServiceInput,
   UpdateStaffNotesInput,
   UpdateLoyaltyConfigInput,
@@ -104,6 +109,13 @@ function hasBookingConflict(
     if (candidate.staffId && booking.staffId !== candidate.staffId) return false
     return booking.startAt < candidate.endAt && candidate.startAt < booking.endAt
   })
+}
+
+function overlapsRange(
+  item: { startAt: string; endAt: string },
+  range: { startAt: string; endAt: string }
+) {
+  return item.startAt < range.endAt && range.startAt < item.endAt
 }
 
 function createAvailabilitySlots(input: {
@@ -515,6 +527,151 @@ export async function createBooking(input: CreateBookingInput): Promise<ApiResul
   })
 
   return ok(booking)
+}
+
+export async function listCalendarEvents(
+  input: ListCalendarEventsInput
+): Promise<ApiResult<CalendarEvent[]>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(input.tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  return ok(
+    tenantResult.data.calendarEvents.filter((event) => {
+      if (input.staffId && event.staffId !== input.staffId) return false
+      return overlapsRange(event, { startAt: input.startAt, endAt: input.endAt })
+    })
+  )
+}
+
+export async function createCalendarEvent(
+  input: CreateCalendarEventInput
+): Promise<ApiResult<CalendarEvent>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(input.tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  const timestamp = nowIso()
+  const event: CalendarEvent = {
+    id: `evt-${Date.now()}`,
+    tenantSlug: input.tenantSlug,
+    staffId: input.staffId ?? null,
+    type: input.type,
+    title: input.title,
+    startAt: input.startAt,
+    endAt: input.endAt,
+    note: input.note,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  }
+
+  mutateDb((current) => {
+    const tenant = current.tenants[input.tenantSlug]
+    return {
+      ...current,
+      tenants: {
+        ...current.tenants,
+        [input.tenantSlug]: {
+          ...tenant,
+          calendarEvents: [...tenant.calendarEvents, event],
+        },
+      },
+    }
+  })
+
+  return ok(event)
+}
+
+export async function updateCalendarEvent(
+  input: UpdateCalendarEventInput
+): Promise<ApiResult<CalendarEvent>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(input.tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  const existing = tenantResult.data.calendarEvents.find((item) => item.id === input.eventId)
+  if (!existing) {
+    return fail(apiError("NOT_FOUND", `Calendar event '${input.eventId}' was not found`, 404))
+  }
+
+  if (existing.updatedAt !== input.expectedUpdatedAt) {
+    return fail(
+      apiError("CONFLICT", "Calendar event was modified by another request", 409, {
+        expectedUpdatedAt: input.expectedUpdatedAt,
+        actualUpdatedAt: existing.updatedAt,
+      })
+    )
+  }
+
+  const updated: CalendarEvent = {
+    ...existing,
+    ...input.patch,
+    updatedAt: nowIso(),
+  }
+
+  mutateDb((current) => {
+    const tenant = current.tenants[input.tenantSlug]
+    return {
+      ...current,
+      tenants: {
+        ...current.tenants,
+        [input.tenantSlug]: {
+          ...tenant,
+          calendarEvents: tenant.calendarEvents.map((event) =>
+            event.id === input.eventId ? updated : event
+          ),
+        },
+      },
+    }
+  })
+
+  return ok(updated)
+}
+
+export async function deleteCalendarEvent(
+  input: DeleteCalendarEventInput
+): Promise<ApiResult<{ id: string }>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(input.tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  const existing = tenantResult.data.calendarEvents.find((item) => item.id === input.eventId)
+  if (!existing) {
+    return fail(apiError("NOT_FOUND", `Calendar event '${input.eventId}' was not found`, 404))
+  }
+
+  if (existing.updatedAt !== input.expectedUpdatedAt) {
+    return fail(
+      apiError("CONFLICT", "Calendar event was modified by another request", 409, {
+        expectedUpdatedAt: input.expectedUpdatedAt,
+        actualUpdatedAt: existing.updatedAt,
+      })
+    )
+  }
+
+  mutateDb((current) => {
+    const tenant = current.tenants[input.tenantSlug]
+    return {
+      ...current,
+      tenants: {
+        ...current.tenants,
+        [input.tenantSlug]: {
+          ...tenant,
+          calendarEvents: tenant.calendarEvents.filter((event) => event.id !== input.eventId),
+        },
+      },
+    }
+  })
+
+  return ok({ id: input.eventId })
 }
 
 export async function updateBooking(input: UpdateBookingInput): Promise<ApiResult<Booking>> {
