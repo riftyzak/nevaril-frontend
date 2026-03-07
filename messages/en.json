@@ -493,6 +493,30 @@
           "description": "Prepare defaults for booking links, embeds and QR sharing.",
           "placeholder": "Embed defaults and preview will be wired in the next step."
         }
+      },
+      "profile": {
+        "name": "Business name",
+        "logoUrl": "Logo URL",
+        "previewLabel": "Brand preview",
+        "previewEyebrow": "Public booking header",
+        "fallbackName": "New business"
+      },
+      "booking": {
+        "staffSelection": "Allow customer to choose staff",
+        "staffSelectionHint": "Turn off when the business assigns staff automatically.",
+        "policyText": "Cancellation policy text",
+        "policyHours": "Hours rule",
+        "previewLabel": "Live preview",
+        "previewRule": "Changes are allowed up to {hours}h before start.",
+        "policyFallback": "Cancellation policy preview will appear here.",
+        "staffSelectionEnabled": "Staff selection is visible in booking flow.",
+        "staffSelectionDisabled": "Staff selection stays hidden and staff is assigned internally."
+      },
+      "customers": {
+        "ownTitle": "Own customers only",
+        "ownDescription": "Staff sees only customers connected to their own appointments.",
+        "allReadonlyTitle": "All customers read-only",
+        "allReadonlyDescription": "Staff can browse the full customer list but cannot own the data."
       }
     }
   },

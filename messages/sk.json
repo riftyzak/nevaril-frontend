@@ -493,6 +493,30 @@
           "description": "Pripravte predvolené nastavenie pre booking odkazy, embed a QR zdieľanie.",
           "placeholder": "Embed defaults a preview doplním v ďalšom kroku."
         }
+      },
+      "profile": {
+        "name": "Názov prevádzky",
+        "logoUrl": "URL loga",
+        "previewLabel": "Brand preview",
+        "previewEyebrow": "Hlavička public bookingu",
+        "fallbackName": "Nová prevádzka"
+      },
+      "booking": {
+        "staffSelection": "Povoliť zákazníkovi výber pracovníka",
+        "staffSelectionHint": "Vypnite, ak prevádzka prideľuje pracovníka interne.",
+        "policyText": "Text storno politiky",
+        "policyHours": "Hodinové pravidlo",
+        "previewLabel": "Živý náhľad",
+        "previewRule": "Zmeny sú povolené najneskôr {hours}h pred začiatkom.",
+        "policyFallback": "Náhľad storno politiky sa zobrazí tu.",
+        "staffSelectionEnabled": "Výber pracovníka je v booking flow viditeľný.",
+        "staffSelectionDisabled": "Výber pracovníka je skrytý a obsadenie rieši prevádzka interne."
+      },
+      "customers": {
+        "ownTitle": "Len vlastní zákazníci",
+        "ownDescription": "Staff vidí iba zákazníkov naviazaných na svoje termíny.",
+        "allReadonlyTitle": "Všetci zákazníci len na čítanie",
+        "allReadonlyDescription": "Staff môže otvoriť celý zoznam zákazníkov, ale bez plnej správy."
       }
     }
   },

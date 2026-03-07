@@ -2,11 +2,14 @@
 
 import { useMemo, useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { updateTenantConfig } from "@/lib/api"
 import type { TenantConfig } from "@/lib/api/types"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
@@ -107,6 +110,14 @@ export function TenantSettingsPanel({ tenantSlug }: Readonly<TenantSettingsPanel
     return JSON.stringify(createDraft(configQuery.data)) !== JSON.stringify(draft)
   }, [configQuery.data, draft])
 
+  function updateDraft(updater: (current: TenantSettingsDraft) => TenantSettingsDraft) {
+    setLocalDraft((current) => {
+      const baseDraft = current ?? (configQuery.data ? createDraft(configQuery.data) : null)
+      if (!baseDraft) return current
+      return updater(baseDraft)
+    })
+  }
+
   const saveMutation = useMutation({
     mutationFn: async () => {
       if (!configQuery.data || !draft) {
@@ -172,25 +183,196 @@ export function TenantSettingsPanel({ tenantSlug }: Readonly<TenantSettingsPanel
         </CardHeader>
       </Card>
 
-      <SectionShell
-        title={t("sections.profile.title")}
-        description={t("sections.profile.description")}
-        placeholder={t("sections.profile.placeholder")}
-      />
-      <SectionShell
-        title={t("sections.booking.title")}
-        description={t("sections.booking.description")}
-        placeholder={t("sections.booking.placeholder")}
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("sections.profile.title")}</CardTitle>
+          <CardDescription>{t("sections.profile.description")}</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="tenant-name">{t("profile.name")}</Label>
+              <Input
+                id="tenant-name"
+                value={draft.tenantName}
+                onChange={(event) =>
+                  updateDraft((current) => ({
+                    ...current,
+                    tenantName: event.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="tenant-logo">{t("profile.logoUrl")}</Label>
+              <Input
+                id="tenant-logo"
+                value={draft.logoUrl}
+                onChange={(event) =>
+                  updateDraft((current) => ({
+                    ...current,
+                    logoUrl: event.target.value,
+                  }))
+                }
+                placeholder="https://"
+              />
+            </div>
+          </div>
+          <div className="rounded-xl border border-border bg-muted/30 p-5">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              {t("profile.previewLabel")}
+            </p>
+            <div className="mt-4 flex items-center gap-4 rounded-xl border border-border bg-background p-4 shadow-sm">
+              {draft.logoUrl ? (
+                <Image
+                  src={draft.logoUrl}
+                  alt={draft.tenantName}
+                  width={64}
+                  height={64}
+                  className="size-16 rounded-xl object-cover"
+                />
+              ) : (
+                <div className="flex size-16 items-center justify-center rounded-xl bg-primary/10 text-xl font-semibold text-primary">
+                  {(draft.tenantName.trim()[0] ?? "N").toUpperCase()}
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="text-sm text-muted-foreground">{t("profile.previewEyebrow")}</p>
+                <p className="truncate text-lg font-semibold">{draft.tenantName || t("profile.fallbackName")}</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("sections.booking.title")}</CardTitle>
+          <CardDescription>{t("sections.booking.description")}</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="grid gap-5">
+            <label className="flex items-start gap-3 rounded-xl border border-border p-4">
+              <input
+                type="checkbox"
+                checked={draft.staffSelectionEnabled}
+                onChange={(event) =>
+                  updateDraft((current) => ({
+                    ...current,
+                    staffSelectionEnabled: event.target.checked,
+                  }))
+                }
+                className="mt-1 size-4"
+              />
+              <div className="grid gap-1">
+                <span className="font-medium">{t("booking.staffSelection")}</span>
+                <span className="text-sm text-muted-foreground">{t("booking.staffSelectionHint")}</span>
+              </div>
+            </label>
+
+            <div className="grid gap-2">
+              <Label htmlFor="tenant-policy-text">{t("booking.policyText")}</Label>
+              <textarea
+                id="tenant-policy-text"
+                value={draft.cancellationPolicyText}
+                onChange={(event) =>
+                  updateDraft((current) => ({
+                    ...current,
+                    cancellationPolicyText: event.target.value,
+                  }))
+                }
+                className="min-h-28 rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+            </div>
+
+            <div className="grid gap-2 sm:max-w-48">
+              <Label htmlFor="tenant-policy-hours">{t("booking.policyHours")}</Label>
+              <Input
+                id="tenant-policy-hours"
+                type="number"
+                min={0}
+                step={1}
+                value={String(draft.cancellationPolicyHours)}
+                onChange={(event) =>
+                  updateDraft((current) => ({
+                    ...current,
+                    cancellationPolicyHours: Number(event.target.value || 0),
+                  }))
+                }
+              />
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border bg-muted/30 p-5">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              {t("booking.previewLabel")}
+            </p>
+            <div className="mt-4 grid gap-3 rounded-xl border border-border bg-background p-4 shadow-sm">
+              <p className="text-sm font-medium">
+                {t("booking.previewRule", { hours: draft.cancellationPolicyHours })}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {draft.cancellationPolicyText || t("booking.policyFallback")}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {draft.staffSelectionEnabled
+                  ? t("booking.staffSelectionEnabled")
+                  : t("booking.staffSelectionDisabled")}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("sections.customers.title")}</CardTitle>
+          <CardDescription>{t("sections.customers.description")}</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3">
+          <label className="flex items-start gap-3 rounded-xl border border-border p-4">
+            <input
+              type="radio"
+              name="customers-visibility"
+              checked={draft.customersVisibility === "own"}
+              onChange={() =>
+                updateDraft((current) => ({
+                  ...current,
+                  customersVisibility: "own",
+                }))
+              }
+              className="mt-1 size-4"
+            />
+            <div className="grid gap-1">
+              <span className="font-medium">{t("customers.ownTitle")}</span>
+              <span className="text-sm text-muted-foreground">{t("customers.ownDescription")}</span>
+            </div>
+          </label>
+          <label className="flex items-start gap-3 rounded-xl border border-border p-4">
+            <input
+              type="radio"
+              name="customers-visibility"
+              checked={draft.customersVisibility === "all_readonly"}
+              onChange={() =>
+                updateDraft((current) => ({
+                  ...current,
+                  customersVisibility: "all_readonly",
+                }))
+              }
+              className="mt-1 size-4"
+            />
+            <div className="grid gap-1">
+              <span className="font-medium">{t("customers.allReadonlyTitle")}</span>
+              <span className="text-sm text-muted-foreground">{t("customers.allReadonlyDescription")}</span>
+            </div>
+          </label>
+        </CardContent>
+      </Card>
+
       <SectionShell
         title={t("sections.customFields.title")}
         description={t("sections.customFields.description")}
         placeholder={t("sections.customFields.placeholder")}
-      />
-      <SectionShell
-        title={t("sections.customers.title")}
-        description={t("sections.customers.description")}
-        placeholder={t("sections.customers.placeholder")}
       />
       <SectionShell
         title={t("sections.share.title")}
