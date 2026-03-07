@@ -43,6 +43,7 @@ import {
   createEmptySlotStart,
   formatItemTimeLabel,
   formatWeekRangeLabel,
+  getDefaultCreateStartAt,
   getInitialWeekStart,
   getItemDateKey,
   getItemPosition,
@@ -255,7 +256,7 @@ export function AdminCalendarPanel({
 
   function openCreateDialog(mode: CreateDialogMode, startAt?: string) {
     const nextStartAt =
-      startAt ?? createEmptySlotStart(weekStart, 4, tz)
+      startAt ?? getDefaultCreateStartAt(weekStart, tz)
     const defaultStaffId = getDefaultCreateStaffId()
     const defaultServiceId = servicesQuery.data?.[0]?.id ?? ""
 
@@ -465,6 +466,7 @@ export function AdminCalendarPanel({
               <div className="grid gap-1">
                 <span className="text-sm font-medium">{t("calendar.staffFilter")}</span>
                 <select
+                  data-testid="calendar-staff-filter"
                   value={session.role === "staff" ? (session.staffId ?? "") : selectedStaffId}
                   onChange={(event) => setSelectedStaffId(event.target.value)}
                   disabled={session.role === "staff"}
@@ -865,6 +867,7 @@ export function AdminCalendarPanel({
                 </label>
                 <select
                   id="calendar-create-staff"
+                  data-testid="calendar-create-staff"
                   value={createStaffId}
                   onChange={(event) => setCreateStaffId(event.target.value)}
                   disabled={session.role === "staff"}
@@ -887,6 +890,7 @@ export function AdminCalendarPanel({
                       </label>
                       <select
                         id="calendar-create-service"
+                        data-testid="calendar-create-service"
                         value={createServiceId}
                         onChange={(event) => {
                           const nextServiceId = event.target.value
@@ -910,6 +914,7 @@ export function AdminCalendarPanel({
                       </label>
                       <select
                         id="calendar-create-variant"
+                        data-testid="calendar-create-variant"
                         value={createVariant}
                         onChange={(event) => setCreateVariant(Number(event.target.value) as 30 | 60 | 90)}
                         className="h-9 rounded-md border border-input bg-background px-3 text-sm"

@@ -1,4 +1,4 @@
-import { addDays, addMinutes, differenceInMinutes, startOfWeek } from "date-fns"
+import { addDays, addMinutes, differenceInMinutes } from "date-fns"
 import { formatInTimeZone, fromZonedTime } from "date-fns-tz"
 
 import type { CalendarEvent, Booking } from "@/lib/api/types"
@@ -39,6 +39,10 @@ function toUtcDate(date: string) {
   return new Date(`${date}T00:00:00.000Z`)
 }
 
+function formatUtcDate(date: Date) {
+  return formatInTimeZone(date, "UTC", "yyyy-MM-dd")
+}
+
 function toZonedDate(date: string, hours: number, minutes: number, timezone: string) {
   const [year, month, day] = date.split("-").map(Number)
   const utcDate = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0))
@@ -47,12 +51,13 @@ function toZonedDate(date: string, hours: number, minutes: number, timezone: str
 
 export function getInitialWeekStart(timezone: string) {
   const localToday = formatInTimeZone(new Date(), timezone, "yyyy-MM-dd")
-  const weekStart = startOfWeek(toUtcDate(localToday), { weekStartsOn: 1 })
-  return formatInTimeZone(weekStart, "UTC", "yyyy-MM-dd")
+  const today = toUtcDate(localToday)
+  const mondayOffset = (today.getUTCDay() + 6) % 7
+  return formatUtcDate(addDays(today, -mondayOffset))
 }
 
 export function shiftWeek(weekStart: string, offsetWeeks: number) {
-  return formatInTimeZone(addDays(toUtcDate(weekStart), offsetWeeks * CALENDAR_WEEK_DAYS), "UTC", "yyyy-MM-dd")
+  return formatUtcDate(addDays(toUtcDate(weekStart), offsetWeeks * CALENDAR_WEEK_DAYS))
 }
 
 export function getWeekDays(weekStart: string, locale: AppLocale, timezone: string) {
@@ -66,18 +71,18 @@ export function getWeekDays(weekStart: string, locale: AppLocale, timezone: stri
   return Array.from({ length: CALENDAR_WEEK_DAYS }, (_, index) => {
     const date = addDays(toUtcDate(weekStart), index)
     return {
-      dateKey: formatInTimeZone(date, "UTC", "yyyy-MM-dd"),
+      dateKey: formatUtcDate(date),
       label: formatter.format(date),
       isToday:
         formatInTimeZone(new Date(), timezone, "yyyy-MM-dd") ===
-        formatInTimeZone(date, "UTC", "yyyy-MM-dd"),
+        formatUtcDate(date),
     }
   })
 }
 
 export function getWeekRange(weekStart: string, timezone: string) {
   const startAt = toZonedDate(weekStart, 0, 0, timezone).toISOString()
-  const endDate = formatInTimeZone(addDays(toUtcDate(weekStart), CALENDAR_WEEK_DAYS), "UTC", "yyyy-MM-dd")
+  const endDate = formatUtcDate(addDays(toUtcDate(weekStart), CALENDAR_WEEK_DAYS))
   const endAt = toZonedDate(endDate, 0, 0, timezone).toISOString()
 
   return { startAt, endAt }
@@ -182,4 +187,29 @@ export function createEmptySlotStart(dateKey: string, rowIndex: number, timezone
 
 export function addDuration(startAt: string, minutes: number) {
   return addMinutes(new Date(startAt), minutes).toISOString()
+}
+
+export function getDefaultCreateStartAt(weekStart: string, timezone: string) {
+  const currentWeekStart = getInitialWeekStart(timezone)
+  if (weekStart !== currentWeekStart) {
+    return createEmptySlotStart(weekStart, 4, timezone)
+  }
+
+  const todayKey = formatInTimeZone(new Date(), timezone, "yyyy-MM-dd")
+  const hour = Number(formatInTimeZone(new Date(), timezone, "H"))
+  const minute = Number(formatInTimeZone(new Date(), timezone, "m"))
+  let roundedMinutes = Math.ceil((hour * 60 + minute + 1) / 30) * 30
+  let dateKey = todayKey
+
+  if (roundedMinutes < CALENDAR_START_HOUR * 60) {
+    roundedMinutes = CALENDAR_START_HOUR * 60
+  }
+
+  if (roundedMinutes >= CALENDAR_END_HOUR * 60) {
+    roundedMinutes = CALENDAR_START_HOUR * 60
+    dateKey = formatUtcDate(addDays(toUtcDate(todayKey), 1))
+  }
+
+  const rowIndex = Math.floor((roundedMinutes - CALENDAR_START_HOUR * 60) / 30)
+  return createEmptySlotStart(dateKey, rowIndex, timezone)
 }
