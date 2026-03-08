@@ -31,6 +31,7 @@ interface ServiceDetailProps {
   uiQuery?: string
   t: {
     loading: string
+    loadFailed: string
     notFound: string
     backToCatalog: string
     chooseVariant: string
@@ -85,6 +86,14 @@ export function ServiceDetail({
     return (
       <Card>
         <CardContent className="pt-6 text-sm text-muted-foreground">{t.loading}</CardContent>
+      </Card>
+    )
+  }
+
+  if (serviceQuery.isError || configQuery.isError || staffQuery.isError) {
+    return (
+      <Card>
+        <CardContent className="pt-6 text-sm text-destructive">{t.loadFailed}</CardContent>
       </Card>
     )
   }

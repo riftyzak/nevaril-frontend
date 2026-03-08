@@ -5,6 +5,7 @@
   "shell": {
     "public": {
       "brandName": "Nevaril",
+      "brandLoadFailed": "Business configuration could not be loaded.",
       "logoPlaceholder": "Booking platform",
       "footerTitle": "Nevaril",
       "footerNote": "Online booking for service businesses"
@@ -87,12 +88,14 @@
     "catalog": {
       "searchPlaceholder": "Search service",
       "loading": "Loading services...",
+      "loadFailed": "Services could not be loaded.",
       "empty": "No services found for your search.",
       "openService": "Choose service",
       "categoryLabel": "Category"
     },
     "detail": {
       "loading": "Loading service...",
+      "loadFailed": "Service could not be loaded.",
       "notFound": "Service was not found.",
       "backToCatalog": "Back to service catalog",
       "chooseVariant": "Choose duration",
@@ -422,6 +425,7 @@
     },
     "services": {
       "title": "Services",
+      "loadFailed": "Services could not be loaded.",
       "ownerCanEdit": "Owner can edit",
       "staffViewOnly": "Staff view only"
     },
@@ -437,6 +441,7 @@
     },
     "staff": {
       "title": "Staff",
+      "loadFailed": "Staff could not be loaded.",
       "ownerDescription": "Owner can edit staff notes",
       "staffDescription": "Staff edits own notes",
       "editorTitle": "Working hours / time-off",

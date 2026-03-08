@@ -3,7 +3,9 @@ import type { Booking, TenantConfig } from "@/lib/api/types"
 
 export async function getTenantConfigOrNull(tenantSlug: string): Promise<TenantConfig | null> {
   const result = await getTenantConfig(tenantSlug)
-  return result.ok ? result.data : null
+  if (result.ok) return result.data
+  if (result.error.code === "NOT_FOUND") return null
+  throw new Error(`${result.error.code}: ${result.error.message}`)
 }
 
 export async function getTenantTimezone(

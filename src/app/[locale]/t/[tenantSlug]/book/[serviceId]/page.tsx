@@ -52,6 +52,7 @@ export default async function ServiceDetailPage({
             uiQuery={uiQuery}
             t={{
               loading: t("detail.loading"),
+              loadFailed: t("detail.loadFailed"),
               notFound: t("detail.notFound"),
               backToCatalog: t("detail.backToCatalog"),
               chooseVariant: t("detail.chooseVariant"),

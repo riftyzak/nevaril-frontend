@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   cancelBooking,
+  getService,
   listBookings,
   listCustomers,
   listServices,
@@ -418,6 +419,7 @@ export function ServicesListPanel({ locale, tenantSlug, session, tenantSettings 
         <CardDescription>{canUpdate ? t("services.ownerCanEdit") : t("services.staffViewOnly")}</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-2">
+        {servicesQuery.isError ? <p className="text-sm text-destructive">{t("services.loadFailed")}</p> : null}
         {(servicesQuery.data ?? []).map((service) => (
           <Link
             key={service.id}
@@ -450,9 +452,9 @@ export function ServiceDetailPanel({
   const serviceQuery = useQuery({
     queryKey: queryKeys.service(tenantSlug, serviceId),
     queryFn: async () => {
-      const result = await listServices(tenantSlug)
+      const result = await getService(tenantSlug, serviceId)
       if (!result.ok) throw new Error(result.error.message)
-      return result.data.find((item) => item.id === serviceId) ?? null
+      return result.data
     },
   })
 
@@ -488,6 +490,14 @@ export function ServiceDetailPanel({
   })
 
   const service = serviceQuery.data
+  if (serviceQuery.isError) {
+    return (
+      <Card>
+        <CardContent className="pt-6 text-sm text-destructive">{t("services.loadFailed")}</CardContent>
+      </Card>
+    )
+  }
+
   if (!service) {
     return (
       <Card>
@@ -603,6 +613,7 @@ export function StaffPanel({ tenantSlug, session }: AdminBaseProps) {
           <CardDescription>{session.role === "owner" ? t("staff.ownerDescription") : t("staff.staffDescription")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-2">
+          {staffQuery.isError ? <p className="text-sm text-destructive">{t("staff.loadFailed")}</p> : null}
           {(staffQuery.data ?? []).map((item) => (
             <div key={item.id} className="rounded-md border border-border p-3 text-sm">
               <p className="font-medium">{item.fullName}</p>
@@ -617,6 +628,7 @@ export function StaffPanel({ tenantSlug, session }: AdminBaseProps) {
           <CardTitle>{t("staff.editorTitle")}</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3">
+          {staffQuery.isError ? <p className="text-sm text-destructive">{t("staff.loadFailed")}</p> : null}
           {session.role === "owner" ? (
             <select
               value={selectedId}

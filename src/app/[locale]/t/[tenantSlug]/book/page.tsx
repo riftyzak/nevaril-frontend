@@ -50,6 +50,7 @@ export default async function BookingCatalogPage({
             t={{
               searchPlaceholder: t("catalog.searchPlaceholder"),
               loading: t("catalog.loading"),
+              loadFailed: t("catalog.loadFailed"),
               empty: t("catalog.empty"),
               openService: t("catalog.openService"),
               categoryLabel: t("catalog.categoryLabel"),

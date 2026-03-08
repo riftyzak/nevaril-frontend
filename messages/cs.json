@@ -5,6 +5,7 @@
   "shell": {
     "public": {
       "brandName": "Nevaril",
+      "brandLoadFailed": "Konfigurace provozovny se nepodařilo načíst.",
       "logoPlaceholder": "Rezervační platforma",
       "footerTitle": "Nevaril",
       "footerNote": "Online rezervace pro služby"
@@ -87,12 +88,14 @@
     "catalog": {
       "searchPlaceholder": "Hledat službu",
       "loading": "Načítám služby...",
+      "loadFailed": "Služby se nepodařilo načíst.",
       "empty": "Žádné služby neodpovídají hledání.",
       "openService": "Vybrat službu",
       "categoryLabel": "Kategorie"
     },
     "detail": {
       "loading": "Načítám službu...",
+      "loadFailed": "Službu se nepodařilo načíst.",
       "notFound": "Služba nebyla nalezena.",
       "backToCatalog": "Zpět na katalog služeb",
       "chooseVariant": "Vyberte délku",
@@ -422,6 +425,7 @@
     },
     "services": {
       "title": "Služby",
+      "loadFailed": "Služby se nepodařilo načíst.",
       "ownerCanEdit": "Owner může upravovat",
       "staffViewOnly": "Staff pouze náhled"
     },
@@ -437,6 +441,7 @@
     },
     "staff": {
       "title": "Pracovníci",
+      "loadFailed": "Pracovníky se nepodařilo načíst.",
       "ownerDescription": "Owner může upravovat poznámky pracovníků",
       "staffDescription": "Staff upravuje vlastní poznámky",
       "editorTitle": "Pracovní doba / volno",

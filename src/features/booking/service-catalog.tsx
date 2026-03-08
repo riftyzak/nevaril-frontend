@@ -25,6 +25,7 @@ interface ServiceCatalogProps {
   t: {
     searchPlaceholder: string
     loading: string
+    loadFailed: string
     empty: string
     openService: string
     categoryLabel: string
@@ -83,7 +84,13 @@ export function ServiceCatalog({ locale, tenantSlug, uiQuery, t }: Readonly<Serv
         </Card>
       ) : null}
 
-      {!servicesQuery.isLoading && filtered.length === 0 ? (
+      {servicesQuery.isError ? (
+        <Card>
+          <CardContent className="pt-6 text-sm text-destructive">{t.loadFailed}</CardContent>
+        </Card>
+      ) : null}
+
+      {!servicesQuery.isLoading && !servicesQuery.isError && filtered.length === 0 ? (
         <Card>
           <CardContent className="pt-6 text-sm text-muted-foreground">{t.empty}</CardContent>
         </Card>
