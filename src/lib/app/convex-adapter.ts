@@ -2,6 +2,9 @@ import type { AppDataAdapter } from "@/lib/app/contracts"
 import {
   mutateConvexService,
   mutateConvexTenantConfig,
+  queryConvexBookingById,
+  queryConvexBookingByToken,
+  queryConvexBookings,
   queryConvexService,
   queryConvexServices,
   queryConvexStaff,
@@ -117,8 +120,43 @@ export const convexAppDataAdapter: AppDataAdapter = {
   deleteCalendarEvent: async () => notImplemented(convexContracts.calendarEvents.delete.name),
   updateBooking: async () => notImplemented(convexContracts.bookings.update.name),
   cancelBooking: async () => notImplemented(convexContracts.bookings.cancel.name),
-  listBookings: async () => notImplemented(convexContracts.bookings.list.name),
-  getBookingByToken: async () => notImplemented(convexContracts.bookings.getByToken.name),
+  listBookings: async (tenantSlug) => {
+    try {
+      return ok(await queryConvexBookings(tenantSlug))
+    } catch (error) {
+      return toConvexFailure(convexContracts.bookings.list.name, error)
+    }
+  },
+  getBookingById: async (tenantSlug, bookingId) => {
+    try {
+      const booking = await queryConvexBookingById(tenantSlug, bookingId)
+      if (!booking) {
+        return fail(
+          apiError("NOT_FOUND", `Booking '${bookingId}' was not found in Convex`, 404, {
+            contractName: convexContracts.bookings.getById.name,
+          })
+        )
+      }
+      return ok(booking)
+    } catch (error) {
+      return toConvexFailure(convexContracts.bookings.getById.name, error)
+    }
+  },
+  getBookingByToken: async (bookingToken, tenantSlug) => {
+    try {
+      const booking = await queryConvexBookingByToken(bookingToken, tenantSlug)
+      if (!booking) {
+        return fail(
+          apiError("NOT_FOUND", `Booking token '${bookingToken}' was not found in Convex`, 404, {
+            contractName: convexContracts.bookings.getByToken.name,
+          })
+        )
+      }
+      return ok(booking)
+    } catch (error) {
+      return toConvexFailure(convexContracts.bookings.getByToken.name, error)
+    }
+  },
   listCustomers: async () => notImplemented(convexContracts.customers.list.name),
   updateCustomerTags: async () => notImplemented(convexContracts.customers.updateTags.name),
   listWaitlist: async () => notImplemented(convexContracts.waitlist.list.name),

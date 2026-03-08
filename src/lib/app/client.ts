@@ -104,6 +104,10 @@ export function listBookings(tenantSlug: string) {
   return getAppDataAdapter().listBookings(tenantSlug)
 }
 
+export function getBookingById(tenantSlug: string, bookingId: string) {
+  return getAppDataAdapter().getBookingById(tenantSlug, bookingId)
+}
+
 export function getBookingByToken(token: string, tenantSlug?: string) {
   return getAppDataAdapter().getBookingByToken(token, tenantSlug)
 }

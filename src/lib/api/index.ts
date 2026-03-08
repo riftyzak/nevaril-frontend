@@ -826,6 +826,24 @@ export async function listBookings(tenantSlug: string): Promise<ApiResult<Bookin
   return ok(tenantResult.data.bookings)
 }
 
+export async function getBookingById(
+  tenantSlug: string,
+  bookingId: string
+): Promise<ApiResult<Booking>> {
+  const simulatedError = await simulateBehavior()
+  if (simulatedError) return fail(simulatedError)
+
+  const tenantResult = getTenantOrError(tenantSlug)
+  if (!tenantResult.ok) return tenantResult
+
+  const booking = tenantResult.data.bookings.find((item) => item.id === bookingId)
+  if (!booking) {
+    return fail(apiError("NOT_FOUND", `Booking '${bookingId}' was not found`, 404))
+  }
+
+  return ok(booking)
+}
+
 export async function getBookingByToken(token: string, tenantSlug?: string): Promise<ApiResult<Booking>> {
   const simulatedError = await simulateBehavior()
   if (simulatedError) return fail(simulatedError)

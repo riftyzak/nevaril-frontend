@@ -4,6 +4,7 @@ import { makeFunctionReference } from "convex/server"
 import { convexContracts } from "@/lib/app/convex-contracts"
 import type {
   ApiResult,
+  Booking,
   Service,
   Staff,
   TenantConfig,
@@ -45,6 +46,22 @@ const servicesGetRef = makeFunctionReference<
 const staffListRef = makeFunctionReference<"query", { tenantSlug: string }, Staff[]>(
   convexContracts.staff.list.name
 )
+
+const bookingsListRef = makeFunctionReference<"query", { tenantSlug: string }, Booking[]>(
+  convexContracts.bookings.list.name
+)
+
+const bookingsGetByIdRef = makeFunctionReference<
+  "query",
+  { tenantSlug: string; bookingId: string },
+  Booking | null
+>(convexContracts.bookings.getById.name)
+
+const bookingsGetByTokenRef = makeFunctionReference<
+  "query",
+  { bookingToken: string; tenantSlug?: string },
+  Booking | null
+>(convexContracts.bookings.getByToken.name)
 
 const tenantSettingsUpdateRef = makeFunctionReference<
   "mutation",
@@ -94,6 +111,18 @@ export async function queryConvexService(tenantSlug: string, serviceId: string) 
 
 export async function queryConvexStaff(tenantSlug: string) {
   return getConvexClient().query(staffListRef, { tenantSlug })
+}
+
+export async function queryConvexBookings(tenantSlug: string) {
+  return getConvexClient().query(bookingsListRef, { tenantSlug })
+}
+
+export async function queryConvexBookingById(tenantSlug: string, bookingId: string) {
+  return getConvexClient().query(bookingsGetByIdRef, { tenantSlug, bookingId })
+}
+
+export async function queryConvexBookingByToken(bookingToken: string, tenantSlug?: string) {
+  return getConvexClient().query(bookingsGetByTokenRef, { bookingToken, tenantSlug })
 }
 
 export async function mutateConvexTenantConfig(input: UpdateTenantConfigInput) {

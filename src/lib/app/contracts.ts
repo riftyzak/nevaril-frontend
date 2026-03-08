@@ -56,6 +56,7 @@ export interface AppDataAdapter {
   updateBooking(input: UpdateBookingInput): Promise<ApiResult<Booking>>
   cancelBooking(input: CancelBookingInput): Promise<ApiResult<Booking>>
   listBookings(tenantSlug: string): Promise<ApiResult<Booking[]>>
+  getBookingById(tenantSlug: string, bookingId: string): Promise<ApiResult<Booking>>
   getBookingByToken(token: string, tenantSlug?: string): Promise<ApiResult<Booking>>
   listCustomers(tenantSlug: string): Promise<ApiResult<Customer[]>>
   updateCustomerTags(input: UpdateCustomerTagsInput): Promise<ApiResult<Customer>>

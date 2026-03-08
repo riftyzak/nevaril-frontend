@@ -24,6 +24,7 @@ export const mockAppDataAdapter: AppDataAdapter = {
   updateBooking: legacyApi.updateBooking,
   cancelBooking: legacyApi.cancelBooking,
   listBookings: legacyApi.listBookings,
+  getBookingById: legacyApi.getBookingById,
   getBookingByToken: legacyApi.getBookingByToken,
   listCustomers: legacyApi.listCustomers,
   updateCustomerTags: legacyApi.updateCustomerTags,
