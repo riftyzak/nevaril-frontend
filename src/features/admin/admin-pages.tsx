@@ -27,6 +27,9 @@ import { can } from "@/lib/auth/permissions"
 import type { MockSession, TenantPermissionSettings } from "@/lib/auth/types"
 import { canModifyBooking } from "@/lib/booking/policy"
 import type { AppLocale } from "@/i18n/locales"
+import { useBooking } from "@/lib/query/hooks/use-booking"
+import { useBookings } from "@/lib/query/hooks/use-bookings"
+import { useService } from "@/lib/query/hooks/use-service"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
 import { queryKeys } from "@/lib/query/keys"
 import { adminAppPath } from "@/lib/tenant/tenant-url"
@@ -107,14 +110,7 @@ export function CalendarPanel({ locale, tenantSlug, session, tz }: AdminBaseProp
 export function BookingsListPanel({ locale, tenantSlug, session, tz }: AdminBaseProps) {
   const t = useTranslations("adminCore")
   const [search, setSearch] = useState("")
-  const bookingsQuery = useQuery({
-    queryKey: ["bookings", tenantSlug],
-    queryFn: async () => {
-      const result = await listBookings(tenantSlug)
-      if (!result.ok) throw new Error(result.error.message)
-      return result.data
-    },
-  })
+  const bookingsQuery = useBookings(tenantSlug)
   const bookings = useMemo(() => {
     const scoped = filterBookingsByScope(bookingsQuery.data ?? [], session)
     return scoped.filter((booking) => booking.customerName.toLowerCase().includes(search.toLowerCase()))
@@ -169,14 +165,7 @@ export function BookingDetailPanel({
   const t = useTranslations("adminCore")
   const queryClient = useQueryClient()
   const [newStartAt, setNewStartAt] = useState("")
-  const bookingQuery = useQuery({
-    queryKey: ["bookings", tenantSlug],
-    queryFn: async () => {
-      const result = await listBookings(tenantSlug)
-      if (!result.ok) throw new Error(result.error.message)
-      return result.data.find((item) => item.id === bookingId) ?? null
-    },
-  })
+  const bookingQuery = useBooking(tenantSlug, bookingId)
 
   const booking = bookingQuery.data
   const manageAllowed = booking ? isOwnBooking(session, booking) : false
@@ -201,7 +190,8 @@ export function BookingDetailPanel({
     },
     onSuccess: async () => {
       toast.success(t("bookingDetail.toastRescheduled"))
-      await queryClient.invalidateQueries({ queryKey: ["bookings", tenantSlug] })
+      await queryClient.invalidateQueries({ queryKey: queryKeys.bookings(tenantSlug) })
+      await queryClient.invalidateQueries({ queryKey: queryKeys.booking(tenantSlug, bookingId) })
     },
     onError: () => toast.error(t("bookingDetail.toastRescheduleFailed")),
   })
@@ -219,7 +209,8 @@ export function BookingDetailPanel({
     },
     onSuccess: async () => {
       toast.success(t("bookingDetail.toastCanceled"))
-      await queryClient.invalidateQueries({ queryKey: ["bookings", tenantSlug] })
+      await queryClient.invalidateQueries({ queryKey: queryKeys.bookings(tenantSlug) })
+      await queryClient.invalidateQueries({ queryKey: queryKeys.booking(tenantSlug, bookingId) })
     },
     onError: () => toast.error(t("bookingDetail.toastCancelFailed")),
   })

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { formatInTimeZone } from "date-fns-tz"
 import { useTranslations } from "next-intl"
 import { useRouter } from "next/navigation"
@@ -16,12 +16,14 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { type AppLocale } from "@/i18n/locales"
-import { getBookingByToken, updateBooking } from "@/lib/app/client"
+import { updateBooking } from "@/lib/app/client"
 import { canModifyBooking } from "@/lib/booking/policy"
 import { useGtm } from "@/lib/gtm/useGtm"
+import { useBookingByToken } from "@/lib/query/hooks/use-booking-by-token"
 import { useService } from "@/lib/query/hooks/use-service"
 import { useStaff } from "@/lib/query/hooks/use-staff"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
+import { queryKeys } from "@/lib/query/keys"
 import { localePath, tenantUrl } from "@/lib/tenant/tenant-url"
 
 type ConfirmationMode = "create" | "manage"
@@ -90,16 +92,7 @@ export function Confirmation({
   const { pushEvent } = useGtm()
   const tenantConfigQuery = useTenantConfig(tenantSlug)
   const staffQuery = useStaff(tenantSlug)
-  const bookingQuery = useQuery({
-    queryKey: ["booking-token", token],
-    queryFn: async () => {
-      if (!token) throw new Error("MISSING_TOKEN")
-      const result = await getBookingByToken(token, tenantSlug)
-      if (!result.ok) throw new Error(result.error.message)
-      return result.data
-    },
-    enabled: Boolean(token && tenantSlug),
-  })
+  const bookingQuery = useBookingByToken(token ?? "", tenantSlug)
 
   const serviceQuery = useService(tenantSlug, serviceId ?? bookingQuery.data?.serviceId ?? "")
   const timezone = tenantConfigQuery.data?.timezone ?? bookingQuery.data?.timezone ?? "Europe/Prague"
@@ -187,7 +180,9 @@ export function Confirmation({
         to: updatedBooking.startAt,
       })
       setSubmitSuccess(t.rescheduleSuccess)
-      await queryClient.invalidateQueries({ queryKey: ["booking-token", token] })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.bookingToken(tenantSlug, token ?? ""),
+      })
       router.push(localePath({ locale, path: `/m/${token}` }))
     },
     onError: (error) => {

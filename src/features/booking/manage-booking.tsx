@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { formatInTimeZone } from "date-fns-tz"
 import { useTranslations } from "next-intl"
 import { useEffect, useRef, useState } from "react"
@@ -23,12 +23,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { type AppLocale } from "@/i18n/locales"
-import { cancelBooking, getBookingByToken } from "@/lib/app/client"
+import { cancelBooking } from "@/lib/app/client"
 import { canModifyBooking } from "@/lib/booking/policy"
 import { useGtm } from "@/lib/gtm/useGtm"
+import { useBookingByToken } from "@/lib/query/hooks/use-booking-by-token"
 import { useService } from "@/lib/query/hooks/use-service"
 import { useStaff } from "@/lib/query/hooks/use-staff"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
+import { queryKeys } from "@/lib/query/keys"
 import { tenantUrl } from "@/lib/tenant/tenant-url"
 
 interface ManageBookingProps {
@@ -78,14 +80,7 @@ export function ManageBooking({
   const queryClient = useQueryClient()
   const { pushEvent } = useGtm()
 
-  const bookingQuery = useQuery({
-    queryKey: ["booking-token", bookingToken],
-    queryFn: async () => {
-      const result = await getBookingByToken(bookingToken, tenantSlugHint)
-      if (!result.ok) throw new Error(result.error.message)
-      return result.data
-    },
-  })
+  const bookingQuery = useBookingByToken(bookingToken, tenantSlugHint)
 
   const tenantSlug = bookingQuery.data?.tenantSlug ?? tenantSlugHint
   const tenantConfigQuery = useTenantConfig(tenantSlug)
@@ -131,7 +126,9 @@ export function ManageBooking({
       pushEvent("cancel_booking", {
         bookingId: booking.id,
       })
-      await queryClient.invalidateQueries({ queryKey: ["booking-token", bookingToken] })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.bookingToken(tenantSlugHint, bookingToken),
+      })
     },
     onError: (error) => {
       const code = (error as Error & { code?: string }).code

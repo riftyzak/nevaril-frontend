@@ -4,6 +4,11 @@ export const queryKeys = {
   service: (tenantSlug: string, serviceId: string) =>
     ["services", tenantSlug, serviceId] as const,
   staff: (tenantSlug: string) => ["staff", tenantSlug] as const,
+  bookings: (tenantSlug: string) => ["bookings", tenantSlug] as const,
+  booking: (tenantSlug: string, bookingId: string) =>
+    ["bookings", tenantSlug, bookingId] as const,
+  bookingToken: (tenantSlug: string, bookingToken: string) =>
+    ["booking-token", tenantSlug, bookingToken] as const,
   calendarEvents: (
     tenantSlug: string,
     startAt: string,
