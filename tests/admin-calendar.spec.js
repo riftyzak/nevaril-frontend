@@ -77,12 +77,17 @@ test("owner can create and manage booking from calendar", async ({ page }) => {
 test("staff calendar stays locked to own scope", async ({ page }) => {
   await resetE2E(page, { role: "staff", staff: "st-1" })
   await page.goto("/cs/app/barber/calendar")
+  const isSunday = new Date().getDay() === 0
 
   await expect(page.getByTestId("calendar-staff-filter")).toBeDisabled()
   await expect(page.getByTestId("calendar-staff-filter")).toHaveValue("st-1")
   await expect(page.locator('[data-testid="calendar-staff-filter"] option')).toHaveCount(1)
 
   const blockTitle = `Staff Block ${Date.now()}`
+
+  if (isSunday) {
+    await page.getByRole("button", { name: "Další týden" }).click()
+  }
 
   await page.getByTestId("calendar-create-block").click()
   await expect(page.getByTestId("calendar-create-staff")).toBeDisabled()
