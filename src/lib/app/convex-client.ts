@@ -4,7 +4,10 @@ import { makeFunctionReference } from "convex/server"
 import { convexContracts } from "@/lib/app/convex-contracts"
 import type {
   ApiResult,
+  AvailabilitySlot,
   Booking,
+  CreateBookingInput,
+  GetAvailabilityInput,
   Service,
   Staff,
   TenantConfig,
@@ -24,6 +27,14 @@ type ConvexServiceUpdateArgs = {
   serviceId: string
   expectedUpdatedAt: string
   patch: UpdateServiceInput["patch"]
+  [key: string]: unknown
+}
+
+type ConvexBookingAvailabilityArgs = GetAvailabilityInput & {
+  [key: string]: unknown
+}
+
+type ConvexBookingCreateArgs = CreateBookingInput & {
   [key: string]: unknown
 }
 
@@ -63,6 +74,12 @@ const bookingsGetByTokenRef = makeFunctionReference<
   Booking | null
 >(convexContracts.bookings.getByToken.name)
 
+const bookingsAvailabilityRef = makeFunctionReference<
+  "query",
+  ConvexBookingAvailabilityArgs,
+  AvailabilitySlot[]
+>(convexContracts.bookings.getAvailability.name)
+
 const tenantSettingsUpdateRef = makeFunctionReference<
   "mutation",
   ConvexTenantSettingsUpdateArgs,
@@ -74,6 +91,12 @@ const servicesUpdateRef = makeFunctionReference<
   ConvexServiceUpdateArgs,
   ApiResult<Service>
 >(convexContracts.services.update.name)
+
+const bookingsCreateRef = makeFunctionReference<
+  "mutation",
+  ConvexBookingCreateArgs,
+  ApiResult<Booking>
+>(convexContracts.bookings.create.name)
 
 const clientCache = new Map<string, ConvexHttpClient>()
 
@@ -125,6 +148,13 @@ export async function queryConvexBookingByToken(bookingToken: string, tenantSlug
   return getConvexClient().query(bookingsGetByTokenRef, { bookingToken, tenantSlug })
 }
 
+export async function queryConvexAvailability(input: GetAvailabilityInput) {
+  return getConvexClient().query(
+    bookingsAvailabilityRef,
+    input as ConvexBookingAvailabilityArgs
+  )
+}
+
 export async function mutateConvexTenantConfig(input: UpdateTenantConfigInput) {
   return getConvexClient().mutation(
     tenantSettingsUpdateRef,
@@ -136,5 +166,12 @@ export async function mutateConvexService(input: UpdateServiceInput) {
   return getConvexClient().mutation(
     servicesUpdateRef,
     input as ConvexServiceUpdateArgs
+  )
+}
+
+export async function mutateConvexBooking(input: CreateBookingInput) {
+  return getConvexClient().mutation(
+    bookingsCreateRef,
+    input as ConvexBookingCreateArgs
   )
 }

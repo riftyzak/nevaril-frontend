@@ -1,7 +1,9 @@
 import type { AppDataAdapter } from "@/lib/app/contracts"
 import {
+  mutateConvexBooking,
   mutateConvexService,
   mutateConvexTenantConfig,
+  queryConvexAvailability,
   queryConvexBookingById,
   queryConvexBookingByToken,
   queryConvexBookings,
@@ -40,6 +42,15 @@ function toConvexFailure<T>(contractName: string, error: unknown): ApiResult<T> 
   const message = error instanceof Error ? error.message : "Unknown Convex error"
   return fail(
     apiError("INTERNAL", `Convex reader '${contractName}' failed: ${message}`, 500, {
+      contractName,
+    })
+  )
+}
+
+function toConvexMutationFailure<T>(contractName: string, error: unknown): ApiResult<T> {
+  const message = error instanceof Error ? error.message : "Unknown Convex error"
+  return fail(
+    apiError("INTERNAL", `Convex mutation '${contractName}' failed: ${message}`, 500, {
       contractName,
     })
   )
@@ -112,8 +123,20 @@ export const convexAppDataAdapter: AppDataAdapter = {
     }
   },
   updateStaffNotes: async () => notImplemented(convexContracts.staff.updateNotes.name),
-  getAvailability: async () => notImplemented(convexContracts.bookings.getAvailability.name),
-  createBooking: async () => notImplemented(convexContracts.bookings.create.name),
+  getAvailability: async (input) => {
+    try {
+      return ok(await queryConvexAvailability(input))
+    } catch (error) {
+      return toConvexFailure(convexContracts.bookings.getAvailability.name, error)
+    }
+  },
+  createBooking: async (input) => {
+    try {
+      return await mutateConvexBooking(input)
+    } catch (error) {
+      return toConvexMutationFailure(convexContracts.bookings.create.name, error)
+    }
+  },
   listCalendarEvents: async () => notImplemented(convexContracts.calendarEvents.list.name),
   createCalendarEvent: async () => notImplemented(convexContracts.calendarEvents.create.name),
   updateCalendarEvent: async () => notImplemented(convexContracts.calendarEvents.update.name),
