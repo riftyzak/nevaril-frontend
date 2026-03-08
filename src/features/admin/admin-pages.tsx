@@ -468,7 +468,7 @@ export function ServiceDetailPanel({
         .split(",")
         .map((item) => Number(item.trim()))
         .filter((item): item is 30 | 60 | 90 => item === 30 || item === 60 || item === 90)
-      const result = await updateService({
+      return updateService({
         tenantSlug,
         serviceId,
         expectedUpdatedAt: service.updatedAt,
@@ -478,10 +478,16 @@ export function ServiceDetailPanel({
           durationOptions: durationOptions.length > 0 ? durationOptions : service.durationOptions,
         },
       })
-      if (!result.ok) throw new Error(result.error.message)
-      return result.data
     },
-    onSuccess: async () => {
+    onSuccess: async (result) => {
+      if (!result.ok) {
+        if (result.error.code === "CONFLICT" || result.error.code === "NOT_FOUND") {
+          await queryClient.invalidateQueries({ queryKey: queryKeys.services(tenantSlug) })
+          await queryClient.invalidateQueries({ queryKey: queryKeys.service(tenantSlug, serviceId) })
+        }
+        toast.error(t("serviceDetail.toastUpdateFailed"))
+        return
+      }
       toast.success(t("serviceDetail.toastUpdated"))
       await queryClient.invalidateQueries({ queryKey: queryKeys.services(tenantSlug) })
       await queryClient.invalidateQueries({ queryKey: queryKeys.service(tenantSlug, serviceId) })
