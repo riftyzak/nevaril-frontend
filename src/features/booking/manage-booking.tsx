@@ -23,7 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { type AppLocale } from "@/i18n/locales"
-import { cancelBooking, getBookingByToken } from "@/lib/api"
+import { cancelBooking, getBookingByToken } from "@/lib/app/client"
 import { canModifyBooking } from "@/lib/booking/policy"
 import { useGtm } from "@/lib/gtm/useGtm"
 import { useService } from "@/lib/query/hooks/use-service"

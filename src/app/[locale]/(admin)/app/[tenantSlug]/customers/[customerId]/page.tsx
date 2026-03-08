@@ -3,10 +3,10 @@ import { redirect } from "next/navigation"
 import { AdminShell } from "@/components/layout/admin-shell"
 import { CustomerDetailPanel } from "@/features/admin/admin-pages"
 import type { AppLocale } from "@/i18n/locales"
+import { getTenantConfig, listBookings } from "@/lib/app/client"
 import { getAdminPageContext } from "@/lib/auth/admin-page"
 import { can } from "@/lib/auth/permissions"
 import { localePath } from "@/lib/tenant/tenant-url"
-import { getDb } from "@/lib/mock/storage"
 
 export default async function AdminCustomerDetailPage({
   params,
@@ -21,10 +21,13 @@ export default async function AdminCustomerDetailPage({
     ability: "view",
   })
 
-  const tenant = getDb().tenants[tenantSlug]
-  const customerStaffIds = tenant?.bookings
-    .filter((item) => item.customerId === customerId)
-    .map((item) => item.staffId ?? null) ?? [null]
+  const bookingsResult = await listBookings(tenantSlug)
+  const customerStaffIds =
+    bookingsResult.ok
+      ? bookingsResult.data
+          .filter((item) => item.customerId === customerId)
+          .map((item) => item.staffId ?? null)
+      : [null]
   const allowed = can(
     session,
     "customers",
@@ -37,7 +40,8 @@ export default async function AdminCustomerDetailPage({
     redirect(localePath({ locale, path: "/not-authorized" }))
   }
 
-  const tz = tenant?.config.timezone ?? "Europe/Prague"
+  const tenantConfig = await getTenantConfig(tenantSlug)
+  const tz = tenantConfig.ok ? tenantConfig.data.timezone : "Europe/Prague"
 
   return (
     <AdminShell locale={locale} navItems={navItems} session={session} tenantSettings={tenantSettings}>

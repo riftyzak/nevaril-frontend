@@ -19,7 +19,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { type AppLocale } from "@/i18n/locales"
-import { createBooking } from "@/lib/api"
+import { createBooking } from "@/lib/app/client"
 import { type ServiceVariant } from "@/lib/api/types"
 import { useGtm } from "@/lib/gtm/useGtm"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"

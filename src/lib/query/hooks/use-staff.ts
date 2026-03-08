@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 
-import { listStaff } from "@/lib/api"
+import { listStaff } from "@/lib/app/client"
 import { queryKeys } from "@/lib/query/keys"
 import { unwrapResult } from "@/lib/query/hooks/utils"
 

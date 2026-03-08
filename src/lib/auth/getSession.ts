@@ -1,16 +1,16 @@
 import { cookies } from "next/headers"
 
+import { getTenantConfig } from "@/lib/app/client"
 import type { MockSession } from "@/lib/auth/types"
 import { parseSessionCookieValue, SESSION_COOKIE_NAME } from "@/lib/auth/session-cookie"
-import { getDb } from "@/lib/mock/storage"
 
 interface GetSessionInput {
   tenantSlug?: string
 }
 
-function resolvePlan(tenantSlug: string): MockSession["plan"] {
-  const tenant = getDb().tenants[tenantSlug]
-  return tenant?.config.plan ?? "starter"
+async function resolvePlan(tenantSlug: string): Promise<MockSession["plan"]> {
+  const result = await getTenantConfig(tenantSlug)
+  return result.ok ? result.data.plan : "starter"
 }
 
 export async function getSession(input?: GetSessionInput): Promise<MockSession> {
@@ -27,6 +27,6 @@ export async function getSession(input?: GetSessionInput): Promise<MockSession> 
     tenantId: tenantSlug,
     tenantSlug,
     staffId,
-    plan: resolvePlan(tenantSlug),
+    plan: await resolvePlan(tenantSlug),
   }
 }

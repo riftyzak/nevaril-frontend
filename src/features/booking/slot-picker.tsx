@@ -17,7 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { type AppLocale } from "@/i18n/locales"
-import { getAvailability } from "@/lib/api"
+import { getAvailability } from "@/lib/app/client"
 import { type AvailabilitySlot, type ServiceVariant } from "@/lib/api/types"
 import { useGtm } from "@/lib/gtm/useGtm"
 import { useService } from "@/lib/query/hooks/use-service"

@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { AppLocale } from "@/i18n/locales"
-import { updateTenantConfig } from "@/lib/api"
+import { updateTenantConfig } from "@/lib/app/client"
 import type { TenantConfig } from "@/lib/api/types"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
 import { useServices } from "@/lib/query/hooks/use-services"

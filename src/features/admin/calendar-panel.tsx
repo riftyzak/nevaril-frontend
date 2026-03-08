@@ -29,7 +29,7 @@ import {
   listStaff,
   updateBooking,
   updateCalendarEvent,
-} from "@/lib/api"
+} from "@/lib/app/client"
 import { canModifyBooking } from "@/lib/booking/policy"
 import type { Booking, CalendarEvent, Staff } from "@/lib/api/types"
 import type { MockSession } from "@/lib/auth/types"

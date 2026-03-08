@@ -1,0 +1,36 @@
+import * as legacyApi from "@/lib/api"
+
+import type { AppDataAdapter } from "@/lib/app/contracts"
+
+export const mockAppDataAdapter: AppDataAdapter = {
+  getTenantConfig: legacyApi.getTenantConfig,
+  updateTenantPlan: legacyApi.updateTenantPlan,
+  updateTenantConfig: legacyApi.updateTenantConfig,
+  getNotificationTemplates: legacyApi.getNotificationTemplates,
+  updateNotificationTemplates: legacyApi.updateNotificationTemplates,
+  getLoyaltyConfig: legacyApi.getLoyaltyConfig,
+  updateLoyaltyConfig: legacyApi.updateLoyaltyConfig,
+  listServices: legacyApi.listServices,
+  getService: legacyApi.getService,
+  updateService: legacyApi.updateService,
+  listStaff: legacyApi.listStaff,
+  updateStaffNotes: legacyApi.updateStaffNotes,
+  getAvailability: legacyApi.getAvailability,
+  createBooking: legacyApi.createBooking,
+  listCalendarEvents: legacyApi.listCalendarEvents,
+  createCalendarEvent: legacyApi.createCalendarEvent,
+  updateCalendarEvent: legacyApi.updateCalendarEvent,
+  deleteCalendarEvent: legacyApi.deleteCalendarEvent,
+  updateBooking: legacyApi.updateBooking,
+  cancelBooking: legacyApi.cancelBooking,
+  listBookings: legacyApi.listBookings,
+  getBookingByToken: legacyApi.getBookingByToken,
+  listCustomers: legacyApi.listCustomers,
+  updateCustomerTags: legacyApi.updateCustomerTags,
+  listWaitlist: legacyApi.listWaitlist,
+  createWaitlistEntry: legacyApi.createWaitlistEntry,
+  assignWaitlistToSlot: legacyApi.assignWaitlistToSlot,
+  listAnalytics: legacyApi.listAnalytics,
+  listVouchers: legacyApi.listVouchers,
+  createVoucherOrder: legacyApi.createVoucherOrder,
+}

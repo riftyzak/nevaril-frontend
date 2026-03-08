@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query"
 
-import { listServices } from "@/lib/api"
+import { listServices } from "@/lib/app/client"
 import { queryKeys } from "@/lib/query/keys"
 import { unwrapResult } from "@/lib/query/hooks/utils"
 

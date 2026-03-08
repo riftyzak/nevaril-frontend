@@ -28,7 +28,7 @@ import {
   listVouchers,
   updateLoyaltyConfig,
   updateNotificationTemplates,
-} from "@/lib/api"
+} from "@/lib/app/client"
 import { useGtm } from "@/lib/gtm/useGtm"
 import type { TenantPlan, VoucherType } from "@/lib/api/types"
 

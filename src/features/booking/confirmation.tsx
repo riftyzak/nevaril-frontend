@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { type AppLocale } from "@/i18n/locales"
-import { getBookingByToken, updateBooking } from "@/lib/api"
+import { getBookingByToken, updateBooking } from "@/lib/app/client"
 import { canModifyBooking } from "@/lib/booking/policy"
 import { useGtm } from "@/lib/gtm/useGtm"
 import { useService } from "@/lib/query/hooks/use-service"

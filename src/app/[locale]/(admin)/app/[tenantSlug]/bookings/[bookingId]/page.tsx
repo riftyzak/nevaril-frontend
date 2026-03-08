@@ -3,10 +3,10 @@ import { redirect } from "next/navigation"
 import { AdminShell } from "@/components/layout/admin-shell"
 import { BookingDetailPanel } from "@/features/admin/admin-pages"
 import type { AppLocale } from "@/i18n/locales"
+import { getTenantConfig, listBookings } from "@/lib/app/client"
 import { getAdminPageContext } from "@/lib/auth/admin-page"
 import { can } from "@/lib/auth/permissions"
 import { localePath } from "@/lib/tenant/tenant-url"
-import { getDb } from "@/lib/mock/storage"
 
 export default async function AdminBookingDetailPage({
   params,
@@ -20,8 +20,10 @@ export default async function AdminBookingDetailPage({
     module: "bookings",
     ability: "view",
   })
-  const tenant = getDb().tenants[tenantSlug]
-  const booking = tenant?.bookings.find((item) => item.id === bookingId)
+  const bookingsResult = await listBookings(tenantSlug)
+  const booking = bookingsResult.ok
+    ? bookingsResult.data.find((item) => item.id === bookingId)
+    : undefined
   const allowed = can(
     session,
     "bookings",
@@ -33,7 +35,8 @@ export default async function AdminBookingDetailPage({
     redirect(localePath({ locale, path: "/not-authorized" }))
   }
 
-  const tz = tenant?.config.timezone ?? "Europe/Prague"
+  const tenantConfig = await getTenantConfig(tenantSlug)
+  const tz = tenantConfig.ok ? tenantConfig.data.timezone : "Europe/Prague"
 
   return (
     <AdminShell locale={locale} navItems={navItems} session={session} tenantSettings={tenantSettings}>

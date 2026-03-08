@@ -41,11 +41,20 @@ test("owner can create and manage booking from calendar", async ({ page }) => {
   await page.goto("/cs/app/barber/calendar")
 
   const customerName = `Calendar Owner ${Date.now()}`
+  const isSunday = new Date().getDay() === 0
+
+  if (isSunday) {
+    await page.getByRole("button", { name: "Další týden" }).click()
+  }
 
   await page.getByTestId("calendar-create-booking").click()
   const createStartInput = page.locator("#calendar-create-start")
   const createStartValue = await createStartInput.inputValue()
-  await createStartInput.fill(addMinutesToInputValue(addDaysToInputValue(createStartValue, 1), 60))
+  await createStartInput.fill(
+    isSunday
+      ? addMinutesToInputValue(createStartValue, 60)
+      : addMinutesToInputValue(addDaysToInputValue(createStartValue, 1), 60)
+  )
   await page.getByLabel("Jméno zákazníka").fill(customerName)
   await page.getByLabel("E-mail").fill("calendar-owner@example.com")
   await page.getByLabel("Telefon").fill("+420777000555")

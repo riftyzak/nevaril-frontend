@@ -25,7 +25,7 @@ import {
   assignWaitlistToSlot,
   getAvailability,
   listWaitlist,
-} from "@/lib/api"
+} from "@/lib/app/client"
 import { type ServiceVariant, type WaitlistEntry } from "@/lib/api/types"
 import { queryKeys } from "@/lib/query/keys"
 import { useServices } from "@/lib/query/hooks/use-services"

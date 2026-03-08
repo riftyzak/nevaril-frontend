@@ -20,7 +20,7 @@ import {
   updateBooking,
   updateService,
   updateStaffNotes,
-} from "@/lib/api"
+} from "@/lib/app/client"
 import type { Booking, Customer } from "@/lib/api/types"
 import { can } from "@/lib/auth/permissions"
 import type { MockSession, TenantPermissionSettings } from "@/lib/auth/types"
