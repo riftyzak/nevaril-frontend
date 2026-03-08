@@ -1,5 +1,6 @@
 import type { AppDataAdapter } from "@/lib/app/contracts"
 import {
+  mutateConvexTenantConfig,
   queryConvexService,
   queryConvexServices,
   queryConvexStaff,
@@ -57,7 +58,13 @@ export const convexAppDataAdapter: AppDataAdapter = {
     }
   },
   updateTenantPlan: async () => notImplemented(convexContracts.tenantSettings.updatePlan.name),
-  updateTenantConfig: async () => notImplemented(convexContracts.tenantSettings.update.name),
+  updateTenantConfig: async (input) => {
+    try {
+      return await mutateConvexTenantConfig(input)
+    } catch (error) {
+      return toConvexFailure(convexContracts.tenantSettings.update.name, error)
+    }
+  },
   getNotificationTemplates: async () =>
     notImplemented(convexContracts.notificationTemplates.get.name),
   updateNotificationTemplates: async () =>

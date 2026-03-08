@@ -2,7 +2,14 @@ import { ConvexHttpClient } from "convex/browser"
 import { makeFunctionReference } from "convex/server"
 
 import { convexContracts } from "@/lib/app/convex-contracts"
-import type { Service, Staff, TenantConfig } from "@/lib/api/types"
+import type { ApiResult, Service, Staff, TenantConfig, UpdateTenantConfigInput } from "@/lib/api/types"
+
+type ConvexTenantSettingsUpdateArgs = {
+  tenantSlug: string
+  expectedUpdatedAt: string
+  patch: UpdateTenantConfigInput["patch"]
+  [key: string]: unknown
+}
 
 const tenantSettingsGetRef = makeFunctionReference<
   "query",
@@ -23,6 +30,12 @@ const servicesGetRef = makeFunctionReference<
 const staffListRef = makeFunctionReference<"query", { tenantSlug: string }, Staff[]>(
   convexContracts.staff.list.name
 )
+
+const tenantSettingsUpdateRef = makeFunctionReference<
+  "mutation",
+  ConvexTenantSettingsUpdateArgs,
+  ApiResult<TenantConfig>
+>(convexContracts.tenantSettings.update.name)
 
 const clientCache = new Map<string, ConvexHttpClient>()
 
@@ -60,4 +73,11 @@ export async function queryConvexService(tenantSlug: string, serviceId: string) 
 
 export async function queryConvexStaff(tenantSlug: string) {
   return getConvexClient().query(staffListRef, { tenantSlug })
+}
+
+export async function mutateConvexTenantConfig(input: UpdateTenantConfigInput) {
+  return getConvexClient().mutation(
+    tenantSettingsUpdateRef,
+    input as ConvexTenantSettingsUpdateArgs
+  )
 }
