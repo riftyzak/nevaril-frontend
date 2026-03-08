@@ -1,13 +1,13 @@
 import { cookies } from "next/headers"
 
-import { getTenantConfig } from "@/lib/app/client"
+import { getTenantConfigOrNull } from "@/lib/app/server"
 import type { AuthAdapter, ResolveSessionInput } from "@/lib/auth/adapter"
 import { parseSessionCookieValue, SESSION_COOKIE_NAME } from "@/lib/auth/session-cookie"
 import type { AppSession, SessionRole } from "@/lib/auth/types"
 
 async function resolvePlan(tenantSlug: string): Promise<AppSession["plan"]> {
-  const result = await getTenantConfig(tenantSlug)
-  return result.ok ? result.data.plan : "starter"
+  const config = await getTenantConfigOrNull(tenantSlug)
+  return config?.plan ?? "starter"
 }
 
 function buildMockSession(input: {

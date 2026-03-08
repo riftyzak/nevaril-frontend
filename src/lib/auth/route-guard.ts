@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 
-import { getTenantConfig } from "@/lib/app/client"
+import { getTenantConfigOrNull } from "@/lib/app/server"
 import { can } from "@/lib/auth/permissions"
 import { requireTenantAccess } from "@/lib/auth/session"
 import type { AppLocale } from "@/i18n/locales"
@@ -27,8 +27,7 @@ interface RequireAccessInput {
 export async function getTenantPermissionSettings(
   tenantSlug: string
 ): Promise<TenantPermissionSettings> {
-  const result = await getTenantConfig(tenantSlug)
-  const config = result.ok ? result.data : null
+  const config = await getTenantConfigOrNull(tenantSlug)
   const visibility =
     config?.customersVisibility ??
     (config?.customerReadMode === "served-only" ? "own" : "all_readonly")

@@ -1,7 +1,7 @@
 import { AdminShell } from "@/components/layout/admin-shell"
 import { ServiceDetailPanel } from "@/features/admin/admin-pages"
 import type { AppLocale } from "@/i18n/locales"
-import { getTenantConfig } from "@/lib/app/client"
+import { getTenantTimezone } from "@/lib/app/server"
 import { getAdminPageContext } from "@/lib/auth/admin-page"
 
 export default async function AdminServiceDetailPage({
@@ -16,8 +16,7 @@ export default async function AdminServiceDetailPage({
     module: "services",
     ability: "view",
   })
-  const tenantConfig = await getTenantConfig(tenantSlug)
-  const tz = tenantConfig.ok ? tenantConfig.data.timezone : "Europe/Prague"
+  const tz = await getTenantTimezone(tenantSlug)
 
   return (
     <AdminShell locale={locale} navItems={navItems} session={session} tenantSettings={tenantSettings}>

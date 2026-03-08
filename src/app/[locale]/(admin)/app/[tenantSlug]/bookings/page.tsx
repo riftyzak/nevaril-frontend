@@ -1,8 +1,8 @@
 import { AdminShell } from "@/components/layout/admin-shell"
 import { BookingsListPanel } from "@/features/admin/admin-pages"
 import type { AppLocale } from "@/i18n/locales"
+import { getTenantTimezone } from "@/lib/app/server"
 import { getAdminPageContext } from "@/lib/auth/admin-page"
-import { getTenantConfig } from "@/lib/app/client"
 
 export default async function AdminBookingsPage({
   params,
@@ -16,8 +16,7 @@ export default async function AdminBookingsPage({
     module: "bookings",
     ability: "view",
   })
-  const tenantConfig = await getTenantConfig(tenantSlug)
-  const tz = tenantConfig.ok ? tenantConfig.data.timezone : "Europe/Prague"
+  const tz = await getTenantTimezone(tenantSlug)
 
   return (
     <AdminShell locale={locale} navItems={navItems} session={session} tenantSettings={tenantSettings}>
