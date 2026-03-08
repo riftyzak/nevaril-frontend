@@ -20,6 +20,7 @@ import { type AppLocale } from "@/i18n/locales"
 import { getAvailability } from "@/lib/app/client"
 import { type AvailabilitySlot, type ServiceVariant } from "@/lib/api/types"
 import { useGtm } from "@/lib/gtm/useGtm"
+import { queryKeys } from "@/lib/query/keys"
 import { useService } from "@/lib/query/hooks/use-service"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
 import { localePath, tenantUrl } from "@/lib/tenant/tenant-url"
@@ -89,7 +90,7 @@ export function SlotPicker({
   const { pushEvent } = useGtm()
 
   const availabilityQuery = useQuery({
-    queryKey: ["availability", tenantSlug, serviceId, variant, staffId ?? "any", date],
+    queryKey: queryKeys.availability(tenantSlug, serviceId, variant, staffId ?? "any", date),
     queryFn: async () => {
       const result = await getAvailability({
         tenantSlug,

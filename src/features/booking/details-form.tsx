@@ -148,9 +148,11 @@ export function DetailsForm({
       router.push(
         `${tenantUrl({ locale, tenantSlug, path: "/book/confirmation" })}?token=${encodeURIComponent(
           booking.bookingToken
-        )}&serviceId=${booking.serviceId}&variant=${variant}${staffId ? `&staffId=${encodeURIComponent(staffId)}` : ""}${
+        )}&serviceId=${booking.serviceId}&variant=${booking.serviceVariant}${
+          booking.staffId ? `&staffId=${encodeURIComponent(booking.staffId)}` : ""
+        }${
           date ? `&date=${encodeURIComponent(date)}` : ""
-        }&startAt=${encodeURIComponent(startAt)}${uiQuery ? `&${uiQuery}` : ""}`
+        }&startAt=${encodeURIComponent(booking.startAt)}${uiQuery ? `&${uiQuery}` : ""}`
       )
     },
     onError: (error) => {
