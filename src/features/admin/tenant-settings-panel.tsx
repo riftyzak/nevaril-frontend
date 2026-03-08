@@ -123,12 +123,17 @@ export function TenantSettingsPanel({ locale, tenantSlug }: Readonly<TenantSetti
         patch,
       })
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       if (!result.ok) {
+        if (result.error.code === "CONFLICT" || result.error.code === "NOT_FOUND") {
+          await configQuery.refetch()
+          setLocalDraft(null)
+        }
         toast.error(t("saveError"))
         return
       }
       queryClient.setQueryData(queryKeys.tenantConfig(tenantSlug), result.data)
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tenantConfig(tenantSlug) })
       setLocalDraft(null)
       toast.success(t("saved"))
     },
