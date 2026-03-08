@@ -40,6 +40,7 @@ import type {
 // Legacy mock repository implementation. Product code should call the app boundary in @/lib/app/client.
 import { canModifyBooking } from "@/lib/booking/policy"
 import { getDb, mutateDb } from "@/lib/mock/storage"
+import { normalizeServicePatch } from "@/lib/services/normalize"
 import { normalizeTenantConfigPatch } from "@/lib/tenant-settings/normalize"
 
 const TZ_DEFAULT = "Europe/Prague"
@@ -404,9 +405,11 @@ export async function updateService(input: UpdateServiceInput): Promise<ApiResul
     )
   }
 
+  const normalized = normalizeServicePatch(service, input.patch)
   const updated: Service = {
     ...service,
     ...input.patch,
+    ...normalized,
     updatedAt: nowIso(),
   }
 

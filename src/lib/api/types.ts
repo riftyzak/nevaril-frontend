@@ -292,7 +292,7 @@ export interface UpdateServiceInput {
   tenantSlug: string
   serviceId: string
   expectedUpdatedAt: string
-  patch: Partial<Pick<Service, "name" | "description" | "durationOptions" | "active">>
+  patch: Partial<Pick<Service, "name" | "description" | "category" | "priceCents" | "durationOptions" | "active">>
 }
 
 export interface UpdateStaffNotesInput {

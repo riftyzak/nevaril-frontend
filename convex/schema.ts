@@ -45,7 +45,9 @@ export default defineSchema({
     active: v.boolean(),
     displayOrder: v.number(),
     updatedAt: v.string(),
-  }).index("by_tenant_id", ["tenantId"]),
+  })
+    .index("by_tenant_id", ["tenantId"])
+    .index("by_tenant_id_service_id", ["tenantId", "serviceId"]),
 
   staffProfiles: defineTable({
     tenantId: v.id("tenants"),
