@@ -40,7 +40,7 @@ import type {
 // Legacy mock repository implementation. Product code should call the app boundary in @/lib/app/client.
 import { canModifyBooking } from "@/lib/booking/policy"
 import { getDb, mutateDb } from "@/lib/mock/storage"
-import { getWidgetThemeOverrides } from "@/lib/theme/widget-theme"
+import { normalizeTenantConfigPatch } from "@/lib/tenant-settings/normalize"
 
 const TZ_DEFAULT = "Europe/Prague"
 
@@ -119,26 +119,6 @@ function overlapsRange(
   range: { startAt: string; endAt: string }
 ) {
   return item.startAt < range.endAt && range.startAt < item.endAt
-}
-
-function customerReadModeFromVisibility(
-  visibility: TenantConfig["customersVisibility"]
-): TenantConfig["customerReadMode"] {
-  return visibility === "own" ? "served-only" : "all-readonly"
-}
-
-function sanitizeCustomFields(fields: TenantConfig["customFields"] | undefined) {
-  if (!fields) return undefined
-
-  return fields
-    .map((field, index) => ({
-      id: field.id.trim() || `field-${index + 1}`,
-      label: field.label.trim(),
-      type: field.type === "textarea" ? ("textarea" as const) : ("text" as const),
-      required: Boolean(field.required),
-      placeholder: field.placeholder?.trim() || undefined,
-    }))
-    .filter((field) => field.label.length > 0)
 }
 
 function createAvailabilitySlots(input: {
@@ -250,48 +230,12 @@ export async function updateTenantConfig(
     )
   }
 
-  const widgetTheme = getWidgetThemeOverrides({
-    primary: input.patch.embedDefaults?.widgetPrimary,
-    radius: input.patch.embedDefaults?.widgetRadius?.replace("px", ""),
-    logoUrl: input.patch.logoUrl,
-  })
-  const nextVisibility = input.patch.customersVisibility ?? currentConfig.customersVisibility
-  const sanitizedCustomFields =
-    sanitizeCustomFields(input.patch.customFields) ?? currentConfig.customFields
+  const normalized = normalizeTenantConfigPatch(currentConfig, input.patch)
 
   const updated: TenantConfig = {
     ...currentConfig,
     ...input.patch,
-    tenantName: input.patch.tenantName?.trim() || currentConfig.tenantName,
-    logoUrl:
-      input.patch.logoUrl !== undefined
-        ? widgetTheme.logoUrl
-        : currentConfig.logoUrl,
-    cancellationPolicyText:
-      input.patch.cancellationPolicyText?.trim() || currentConfig.cancellationPolicyText,
-    cancellationPolicyHours:
-      input.patch.cancellationPolicyHours !== undefined
-        ? Math.max(0, Math.round(input.patch.cancellationPolicyHours))
-        : currentConfig.cancellationPolicyHours,
-    customFields: sanitizedCustomFields,
-    customersVisibility: nextVisibility,
-    customerReadMode: customerReadModeFromVisibility(nextVisibility),
-    embedDefaults: {
-      ...currentConfig.embedDefaults,
-      ...input.patch.embedDefaults,
-      widgetPrimary:
-        input.patch.embedDefaults?.widgetPrimary !== undefined
-          ? widgetTheme.primary
-          : currentConfig.embedDefaults.widgetPrimary,
-      widgetRadius:
-        input.patch.embedDefaults?.widgetRadius !== undefined
-          ? widgetTheme.radius
-          : currentConfig.embedDefaults.widgetRadius,
-      defaultServiceId:
-        input.patch.embedDefaults?.defaultServiceId !== undefined
-          ? input.patch.embedDefaults.defaultServiceId
-          : currentConfig.embedDefaults.defaultServiceId,
-    },
+    ...normalized,
     updatedAt: nowIso(),
   }
 
