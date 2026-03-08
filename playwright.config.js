@@ -23,7 +23,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `NEXT_PUBLIC_E2E=1 npm run dev -- --port ${PORT}`,
+    command: `NEXT_PUBLIC_E2E=1 npm run build && NEXT_PUBLIC_E2E=1 npm run start -- --port ${PORT}`,
     url: `http://127.0.0.1:${PORT}/cs`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
