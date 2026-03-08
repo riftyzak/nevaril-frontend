@@ -1,0 +1,28 @@
+{
+  "createInput": {
+    "tenantSlug": "barber",
+    "serviceId": "svc-cut",
+    "serviceVariant": 60,
+    "staffId": "st-1",
+    "customerId": "lead-example",
+    "customerName": "Create Flow User",
+    "customerEmail": "create@example.com",
+    "customerPhone": "+420777555111",
+    "customFieldValues": {
+      "note": "Please keep the sides shorter."
+    },
+    "startAt": "2026-01-13T10:00:00.000Z"
+  },
+  "expectedBooking": {
+    "serviceId": "svc-cut",
+    "serviceVariant": 60,
+    "staffId": "st-1",
+    "customerName": "Create Flow User",
+    "customerEmail": "create@example.com",
+    "customerPhone": "+420777555111",
+    "status": "confirmed",
+    "timezone": "Europe/Prague",
+    "bookingTokenPrefix": "barber-manage-",
+    "manageTokenMatchesBookingToken": true
+  }
+}
