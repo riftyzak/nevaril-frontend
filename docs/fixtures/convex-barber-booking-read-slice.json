@@ -1,0 +1,41 @@
+{
+  "tenant": {
+    "slug": "barber",
+    "name": "Brass Barber",
+    "timezone": "Europe/Prague"
+  },
+  "bookings": [
+    {
+      "id": "bk-1",
+      "serviceId": "svc-cut",
+      "serviceVariant": 60,
+      "staffId": "st-1",
+      "customerId": "cus-1",
+      "customerName": "Anna Novakova",
+      "customerEmail": "anna@example.com",
+      "customerPhone": "+420777000111",
+      "startAt": "2026-01-12T09:00:00.000Z",
+      "endAt": "2026-01-12T10:00:00.000Z",
+      "timezone": "Europe/Prague",
+      "status": "confirmed",
+      "bookingToken": "barber-manage-1",
+      "manageToken": "barber-manage-1"
+    },
+    {
+      "id": "bk-2",
+      "serviceId": "svc-beard",
+      "serviceVariant": 30,
+      "staffId": "st-owner",
+      "customerId": "cus-2",
+      "customerName": "Marek Sramek",
+      "customerEmail": "marek@example.com",
+      "customerPhone": "+420777000222",
+      "startAt": "2026-01-12T10:30:00.000Z",
+      "endAt": "2026-01-12T11:00:00.000Z",
+      "timezone": "Europe/Prague",
+      "status": "rescheduled",
+      "bookingToken": "barber-manage-2",
+      "manageToken": "barber-manage-2"
+    }
+  ]
+}

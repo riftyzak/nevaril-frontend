@@ -1,6 +1,7 @@
 import type { GenericDataModel, GenericDatabaseReader } from "convex/server"
+import type { GenericId } from "convex/values"
 
-import type { Service, Staff, TenantConfig } from "../src/lib/api/types"
+import type { Booking, Service, Staff, TenantConfig } from "../src/lib/api/types"
 
 export async function getTenantBySlug(
   db: GenericDatabaseReader<GenericDataModel>,
@@ -10,6 +11,13 @@ export async function getTenantBySlug(
     .query("tenants")
     .withIndex("by_slug", (query) => query.eq("slug", tenantSlug))
     .unique()
+}
+
+export async function getTenantById(
+  db: GenericDatabaseReader<GenericDataModel>,
+  tenantId: string
+) {
+  return db.get(tenantId as GenericId<"tenants">)
 }
 
 export function mapTenantConfig(input: {
@@ -93,5 +101,46 @@ export function mapStaff(tenantSlug: string, staff: {
     availabilityNote: staff.availabilityNote,
     timeOffNote: staff.timeOffNote,
     updatedAt: staff.updatedAt,
+  }
+}
+
+export function mapBooking(tenantSlug: string, booking: {
+  bookingId: string
+  serviceId: string
+  serviceVariant: Booking["serviceVariant"]
+  staffId: Booking["staffId"]
+  customerId: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  customFieldValues: Booking["customFieldValues"]
+  startAt: string
+  endAt: string
+  timezone: string
+  status: Booking["status"]
+  bookingToken: string
+  manageToken: string
+  createdAt: string
+  updatedAt: string
+}): Booking {
+  return {
+    id: booking.bookingId,
+    tenantSlug,
+    serviceId: booking.serviceId,
+    serviceVariant: booking.serviceVariant,
+    staffId: booking.staffId,
+    customerId: booking.customerId,
+    customerName: booking.customerName,
+    customerEmail: booking.customerEmail,
+    customerPhone: booking.customerPhone,
+    customFieldValues: booking.customFieldValues,
+    startAt: booking.startAt,
+    endAt: booking.endAt,
+    timezone: booking.timezone,
+    status: booking.status,
+    bookingToken: booking.bookingToken,
+    manageToken: booking.manageToken,
+    createdAt: booking.createdAt,
+    updatedAt: booking.updatedAt,
   }
 }

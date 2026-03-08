@@ -62,4 +62,35 @@ export default defineSchema({
   })
     .index("by_tenant_id", ["tenantId"])
     .index("by_tenant_id_staff_id", ["tenantId", "staffId"]),
+
+  bookings: defineTable({
+    tenantId: v.id("tenants"),
+    bookingId: v.string(),
+    serviceId: v.string(),
+    serviceVariant: v.union(v.literal(30), v.literal(60), v.literal(90)),
+    staffId: v.union(v.string(), v.null()),
+    customerId: v.string(),
+    customerName: v.string(),
+    customerEmail: v.string(),
+    customerPhone: v.string(),
+    customFieldValues: v.record(v.string(), v.string()),
+    startAt: v.string(),
+    endAt: v.string(),
+    timezone: v.string(),
+    status: v.union(
+      v.literal("confirmed"),
+      v.literal("cancelled"),
+      v.literal("rescheduled"),
+      v.literal("completed")
+    ),
+    bookingToken: v.string(),
+    manageToken: v.string(),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+  })
+    .index("by_tenant_id", ["tenantId"])
+    .index("by_tenant_id_start_at", ["tenantId", "startAt"])
+    .index("by_tenant_id_booking_id", ["tenantId", "bookingId"])
+    .index("by_booking_token", ["bookingToken"])
+    .index("by_manage_token", ["manageToken"]),
 })
