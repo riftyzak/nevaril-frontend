@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation"
 
 import { getTenantConfig } from "@/lib/app/client"
-import { getSession } from "@/lib/auth/getSession"
 import { can } from "@/lib/auth/permissions"
+import { requireTenantAccess } from "@/lib/auth/session"
 import type { AppLocale } from "@/i18n/locales"
 import type {
   MockSession,
@@ -41,7 +41,10 @@ export async function requireRouteAccess(input: RequireAccessInput): Promise<{
   session: MockSession
   tenantSettings: TenantPermissionSettings
 }> {
-  const session = await getSession({ tenantSlug: input.tenantSlug })
+  const { session } = await requireTenantAccess({
+    locale: input.locale as AppLocale,
+    tenantSlug: input.tenantSlug,
+  })
   const tenantSettings = await getTenantPermissionSettings(input.tenantSlug)
   const allowed = can(
     session,
