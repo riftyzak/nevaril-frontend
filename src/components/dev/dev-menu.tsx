@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { parseSessionCookieValue, SESSION_COOKIE_NAME, serializeSessionCookieValue } from "@/lib/auth/session-cookie"
 import { updateTenantPlan } from "@/lib/app/client"
 import type { TenantPlan } from "@/lib/api/types"
-import { getDevSettings, resetSeed, setDevSettings } from "@/lib/mock/storage"
+import { readMockDevSettings, resetMockData, writeMockDevSettings } from "@/lib/dev/mock-controls"
 import { useTenant } from "@/lib/tenant/tenant-provider"
 import { useServices } from "@/lib/query/hooks/use-services"
 import { useStaff } from "@/lib/query/hooks/use-staff"
@@ -26,8 +26,8 @@ export function DevMenu() {
   const { data: staff } = useStaff(tenantSlug)
 
   const [open, setOpen] = useState(false)
-  const [latencyMs, setLatencyMs] = useState(() => getDevSettings().latencyMs)
-  const [errorRatePct, setErrorRatePct] = useState(() => getDevSettings().errorRatePct)
+  const [latencyMs, setLatencyMs] = useState(() => readMockDevSettings().latencyMs)
+  const [errorRatePct, setErrorRatePct] = useState(() => readMockDevSettings().errorRatePct)
   const [planOverride, setPlanOverride] = useState<TenantPlan | null>(null)
   const plan = planOverride ?? tenantConfig?.plan ?? "business"
   const initialSession =
@@ -44,14 +44,14 @@ export function DevMenu() {
   const e2eAppliedRef = useRef(false)
 
   function applySettings() {
-    const next = setDevSettings({ latencyMs, errorRatePct })
+    const next = writeMockDevSettings({ latencyMs, errorRatePct })
     setLatencyMs(next.latencyMs)
     setErrorRatePct(next.errorRatePct)
     void queryClient.invalidateQueries()
   }
 
   function handleResetSeed() {
-    resetSeed()
+    resetMockData()
     void queryClient.invalidateQueries()
   }
 
@@ -71,8 +71,8 @@ export function DevMenu() {
     if (searchParams.get("__e2e") !== "reset") return
 
     e2eAppliedRef.current = true
-    resetSeed()
-    setDevSettings({ latencyMs: 0, errorRatePct: 0 })
+    resetMockData()
+    writeMockDevSettings({ latencyMs: 0, errorRatePct: 0 })
     const nextRole = searchParams.get("__role") === "staff" ? "staff" : "owner"
     const nextStaffId = searchParams.get("__staff") ?? "st-1"
 

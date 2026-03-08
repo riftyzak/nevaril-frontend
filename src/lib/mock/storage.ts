@@ -2,6 +2,7 @@ import type { DevSettings, MockDatabase } from "@/lib/api/types"
 import { createSeedDatabase, DB_VERSION } from "@/lib/mock/seed"
 
 const STORAGE_KEY = "nevaril:mock-db"
+// Legacy mock storage engine. Do not import this directly from product UI code.
 
 type MockEnvelope = {
   version: number

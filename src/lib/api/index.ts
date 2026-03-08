@@ -37,6 +37,7 @@ import type {
   Voucher,
   WaitlistEntry,
 } from "@/lib/api/types"
+// Legacy mock repository implementation. Product code should call the app boundary in @/lib/app/client.
 import { canModifyBooking } from "@/lib/booking/policy"
 import { getDb, mutateDb } from "@/lib/mock/storage"
 import { getWidgetThemeOverrides } from "@/lib/theme/widget-theme"

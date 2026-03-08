@@ -3,13 +3,13 @@
 import { useEffect } from "react"
 
 import { QueryProvider } from "@/lib/query/query-provider"
-import { resetSeed, setDevSettings } from "@/lib/mock/storage"
+import { resetMockData, writeMockDevSettings } from "@/lib/dev/mock-controls"
 import { TenantProvider } from "@/lib/tenant/tenant-provider"
 
 export function StoryProviders({ children, theme = "light", tenantSlug = "barber" }) {
   useEffect(() => {
-    resetSeed()
-    setDevSettings({ latencyMs: 0, errorRatePct: 0 })
+    resetMockData()
+    writeMockDevSettings({ latencyMs: 0, errorRatePct: 0 })
   }, [])
 
   return (
