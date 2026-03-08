@@ -1,5 +1,6 @@
 import type { AppDataAdapter } from "@/lib/app/contracts"
 import {
+  mutateConvexService,
   mutateConvexTenantConfig,
   queryConvexService,
   queryConvexServices,
@@ -93,7 +94,13 @@ export const convexAppDataAdapter: AppDataAdapter = {
       return toConvexFailure(convexContracts.services.get.name, error)
     }
   },
-  updateService: async () => notImplemented(convexContracts.services.update.name),
+  updateService: async (input) => {
+    try {
+      return await mutateConvexService(input)
+    } catch (error) {
+      return toConvexFailure(convexContracts.services.update.name, error)
+    }
+  },
   listStaff: async (tenantSlug) => {
     try {
       return ok(await queryConvexStaff(tenantSlug))

@@ -2,12 +2,27 @@ import { ConvexHttpClient } from "convex/browser"
 import { makeFunctionReference } from "convex/server"
 
 import { convexContracts } from "@/lib/app/convex-contracts"
-import type { ApiResult, Service, Staff, TenantConfig, UpdateTenantConfigInput } from "@/lib/api/types"
+import type {
+  ApiResult,
+  Service,
+  Staff,
+  TenantConfig,
+  UpdateServiceInput,
+  UpdateTenantConfigInput,
+} from "@/lib/api/types"
 
 type ConvexTenantSettingsUpdateArgs = {
   tenantSlug: string
   expectedUpdatedAt: string
   patch: UpdateTenantConfigInput["patch"]
+  [key: string]: unknown
+}
+
+type ConvexServiceUpdateArgs = {
+  tenantSlug: string
+  serviceId: string
+  expectedUpdatedAt: string
+  patch: UpdateServiceInput["patch"]
   [key: string]: unknown
 }
 
@@ -36,6 +51,12 @@ const tenantSettingsUpdateRef = makeFunctionReference<
   ConvexTenantSettingsUpdateArgs,
   ApiResult<TenantConfig>
 >(convexContracts.tenantSettings.update.name)
+
+const servicesUpdateRef = makeFunctionReference<
+  "mutation",
+  ConvexServiceUpdateArgs,
+  ApiResult<Service>
+>(convexContracts.services.update.name)
 
 const clientCache = new Map<string, ConvexHttpClient>()
 
@@ -79,5 +100,12 @@ export async function mutateConvexTenantConfig(input: UpdateTenantConfigInput) {
   return getConvexClient().mutation(
     tenantSettingsUpdateRef,
     input as ConvexTenantSettingsUpdateArgs
+  )
+}
+
+export async function mutateConvexService(input: UpdateServiceInput) {
+  return getConvexClient().mutation(
+    servicesUpdateRef,
+    input as ConvexServiceUpdateArgs
   )
 }
