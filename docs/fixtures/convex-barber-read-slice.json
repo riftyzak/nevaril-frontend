@@ -1,0 +1,43 @@
+{
+  "tenant": {
+    "slug": "barber",
+    "name": "Brass Barber",
+    "timezone": "Europe/Prague",
+    "logoUrl": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=120&q=80",
+    "staffSelectionEnabled": true,
+    "cancellationPolicyHours": 24,
+    "cancellationPolicyText": "Změny a zrušení přijímáme nejpozději 24h před termínem."
+  },
+  "services": [
+    {
+      "id": "svc-cut",
+      "name": "Haircut",
+      "category": "Cut",
+      "priceCents": 4200,
+      "durationOptions": [30, 60, 90],
+      "active": true
+    },
+    {
+      "id": "svc-beard",
+      "name": "Beard Trim",
+      "category": "Beard",
+      "priceCents": 2500,
+      "durationOptions": [30, 60, 90],
+      "active": true
+    }
+  ],
+  "staff": [
+    {
+      "id": "st-owner",
+      "fullName": "Martin Novak",
+      "role": "owner",
+      "active": true
+    },
+    {
+      "id": "st-1",
+      "fullName": "Tomas Kral",
+      "role": "staff",
+      "active": true
+    }
+  ]
+}
