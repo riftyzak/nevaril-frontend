@@ -121,7 +121,7 @@ export const convexContracts = {
     >("tenants:listForUser"),
   },
   tenantSettings: {
-    get: defineConvexQuery<"tenantSettings:get", { tenantSlug: string }, TenantConfig>(
+    get: defineConvexQuery<"tenantSettings:get", { tenantSlug: string }, TenantConfig | null>(
       "tenantSettings:get"
     ),
     update: defineConvexMutation<

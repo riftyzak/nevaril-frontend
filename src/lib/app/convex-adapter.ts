@@ -1,5 +1,12 @@
 import type { AppDataAdapter } from "@/lib/app/contracts"
+import {
+  queryConvexService,
+  queryConvexServices,
+  queryConvexStaff,
+  queryConvexTenantConfig,
+} from "@/lib/app/convex-client"
 import { convexContracts } from "@/lib/app/convex-contracts"
+import type { ApiError, ApiResult } from "@/lib/api/types"
 
 function notImplemented(contractName: string): never {
   throw new Error(
@@ -7,8 +14,48 @@ function notImplemented(contractName: string): never {
   )
 }
 
+function ok<T>(data: T): ApiResult<T> {
+  return { ok: true, data }
+}
+
+function fail<T>(error: ApiError): ApiResult<T> {
+  return { ok: false, error }
+}
+
+function apiError(
+  code: ApiError["code"],
+  message: string,
+  status: number,
+  details?: Record<string, unknown>
+): ApiError {
+  return { code, message, status, details }
+}
+
+function toConvexFailure<T>(contractName: string, error: unknown): ApiResult<T> {
+  const message = error instanceof Error ? error.message : "Unknown Convex error"
+  return fail(
+    apiError("INTERNAL", `Convex reader '${contractName}' failed: ${message}`, 500, {
+      contractName,
+    })
+  )
+}
+
 export const convexAppDataAdapter: AppDataAdapter = {
-  getTenantConfig: async () => notImplemented(convexContracts.tenantSettings.get.name),
+  getTenantConfig: async (tenantSlug) => {
+    try {
+      const config = await queryConvexTenantConfig(tenantSlug)
+      if (!config) {
+        return fail(
+          apiError("NOT_FOUND", `Tenant '${tenantSlug}' was not found in Convex`, 404, {
+            contractName: convexContracts.tenantSettings.get.name,
+          })
+        )
+      }
+      return ok(config)
+    } catch (error) {
+      return toConvexFailure(convexContracts.tenantSettings.get.name, error)
+    }
+  },
   updateTenantPlan: async () => notImplemented(convexContracts.tenantSettings.updatePlan.name),
   updateTenantConfig: async () => notImplemented(convexContracts.tenantSettings.update.name),
   getNotificationTemplates: async () =>
@@ -17,10 +64,36 @@ export const convexAppDataAdapter: AppDataAdapter = {
     notImplemented(convexContracts.notificationTemplates.update.name),
   getLoyaltyConfig: async () => notImplemented(convexContracts.loyalty.get.name),
   updateLoyaltyConfig: async () => notImplemented(convexContracts.loyalty.update.name),
-  listServices: async () => notImplemented(convexContracts.services.list.name),
-  getService: async () => notImplemented(convexContracts.services.get.name),
+  listServices: async (tenantSlug) => {
+    try {
+      return ok(await queryConvexServices(tenantSlug))
+    } catch (error) {
+      return toConvexFailure(convexContracts.services.list.name, error)
+    }
+  },
+  getService: async (tenantSlug, serviceId) => {
+    try {
+      const service = await queryConvexService(tenantSlug, serviceId)
+      if (!service) {
+        return fail(
+          apiError("NOT_FOUND", `Service '${serviceId}' was not found in Convex`, 404, {
+            contractName: convexContracts.services.get.name,
+          })
+        )
+      }
+      return ok(service)
+    } catch (error) {
+      return toConvexFailure(convexContracts.services.get.name, error)
+    }
+  },
   updateService: async () => notImplemented(convexContracts.services.update.name),
-  listStaff: async () => notImplemented(convexContracts.staff.list.name),
+  listStaff: async (tenantSlug) => {
+    try {
+      return ok(await queryConvexStaff(tenantSlug))
+    } catch (error) {
+      return toConvexFailure(convexContracts.staff.list.name, error)
+    }
+  },
   updateStaffNotes: async () => notImplemented(convexContracts.staff.updateNotes.name),
   getAvailability: async () => notImplemented(convexContracts.bookings.getAvailability.name),
   createBooking: async () => notImplemented(convexContracts.bookings.create.name),
