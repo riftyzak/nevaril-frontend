@@ -130,9 +130,19 @@ export function AdminCalendarPanel({
   const weekRange = useMemo(() => getWeekRange(weekStart, tz), [weekStart, tz])
   const weekDays = useMemo(() => getWeekDays(weekStart, locale, tz), [locale, tz, weekStart])
   const timeLabels = useMemo(() => buildTimeLabels(), [])
+  const calendarScopeStaffId =
+    session.role === "staff"
+      ? (session.staffId ?? undefined)
+      : selectedStaffId === "all"
+        ? undefined
+        : selectedStaffId
+  const calendarScopeKey =
+    session.role === "staff" ? (session.staffId ?? "own") : selectedStaffId
+  const bookingsQueryKey = queryKeys.bookings(tenantSlug)
+  const calendarEventsQueryPrefix = ["calendar-events", tenantSlug] as const
 
   const bookingsQuery = useQuery({
-    queryKey: ["bookings", tenantSlug],
+    queryKey: bookingsQueryKey,
     queryFn: async () => {
       const result = await listBookings(tenantSlug)
       if (!result.ok) throw new Error(result.error.message)
@@ -160,19 +170,14 @@ export function AdminCalendarPanel({
       tenantSlug,
       weekRange.startAt,
       weekRange.endAt,
-      session.role === "staff" ? (session.staffId ?? "own") : selectedStaffId
+      calendarScopeKey
     ),
     queryFn: async () => {
       const result = await listCalendarEvents({
         tenantSlug,
         startAt: weekRange.startAt,
         endAt: weekRange.endAt,
-        staffId:
-          session.role === "staff"
-            ? (session.staffId ?? undefined)
-            : selectedStaffId === "all"
-              ? undefined
-              : selectedStaffId,
+        staffId: calendarScopeStaffId,
       })
       if (!result.ok) throw new Error(result.error.message)
       return result.data
@@ -189,17 +194,20 @@ export function AdminCalendarPanel({
       .filter((booking) => booking.status !== "cancelled")
       .filter((booking) => booking.startAt < weekRange.endAt && booking.endAt > weekRange.startAt)
       .filter((booking) =>
-        session.role === "staff"
-          ? booking.staffId === session.staffId
-          : selectedStaffId === "all"
-            ? true
-            : booking.staffId === selectedStaffId
+        calendarScopeStaffId ? booking.staffId === calendarScopeStaffId : true
       )
 
     const scopedEvents = filterScopedEvents(eventsQuery.data ?? [], session)
 
     return normalizeCalendarItems(scopedBookings, scopedEvents)
-  }, [bookingsQuery.data, eventsQuery.data, selectedStaffId, session, weekRange.endAt, weekRange.startAt])
+  }, [
+    bookingsQuery.data,
+    calendarScopeStaffId,
+    eventsQuery.data,
+    session,
+    weekRange.endAt,
+    weekRange.startAt,
+  ])
 
   const itemsByDay = useMemo(() => {
     return weekDays.reduce<Record<string, typeof calendarItems>>((accumulator, day) => {
@@ -324,7 +332,7 @@ export function AdminCalendarPanel({
     },
     onSuccess: async () => {
       toast.success(t("calendar.detail.toastRescheduled"))
-      await queryClient.invalidateQueries({ queryKey: ["bookings", tenantSlug] })
+      await queryClient.invalidateQueries({ queryKey: bookingsQueryKey })
     },
     onError: () => toast.error(t("calendar.detail.toastRescheduleFailed")),
   })
@@ -342,7 +350,7 @@ export function AdminCalendarPanel({
     },
     onSuccess: async () => {
       toast.success(t("calendar.detail.toastCanceled"))
-      await queryClient.invalidateQueries({ queryKey: ["bookings", tenantSlug] })
+      await queryClient.invalidateQueries({ queryKey: bookingsQueryKey })
       setSelectedItem(null)
     },
     onError: () => toast.error(t("calendar.detail.toastCancelFailed")),
@@ -367,7 +375,7 @@ export function AdminCalendarPanel({
     },
     onSuccess: async () => {
       toast.success(t("calendar.detail.toastEventUpdated"))
-      await queryClient.invalidateQueries({ queryKey: ["calendar-events", tenantSlug] })
+      await queryClient.invalidateQueries({ queryKey: calendarEventsQueryPrefix })
     },
     onError: () => toast.error(t("calendar.detail.toastEventUpdateFailed")),
   })
@@ -385,7 +393,7 @@ export function AdminCalendarPanel({
     },
     onSuccess: async () => {
       toast.success(t("calendar.detail.toastEventDeleted"))
-      await queryClient.invalidateQueries({ queryKey: ["calendar-events", tenantSlug] })
+      await queryClient.invalidateQueries({ queryKey: calendarEventsQueryPrefix })
       setSelectedItem(null)
     },
     onError: () => toast.error(t("calendar.detail.toastEventDeleteFailed")),
@@ -409,7 +417,7 @@ export function AdminCalendarPanel({
     },
     onSuccess: async () => {
       toast.success(t("calendar.create.toastBookingCreated"))
-      await queryClient.invalidateQueries({ queryKey: ["bookings", tenantSlug] })
+      await queryClient.invalidateQueries({ queryKey: bookingsQueryKey })
       resetCreateDialog()
     },
     onError: () => toast.error(t("calendar.create.toastBookingCreateFailed")),
@@ -434,7 +442,7 @@ export function AdminCalendarPanel({
     },
     onSuccess: async () => {
       toast.success(t("calendar.create.toastEventCreated"))
-      await queryClient.invalidateQueries({ queryKey: ["calendar-events", tenantSlug] })
+      await queryClient.invalidateQueries({ queryKey: calendarEventsQueryPrefix })
       resetCreateDialog()
     },
     onError: () => toast.error(t("calendar.create.toastEventCreateFailed")),
