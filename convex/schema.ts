@@ -109,4 +109,22 @@ export default defineSchema({
     .index("by_tenant_id_start_at", ["tenantId", "startAt"])
     .index("by_tenant_id_staff_id_start_at", ["tenantId", "staffId", "startAt"])
     .index("by_tenant_id_event_id", ["tenantId", "eventId"]),
+
+  waitlistEntries: defineTable({
+    tenantId: v.id("tenants"),
+    entryId: v.string(),
+    serviceId: v.string(),
+    customerName: v.string(),
+    email: v.string(),
+    phone: v.string(),
+    note: v.string(),
+    preferredDate: v.string(),
+    preferredTimeLabel: v.string(),
+    status: v.union(v.literal("new"), v.literal("assigned"), v.literal("cancelled")),
+    assignedBookingId: v.union(v.string(), v.null()),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+  })
+    .index("by_tenant_id_created_at", ["tenantId", "createdAt"])
+    .index("by_tenant_id_entry_id", ["tenantId", "entryId"]),
 })

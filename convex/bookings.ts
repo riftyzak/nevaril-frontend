@@ -204,6 +204,113 @@ function toApiBooking(tenantSlug: string, booking: Doc<"bookings">): Booking {
   return mapBooking(tenantSlug, booking)
 }
 
+export async function createBookingRecord(
+  ctx: MutationCtx,
+  args: CreateBookingInput
+): Promise<ApiResult<Booking>> {
+  const tenant = await getTenantBySlug(ctx.db, args.tenantSlug)
+  if (!tenant) {
+    return fail(apiError("NOT_FOUND", `Tenant '${args.tenantSlug}' was not found in Convex`, 404))
+  }
+
+  const tenantId = tenant._id as Id<"tenants">
+  const services = await ctx.db
+    .query("services")
+    .withIndex("by_tenant_id", (query) => query.eq("tenantId", tenantId))
+    .collect()
+  const service = services.find((item) => item.serviceId === args.serviceId) ?? null
+  if (!service) {
+    return fail(apiError("NOT_FOUND", `Service '${args.serviceId}' was not found in Convex`, 404))
+  }
+
+  if (!isIsoDate(args.startAt)) {
+    return fail(
+      apiError("VALIDATION", "Booking startAt must be a valid ISO date", 400, {
+        startAt: args.startAt,
+      })
+    )
+  }
+
+  if (args.staffId) {
+    const staffProfiles = await ctx.db
+      .query("staffProfiles")
+      .withIndex("by_tenant_id", (query) => query.eq("tenantId", tenantId))
+      .collect()
+    const staff = staffProfiles.find((item) => item.staffId === args.staffId) ?? null
+    if (!staff) {
+      return fail(apiError("NOT_FOUND", `Staff '${args.staffId}' was not found in Convex`, 404))
+    }
+  }
+
+  const startAt = new Date(args.startAt).toISOString()
+  const endAt = computeEndAt(startAt, args.serviceVariant)
+  const bookings = await ctx.db
+    .query("bookings")
+    .withIndex("by_tenant_id_start_at", (query) => query.eq("tenantId", tenantId))
+    .collect()
+
+  if (
+    hasBookingConflict(bookings, {
+      startAt,
+      endAt,
+      staffId: args.staffId ?? null,
+    })
+  ) {
+    return fail(
+      apiError("CONFLICT", "Selected slot is no longer available", 409, {
+        startAt,
+        staffId: args.staffId ?? null,
+      })
+    )
+  }
+
+  const timestamp = nowIso()
+  const bookingToken = makeManageToken(args.tenantSlug)
+  const bookingId = makeBookingId()
+
+  await ctx.db.insert("bookings", {
+    tenantId,
+    bookingId,
+    serviceId: args.serviceId,
+    serviceVariant: args.serviceVariant,
+    staffId: args.staffId ?? null,
+    customerId: args.customerId,
+    customerName: args.customerName,
+    customerEmail: args.customerEmail,
+    customerPhone: args.customerPhone,
+    customFieldValues: args.customFieldValues ?? {},
+    startAt,
+    endAt,
+    timezone: String(tenant.timezone ?? TZ_DEFAULT),
+    status: "confirmed",
+    bookingToken,
+    manageToken: bookingToken,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  })
+
+  return ok({
+    id: bookingId,
+    tenantSlug: args.tenantSlug,
+    serviceId: args.serviceId,
+    serviceVariant: args.serviceVariant,
+    staffId: args.staffId ?? null,
+    customerId: args.customerId,
+    customerName: args.customerName,
+    customerEmail: args.customerEmail,
+    customerPhone: args.customerPhone,
+    customFieldValues: args.customFieldValues ?? {},
+    startAt,
+    endAt,
+    timezone: String(tenant.timezone ?? TZ_DEFAULT),
+    status: "confirmed",
+    bookingToken,
+    manageToken: bookingToken,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  })
+}
+
 async function updateBookingRecord(
   ctx: MutationCtx,
   args: UpdateBookingInput
@@ -414,108 +521,7 @@ export const getAvailability = queryGeneric({
 
 export const create = mutationGeneric({
   args: createArgs,
-  handler: async (ctx, args) => {
-    const tenant = await getTenantBySlug(ctx.db, args.tenantSlug)
-    if (!tenant) {
-      return fail(apiError("NOT_FOUND", `Tenant '${args.tenantSlug}' was not found in Convex`, 404))
-    }
-
-    const services = await ctx.db
-      .query("services")
-      .withIndex("by_tenant_id", (query) => query.eq("tenantId", tenant._id))
-      .collect()
-    const service = services.find((item) => item.serviceId === args.serviceId) ?? null
-    if (!service) {
-      return fail(apiError("NOT_FOUND", `Service '${args.serviceId}' was not found in Convex`, 404))
-    }
-
-    if (!isIsoDate(args.startAt)) {
-      return fail(
-        apiError("VALIDATION", "Booking startAt must be a valid ISO date", 400, {
-          startAt: args.startAt,
-        })
-      )
-    }
-
-    if (args.staffId) {
-      const staffProfiles = await ctx.db
-        .query("staffProfiles")
-        .withIndex("by_tenant_id", (query) => query.eq("tenantId", tenant._id))
-        .collect()
-      const staff = staffProfiles.find((item) => item.staffId === args.staffId) ?? null
-      if (!staff) {
-        return fail(apiError("NOT_FOUND", `Staff '${args.staffId}' was not found in Convex`, 404))
-      }
-    }
-
-    const startAt = new Date(args.startAt).toISOString()
-    const endAt = computeEndAt(startAt, args.serviceVariant)
-    const bookings = await ctx.db
-      .query("bookings")
-      .withIndex("by_tenant_id_start_at", (query) => query.eq("tenantId", tenant._id))
-      .collect()
-
-    if (
-      hasBookingConflict(bookings, {
-        startAt,
-        endAt,
-        staffId: args.staffId ?? null,
-      })
-    ) {
-      return fail(
-        apiError("CONFLICT", "Selected slot is no longer available", 409, {
-          startAt,
-          staffId: args.staffId ?? null,
-        })
-      )
-    }
-
-    const timestamp = nowIso()
-    const bookingToken = makeManageToken(args.tenantSlug)
-    const bookingId = makeBookingId()
-
-    await ctx.db.insert("bookings", {
-      tenantId: tenant._id,
-      bookingId,
-      serviceId: args.serviceId,
-      serviceVariant: args.serviceVariant,
-      staffId: args.staffId ?? null,
-      customerId: args.customerId,
-      customerName: args.customerName,
-      customerEmail: args.customerEmail,
-      customerPhone: args.customerPhone,
-      customFieldValues: args.customFieldValues ?? {},
-      startAt,
-      endAt,
-      timezone: String(tenant.timezone ?? TZ_DEFAULT),
-      status: "confirmed",
-      bookingToken,
-      manageToken: bookingToken,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    })
-
-    return ok({
-      id: bookingId,
-      tenantSlug: args.tenantSlug,
-      serviceId: args.serviceId,
-      serviceVariant: args.serviceVariant,
-      staffId: args.staffId ?? null,
-      customerId: args.customerId,
-      customerName: args.customerName,
-      customerEmail: args.customerEmail,
-      customerPhone: args.customerPhone,
-      customFieldValues: args.customFieldValues ?? {},
-      startAt,
-      endAt,
-      timezone: String(tenant.timezone ?? TZ_DEFAULT),
-      status: "confirmed",
-      bookingToken,
-      manageToken: bookingToken,
-      createdAt: timestamp,
-      updatedAt: timestamp,
-    })
-  },
+  handler: (ctx, args) => createBookingRecord(ctx, args),
 })
 
 export const update = mutationGeneric({

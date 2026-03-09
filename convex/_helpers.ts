@@ -1,7 +1,14 @@
 import type { GenericDataModel, GenericDatabaseReader } from "convex/server"
 import type { GenericId } from "convex/values"
 
-import type { Booking, CalendarEvent, Service, Staff, TenantConfig } from "../src/lib/api/types"
+import type {
+  Booking,
+  CalendarEvent,
+  Service,
+  Staff,
+  TenantConfig,
+  WaitlistEntry,
+} from "../src/lib/api/types"
 
 export async function getTenantBySlug(
   db: GenericDatabaseReader<GenericDataModel>,
@@ -167,5 +174,36 @@ export function mapCalendarEvent(tenantSlug: string, event: {
     note: event.note,
     createdAt: event.createdAt,
     updatedAt: event.updatedAt,
+  }
+}
+
+export function mapWaitlistEntry(tenantSlug: string, entry: {
+  entryId: string
+  serviceId: string
+  customerName: string
+  email: string
+  phone: string
+  note: string
+  preferredDate: string
+  preferredTimeLabel: string
+  status: WaitlistEntry["status"]
+  assignedBookingId: string | null
+  createdAt: string
+  updatedAt: string
+}): WaitlistEntry {
+  return {
+    id: entry.entryId,
+    tenantSlug,
+    serviceId: entry.serviceId,
+    customerName: entry.customerName,
+    email: entry.email,
+    phone: entry.phone,
+    note: entry.note,
+    preferredDate: entry.preferredDate,
+    preferredTimeLabel: entry.preferredTimeLabel,
+    status: entry.status,
+    assignedBookingId: entry.assignedBookingId,
+    createdAt: entry.createdAt,
+    updatedAt: entry.updatedAt,
   }
 }

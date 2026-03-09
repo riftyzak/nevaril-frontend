@@ -257,6 +257,47 @@ export const seedBarberReadSlice = mutation({
       }
     }
 
+    const desiredWaitlistEntries = [
+      {
+        entryId: "wl-1",
+        serviceId: "svc-cut",
+        customerName: "Iva Horakova",
+        email: "iva@example.com",
+        phone: "+420777100333",
+        note: "",
+        preferredDate: "2026-01-13",
+        preferredTimeLabel: "afternoon",
+        status: "new" as const,
+        assignedBookingId: null,
+        createdAt: BASE_TIMESTAMP,
+        updatedAt: BASE_TIMESTAMP,
+      },
+    ]
+
+    const existingWaitlistEntries = await ctx.db
+      .query("waitlistEntries")
+      .withIndex("by_tenant_id_created_at", (query) => query.eq("tenantId", tenantId))
+      .collect()
+    const desiredWaitlistEntryIds = new Set(
+      desiredWaitlistEntries.map((entry) => entry.entryId)
+    )
+
+    for (const entry of existingWaitlistEntries) {
+      if (!desiredWaitlistEntryIds.has(entry.entryId)) {
+        await ctx.db.delete(entry._id)
+      }
+    }
+
+    for (const entry of desiredWaitlistEntries) {
+      const existing = existingWaitlistEntries.find((item) => item.entryId === entry.entryId)
+      const payload = { tenantId, ...entry }
+      if (existing) {
+        await ctx.db.patch(existing._id, payload)
+      } else {
+        await ctx.db.insert("waitlistEntries", payload)
+      }
+    }
+
     return { ok: true, tenantSlug: "barber" }
   },
 })

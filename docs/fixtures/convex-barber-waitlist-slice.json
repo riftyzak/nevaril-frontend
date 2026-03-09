@@ -1,0 +1,26 @@
+{
+  "tenant": {
+    "slug": "barber",
+    "name": "Brass Barber",
+    "timezone": "Europe/Prague"
+  },
+  "waitlistEntries": [
+    {
+      "id": "wl-1",
+      "serviceId": "svc-cut",
+      "customerName": "Iva Horakova",
+      "email": "iva@example.com",
+      "phone": "+420777100333",
+      "note": "",
+      "preferredDate": "2026-01-13",
+      "preferredTimeLabel": "afternoon",
+      "status": "new",
+      "assignedBookingId": null
+    }
+  ],
+  "relatedReadParity": {
+    "services": ["svc-cut", "svc-beard"],
+    "staff": ["st-owner", "st-1"],
+    "bookings": ["bk-1", "bk-2"]
+  }
+}
