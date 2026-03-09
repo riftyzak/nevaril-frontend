@@ -88,9 +88,12 @@ export function AdminWaitlistInbox({ tenantSlug, t }: Readonly<AdminWaitlistInbo
     email: string
     sms: string
   } | null>(null)
+  const waitlistQueryKey = queryKeys.waitlist(tenantSlug)
+  const bookingsQueryKey = queryKeys.bookings(tenantSlug)
+  const availabilityQueryPrefix = ["availability", tenantSlug] as const
 
   const waitlistQuery = useQuery({
-    queryKey: queryKeys.waitlist(tenantSlug),
+    queryKey: waitlistQueryKey,
     queryFn: async () => {
       const result = await listWaitlist(tenantSlug)
       if (!result.ok) throw new Error(result.error.message)
@@ -167,9 +170,9 @@ export function AdminWaitlistInbox({ tenantSlug, t }: Readonly<AdminWaitlistInbo
       toast.success(t.successToast)
       setActiveEntry(null)
       setSelectedStartAt("")
-      await queryClient.invalidateQueries({ queryKey: queryKeys.waitlist(tenantSlug) })
-      await queryClient.invalidateQueries({ queryKey: ["availability", tenantSlug] })
-      await queryClient.invalidateQueries({ queryKey: ["bookings", tenantSlug] })
+      await queryClient.invalidateQueries({ queryKey: waitlistQueryKey })
+      await queryClient.invalidateQueries({ queryKey: availabilityQueryPrefix })
+      await queryClient.invalidateQueries({ queryKey: bookingsQueryKey })
     },
     onError: () => {
       toast.error(t.assignError)
