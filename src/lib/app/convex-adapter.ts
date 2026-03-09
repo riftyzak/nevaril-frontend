@@ -6,6 +6,8 @@ import {
   mutateConvexCalendarEventCreate,
   mutateConvexCalendarEventDelete,
   mutateConvexCalendarEventUpdate,
+  mutateConvexWaitlistAssign,
+  mutateConvexWaitlistCreate,
   mutateConvexService,
   mutateConvexTenantConfig,
   queryConvexAvailability,
@@ -17,6 +19,7 @@ import {
   queryConvexServices,
   queryConvexStaff,
   queryConvexTenantConfig,
+  queryConvexWaitlist,
 } from "@/lib/app/convex-client"
 import { convexContracts } from "@/lib/app/convex-contracts"
 import type { ApiError, ApiResult } from "@/lib/api/types"
@@ -224,9 +227,27 @@ export const convexAppDataAdapter: AppDataAdapter = {
   },
   listCustomers: async () => notImplemented(convexContracts.customers.list.name),
   updateCustomerTags: async () => notImplemented(convexContracts.customers.updateTags.name),
-  listWaitlist: async () => notImplemented(convexContracts.waitlist.list.name),
-  createWaitlistEntry: async () => notImplemented(convexContracts.waitlist.create.name),
-  assignWaitlistToSlot: async () => notImplemented(convexContracts.waitlist.assign.name),
+  listWaitlist: async (tenantSlug) => {
+    try {
+      return ok(await queryConvexWaitlist(tenantSlug))
+    } catch (error) {
+      return toConvexFailure(convexContracts.waitlist.list.name, error)
+    }
+  },
+  createWaitlistEntry: async (input) => {
+    try {
+      return await mutateConvexWaitlistCreate(input)
+    } catch (error) {
+      return toConvexMutationFailure(convexContracts.waitlist.create.name, error)
+    }
+  },
+  assignWaitlistToSlot: async (input) => {
+    try {
+      return await mutateConvexWaitlistAssign(input)
+    } catch (error) {
+      return toConvexMutationFailure(convexContracts.waitlist.assign.name, error)
+    }
+  },
   listAnalytics: async () => notImplemented(convexContracts.analytics.list.name),
   listVouchers: async () => notImplemented(convexContracts.vouchers.list.name),
   createVoucherOrder: async () => notImplemented(convexContracts.vouchers.createOrder.name),

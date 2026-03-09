@@ -4,12 +4,14 @@ import { makeFunctionReference } from "convex/server"
 import { convexContracts } from "@/lib/app/convex-contracts"
 import type {
   ApiResult,
+  AssignWaitlistToSlotInput,
   AvailabilitySlot,
   Booking,
   CancelBookingInput,
   CalendarEvent,
   CreateBookingInput,
   CreateCalendarEventInput,
+  CreateWaitlistEntryInput,
   DeleteCalendarEventInput,
   GetAvailabilityInput,
   Service,
@@ -19,6 +21,7 @@ import type {
   UpdateCalendarEventInput,
   UpdateServiceInput,
   UpdateTenantConfigInput,
+  WaitlistEntry,
 } from "@/lib/api/types"
 
 type ConvexTenantSettingsUpdateArgs = {
@@ -71,6 +74,18 @@ type ConvexCalendarEventDeleteArgs = DeleteCalendarEventInput & {
   [key: string]: unknown
 }
 
+type ConvexWaitlistListArgs = {
+  tenantSlug: string
+}
+
+type ConvexWaitlistCreateArgs = CreateWaitlistEntryInput & {
+  [key: string]: unknown
+}
+
+type ConvexWaitlistAssignArgs = AssignWaitlistToSlotInput & {
+  [key: string]: unknown
+}
+
 const tenantSettingsGetRef = makeFunctionReference<
   "query",
   { tenantSlug: string },
@@ -119,6 +134,12 @@ const calendarEventsListRef = makeFunctionReference<
   CalendarEvent[]
 >(convexContracts.calendarEvents.list.name)
 
+const waitlistListRef = makeFunctionReference<
+  "query",
+  ConvexWaitlistListArgs,
+  WaitlistEntry[]
+>(convexContracts.waitlist.list.name)
+
 const tenantSettingsUpdateRef = makeFunctionReference<
   "mutation",
   ConvexTenantSettingsUpdateArgs,
@@ -166,6 +187,18 @@ const calendarEventsDeleteRef = makeFunctionReference<
   ConvexCalendarEventDeleteArgs,
   ApiResult<{ id: string }>
 >(convexContracts.calendarEvents.delete.name)
+
+const waitlistCreateRef = makeFunctionReference<
+  "mutation",
+  ConvexWaitlistCreateArgs,
+  ApiResult<WaitlistEntry>
+>(convexContracts.waitlist.create.name)
+
+const waitlistAssignRef = makeFunctionReference<
+  "mutation",
+  ConvexWaitlistAssignArgs,
+  ApiResult<WaitlistEntry>
+>(convexContracts.waitlist.assign.name)
 
 const clientCache = new Map<string, ConvexHttpClient>()
 
@@ -228,6 +261,10 @@ export async function queryConvexCalendarEvents(input: ConvexCalendarEventsListA
   return getConvexClient().query(calendarEventsListRef, input)
 }
 
+export async function queryConvexWaitlist(tenantSlug: string) {
+  return getConvexClient().query(waitlistListRef, { tenantSlug })
+}
+
 export async function mutateConvexTenantConfig(input: UpdateTenantConfigInput) {
   return getConvexClient().mutation(
     tenantSettingsUpdateRef,
@@ -281,5 +318,19 @@ export async function mutateConvexCalendarEventDelete(input: DeleteCalendarEvent
   return getConvexClient().mutation(
     calendarEventsDeleteRef,
     input as ConvexCalendarEventDeleteArgs
+  )
+}
+
+export async function mutateConvexWaitlistCreate(input: CreateWaitlistEntryInput) {
+  return getConvexClient().mutation(
+    waitlistCreateRef,
+    input as ConvexWaitlistCreateArgs
+  )
+}
+
+export async function mutateConvexWaitlistAssign(input: AssignWaitlistToSlotInput) {
+  return getConvexClient().mutation(
+    waitlistAssignRef,
+    input as ConvexWaitlistAssignArgs
   )
 }
