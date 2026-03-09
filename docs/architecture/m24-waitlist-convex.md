@@ -94,3 +94,11 @@ NEXT_PUBLIC_CONVEX_URL=https://<deployment>.convex.cloud \
 CONVEX_URL=https://<deployment>.convex.cloud \
 npx playwright test tests/waitlist-convex.spec.js
 ```
+
+The focused Convex smoke validates:
+
+- public waitlist create succeeds
+- admin waitlist inbox renders seeded Convex data
+- admin assign persists assigned state after reload
+- the created booking is visible through the existing bookings read slice
+- staff route access stays aligned with current bookings-module semantics
