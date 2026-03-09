@@ -79,6 +79,14 @@ npx playwright test tests/admin-calendar.spec.js
 
 ### Convex mode
 
+Seed the barber parity slice first:
+
+```bash
+npx convex run seed:seedBarberReadSlice
+```
+
+Then run the focused smoke:
+
 ```bash
 APP_DATA_SOURCE=convex \
 NEXT_PUBLIC_APP_DATA_SOURCE=convex \
@@ -86,3 +94,10 @@ NEXT_PUBLIC_CONVEX_URL=https://<deployment>.convex.cloud \
 CONVEX_URL=https://<deployment>.convex.cloud \
 npx playwright test tests/admin-calendar-convex.spec.js
 ```
+
+The focused Convex smoke validates:
+
+- owner sees seeded booking and calendar event items in the week view
+- owner can create blocked/time_off events and reload sees persisted values
+- owner can update and delete a calendar event with reload parity
+- staff remains restricted to own-scope calendar data
