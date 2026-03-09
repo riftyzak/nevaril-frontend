@@ -208,6 +208,55 @@ export const seedBarberReadSlice = mutation({
       }
     }
 
+    const desiredCalendarEvents = [
+      {
+        eventId: "evt-block-1",
+        staffId: "st-1",
+        type: "blocked" as const,
+        title: "Blok na udrzbu",
+        startAt: "2026-01-13T11:00:00.000Z",
+        endAt: "2026-01-13T12:30:00.000Z",
+        note: "Rezerva mezi smenami",
+        createdAt: BASE_TIMESTAMP,
+        updatedAt: BASE_TIMESTAMP,
+      },
+      {
+        eventId: "evt-timeoff-1",
+        staffId: "st-owner",
+        type: "time_off" as const,
+        title: "Osobni volno",
+        startAt: "2026-01-14T08:00:00.000Z",
+        endAt: "2026-01-14T11:00:00.000Z",
+        note: "Lekar",
+        createdAt: BASE_TIMESTAMP,
+        updatedAt: BASE_TIMESTAMP,
+      },
+    ]
+
+    const existingCalendarEvents = await ctx.db
+      .query("calendarEvents")
+      .withIndex("by_tenant_id_start_at", (query) => query.eq("tenantId", tenantId))
+      .collect()
+    const desiredCalendarEventIds = new Set(
+      desiredCalendarEvents.map((event) => event.eventId)
+    )
+
+    for (const event of existingCalendarEvents) {
+      if (!desiredCalendarEventIds.has(event.eventId)) {
+        await ctx.db.delete(event._id)
+      }
+    }
+
+    for (const event of desiredCalendarEvents) {
+      const existing = existingCalendarEvents.find((item) => item.eventId === event.eventId)
+      const payload = { tenantId, ...event }
+      if (existing) {
+        await ctx.db.patch(existing._id, payload)
+      } else {
+        await ctx.db.insert("calendarEvents", payload)
+      }
+    }
+
     return { ok: true, tenantSlug: "barber" }
   },
 })

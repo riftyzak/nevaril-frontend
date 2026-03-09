@@ -1,0 +1,45 @@
+{
+  "tenant": {
+    "slug": "barber",
+    "name": "Brass Barber",
+    "timezone": "Europe/Prague"
+  },
+  "bookings": [
+    {
+      "id": "bk-1",
+      "staffId": "st-1",
+      "customerName": "Anna Novakova",
+      "startAt": "2026-01-12T09:00:00.000Z",
+      "endAt": "2026-01-12T10:00:00.000Z",
+      "status": "confirmed"
+    },
+    {
+      "id": "bk-2",
+      "staffId": "st-owner",
+      "customerName": "Marek Sramek",
+      "startAt": "2026-01-12T10:30:00.000Z",
+      "endAt": "2026-01-12T11:00:00.000Z",
+      "status": "rescheduled"
+    }
+  ],
+  "calendarEvents": [
+    {
+      "id": "evt-block-1",
+      "staffId": "st-1",
+      "type": "blocked",
+      "title": "Blok na udrzbu",
+      "startAt": "2026-01-13T11:00:00.000Z",
+      "endAt": "2026-01-13T12:30:00.000Z",
+      "note": "Rezerva mezi smenami"
+    },
+    {
+      "id": "evt-timeoff-1",
+      "staffId": "st-owner",
+      "type": "time_off",
+      "title": "Osobni volno",
+      "startAt": "2026-01-14T08:00:00.000Z",
+      "endAt": "2026-01-14T11:00:00.000Z",
+      "note": "Lekar"
+    }
+  ]
+}

@@ -93,4 +93,20 @@ export default defineSchema({
     .index("by_tenant_id_booking_id", ["tenantId", "bookingId"])
     .index("by_booking_token", ["bookingToken"])
     .index("by_manage_token", ["manageToken"]),
+
+  calendarEvents: defineTable({
+    tenantId: v.id("tenants"),
+    eventId: v.string(),
+    staffId: v.union(v.string(), v.null()),
+    type: v.union(v.literal("blocked"), v.literal("time_off")),
+    title: v.string(),
+    startAt: v.string(),
+    endAt: v.string(),
+    note: v.optional(v.string()),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+  })
+    .index("by_tenant_id_start_at", ["tenantId", "startAt"])
+    .index("by_tenant_id_staff_id_start_at", ["tenantId", "staffId", "startAt"])
+    .index("by_tenant_id_event_id", ["tenantId", "eventId"]),
 })
