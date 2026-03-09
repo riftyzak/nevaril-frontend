@@ -7,12 +7,16 @@ import type {
   AvailabilitySlot,
   Booking,
   CancelBookingInput,
+  CalendarEvent,
   CreateBookingInput,
+  CreateCalendarEventInput,
+  DeleteCalendarEventInput,
   GetAvailabilityInput,
   Service,
   Staff,
   TenantConfig,
   UpdateBookingInput,
+  UpdateCalendarEventInput,
   UpdateServiceInput,
   UpdateTenantConfigInput,
 } from "@/lib/api/types"
@@ -45,6 +49,25 @@ type ConvexBookingUpdateArgs = UpdateBookingInput & {
 }
 
 type ConvexBookingCancelArgs = CancelBookingInput & {
+  [key: string]: unknown
+}
+
+type ConvexCalendarEventsListArgs = {
+  tenantSlug: string
+  startAt: string
+  endAt: string
+  staffId?: string
+}
+
+type ConvexCalendarEventCreateArgs = CreateCalendarEventInput & {
+  [key: string]: unknown
+}
+
+type ConvexCalendarEventUpdateArgs = UpdateCalendarEventInput & {
+  [key: string]: unknown
+}
+
+type ConvexCalendarEventDeleteArgs = DeleteCalendarEventInput & {
   [key: string]: unknown
 }
 
@@ -90,6 +113,12 @@ const bookingsAvailabilityRef = makeFunctionReference<
   AvailabilitySlot[]
 >(convexContracts.bookings.getAvailability.name)
 
+const calendarEventsListRef = makeFunctionReference<
+  "query",
+  ConvexCalendarEventsListArgs,
+  CalendarEvent[]
+>(convexContracts.calendarEvents.list.name)
+
 const tenantSettingsUpdateRef = makeFunctionReference<
   "mutation",
   ConvexTenantSettingsUpdateArgs,
@@ -119,6 +148,24 @@ const bookingsCancelRef = makeFunctionReference<
   ConvexBookingCancelArgs,
   ApiResult<Booking>
 >(convexContracts.bookings.cancel.name)
+
+const calendarEventsCreateRef = makeFunctionReference<
+  "mutation",
+  ConvexCalendarEventCreateArgs,
+  ApiResult<CalendarEvent>
+>(convexContracts.calendarEvents.create.name)
+
+const calendarEventsUpdateRef = makeFunctionReference<
+  "mutation",
+  ConvexCalendarEventUpdateArgs,
+  ApiResult<CalendarEvent>
+>(convexContracts.calendarEvents.update.name)
+
+const calendarEventsDeleteRef = makeFunctionReference<
+  "mutation",
+  ConvexCalendarEventDeleteArgs,
+  ApiResult<{ id: string }>
+>(convexContracts.calendarEvents.delete.name)
 
 const clientCache = new Map<string, ConvexHttpClient>()
 
@@ -177,6 +224,10 @@ export async function queryConvexAvailability(input: GetAvailabilityInput) {
   )
 }
 
+export async function queryConvexCalendarEvents(input: ConvexCalendarEventsListArgs) {
+  return getConvexClient().query(calendarEventsListRef, input)
+}
+
 export async function mutateConvexTenantConfig(input: UpdateTenantConfigInput) {
   return getConvexClient().mutation(
     tenantSettingsUpdateRef,
@@ -209,5 +260,26 @@ export async function mutateConvexBookingCancel(input: CancelBookingInput) {
   return getConvexClient().mutation(
     bookingsCancelRef,
     input as ConvexBookingCancelArgs
+  )
+}
+
+export async function mutateConvexCalendarEventCreate(input: CreateCalendarEventInput) {
+  return getConvexClient().mutation(
+    calendarEventsCreateRef,
+    input as ConvexCalendarEventCreateArgs
+  )
+}
+
+export async function mutateConvexCalendarEventUpdate(input: UpdateCalendarEventInput) {
+  return getConvexClient().mutation(
+    calendarEventsUpdateRef,
+    input as ConvexCalendarEventUpdateArgs
+  )
+}
+
+export async function mutateConvexCalendarEventDelete(input: DeleteCalendarEventInput) {
+  return getConvexClient().mutation(
+    calendarEventsDeleteRef,
+    input as ConvexCalendarEventDeleteArgs
   )
 }

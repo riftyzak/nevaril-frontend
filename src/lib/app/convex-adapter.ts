@@ -3,12 +3,16 @@ import {
   mutateConvexBookingCancel,
   mutateConvexBookingUpdate,
   mutateConvexBooking,
+  mutateConvexCalendarEventCreate,
+  mutateConvexCalendarEventDelete,
+  mutateConvexCalendarEventUpdate,
   mutateConvexService,
   mutateConvexTenantConfig,
   queryConvexAvailability,
   queryConvexBookingById,
   queryConvexBookingByToken,
   queryConvexBookings,
+  queryConvexCalendarEvents,
   queryConvexService,
   queryConvexServices,
   queryConvexStaff,
@@ -139,10 +143,34 @@ export const convexAppDataAdapter: AppDataAdapter = {
       return toConvexMutationFailure(convexContracts.bookings.create.name, error)
     }
   },
-  listCalendarEvents: async () => notImplemented(convexContracts.calendarEvents.list.name),
-  createCalendarEvent: async () => notImplemented(convexContracts.calendarEvents.create.name),
-  updateCalendarEvent: async () => notImplemented(convexContracts.calendarEvents.update.name),
-  deleteCalendarEvent: async () => notImplemented(convexContracts.calendarEvents.delete.name),
+  listCalendarEvents: async (input) => {
+    try {
+      return ok(await queryConvexCalendarEvents(input))
+    } catch (error) {
+      return toConvexFailure(convexContracts.calendarEvents.list.name, error)
+    }
+  },
+  createCalendarEvent: async (input) => {
+    try {
+      return await mutateConvexCalendarEventCreate(input)
+    } catch (error) {
+      return toConvexMutationFailure(convexContracts.calendarEvents.create.name, error)
+    }
+  },
+  updateCalendarEvent: async (input) => {
+    try {
+      return await mutateConvexCalendarEventUpdate(input)
+    } catch (error) {
+      return toConvexMutationFailure(convexContracts.calendarEvents.update.name, error)
+    }
+  },
+  deleteCalendarEvent: async (input) => {
+    try {
+      return await mutateConvexCalendarEventDelete(input)
+    } catch (error) {
+      return toConvexMutationFailure(convexContracts.calendarEvents.delete.name, error)
+    }
+  },
   updateBooking: async (input) => {
     try {
       return await mutateConvexBookingUpdate(input)
