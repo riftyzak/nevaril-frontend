@@ -192,6 +192,11 @@ export function BookingDetailPanel({
       toast.success(t("bookingDetail.toastRescheduled"))
       await queryClient.invalidateQueries({ queryKey: queryKeys.bookings(tenantSlug) })
       await queryClient.invalidateQueries({ queryKey: queryKeys.booking(tenantSlug, bookingId) })
+      if (booking) {
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.bookingToken(tenantSlug, booking.bookingToken),
+        })
+      }
     },
     onError: () => toast.error(t("bookingDetail.toastRescheduleFailed")),
   })
@@ -211,6 +216,11 @@ export function BookingDetailPanel({
       toast.success(t("bookingDetail.toastCanceled"))
       await queryClient.invalidateQueries({ queryKey: queryKeys.bookings(tenantSlug) })
       await queryClient.invalidateQueries({ queryKey: queryKeys.booking(tenantSlug, bookingId) })
+      if (booking) {
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.bookingToken(tenantSlug, booking.bookingToken),
+        })
+      }
     },
     onError: () => toast.error(t("bookingDetail.toastCancelFailed")),
   })
@@ -254,9 +264,15 @@ export function BookingDetailPanel({
             <p className="text-sm text-muted-foreground">{t("bookingDetail.policyRule", { hours: policyHours })}</p>
           ) : null}
           <div className="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
-            <Input type="datetime-local" value={newStartAt} onChange={(event) => setNewStartAt(event.target.value)} />
+            <Input
+              data-testid="admin-booking-reschedule-input"
+              type="datetime-local"
+              value={newStartAt}
+              onChange={(event) => setNewStartAt(event.target.value)}
+            />
             <Button
               type="button"
+              data-testid="admin-booking-reschedule-button"
               disabled={!manageAllowed || !policyAllowed || !newStartAt || rescheduleMutation.isPending}
               onClick={() => rescheduleMutation.mutate()}
             >
@@ -264,6 +280,7 @@ export function BookingDetailPanel({
             </Button>
             <Button
               type="button"
+              data-testid="admin-booking-cancel-button"
               variant="outline"
               disabled={!manageAllowed || !policyAllowed || cancelMutation.isPending}
               onClick={() => cancelMutation.mutate()}

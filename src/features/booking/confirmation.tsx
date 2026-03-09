@@ -181,7 +181,13 @@ export function Confirmation({
       })
       setSubmitSuccess(t.rescheduleSuccess)
       await queryClient.invalidateQueries({
-        queryKey: queryKeys.bookingToken(tenantSlug, token ?? ""),
+        queryKey: queryKeys.bookingToken(updatedBooking.tenantSlug, token ?? ""),
+      })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.booking(updatedBooking.tenantSlug, updatedBooking.id),
+      })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.bookings(updatedBooking.tenantSlug),
       })
       router.push(localePath({ locale, path: `/m/${token}` }))
     },

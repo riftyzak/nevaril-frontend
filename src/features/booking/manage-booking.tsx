@@ -127,7 +127,13 @@ export function ManageBooking({
         bookingId: booking.id,
       })
       await queryClient.invalidateQueries({
-        queryKey: queryKeys.bookingToken(tenantSlugHint, bookingToken),
+        queryKey: queryKeys.bookingToken(booking.tenantSlug, bookingToken),
+      })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.booking(booking.tenantSlug, booking.id),
+      })
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.bookings(booking.tenantSlug),
       })
     },
     onError: (error) => {
