@@ -6,11 +6,13 @@ import type {
   ApiResult,
   AvailabilitySlot,
   Booking,
+  CancelBookingInput,
   CreateBookingInput,
   GetAvailabilityInput,
   Service,
   Staff,
   TenantConfig,
+  UpdateBookingInput,
   UpdateServiceInput,
   UpdateTenantConfigInput,
 } from "@/lib/api/types"
@@ -35,6 +37,14 @@ type ConvexBookingAvailabilityArgs = GetAvailabilityInput & {
 }
 
 type ConvexBookingCreateArgs = CreateBookingInput & {
+  [key: string]: unknown
+}
+
+type ConvexBookingUpdateArgs = UpdateBookingInput & {
+  [key: string]: unknown
+}
+
+type ConvexBookingCancelArgs = CancelBookingInput & {
   [key: string]: unknown
 }
 
@@ -97,6 +107,18 @@ const bookingsCreateRef = makeFunctionReference<
   ConvexBookingCreateArgs,
   ApiResult<Booking>
 >(convexContracts.bookings.create.name)
+
+const bookingsUpdateRef = makeFunctionReference<
+  "mutation",
+  ConvexBookingUpdateArgs,
+  ApiResult<Booking>
+>(convexContracts.bookings.update.name)
+
+const bookingsCancelRef = makeFunctionReference<
+  "mutation",
+  ConvexBookingCancelArgs,
+  ApiResult<Booking>
+>(convexContracts.bookings.cancel.name)
 
 const clientCache = new Map<string, ConvexHttpClient>()
 
@@ -173,5 +195,19 @@ export async function mutateConvexBooking(input: CreateBookingInput) {
   return getConvexClient().mutation(
     bookingsCreateRef,
     input as ConvexBookingCreateArgs
+  )
+}
+
+export async function mutateConvexBookingUpdate(input: UpdateBookingInput) {
+  return getConvexClient().mutation(
+    bookingsUpdateRef,
+    input as ConvexBookingUpdateArgs
+  )
+}
+
+export async function mutateConvexBookingCancel(input: CancelBookingInput) {
+  return getConvexClient().mutation(
+    bookingsCancelRef,
+    input as ConvexBookingCancelArgs
   )
 }

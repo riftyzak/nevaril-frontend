@@ -1,5 +1,7 @@
 import type { AppDataAdapter } from "@/lib/app/contracts"
 import {
+  mutateConvexBookingCancel,
+  mutateConvexBookingUpdate,
   mutateConvexBooking,
   mutateConvexService,
   mutateConvexTenantConfig,
@@ -141,8 +143,20 @@ export const convexAppDataAdapter: AppDataAdapter = {
   createCalendarEvent: async () => notImplemented(convexContracts.calendarEvents.create.name),
   updateCalendarEvent: async () => notImplemented(convexContracts.calendarEvents.update.name),
   deleteCalendarEvent: async () => notImplemented(convexContracts.calendarEvents.delete.name),
-  updateBooking: async () => notImplemented(convexContracts.bookings.update.name),
-  cancelBooking: async () => notImplemented(convexContracts.bookings.cancel.name),
+  updateBooking: async (input) => {
+    try {
+      return await mutateConvexBookingUpdate(input)
+    } catch (error) {
+      return toConvexMutationFailure(convexContracts.bookings.update.name, error)
+    }
+  },
+  cancelBooking: async (input) => {
+    try {
+      return await mutateConvexBookingCancel(input)
+    } catch (error) {
+      return toConvexMutationFailure(convexContracts.bookings.cancel.name, error)
+    }
+  },
   listBookings: async (tenantSlug) => {
     try {
       return ok(await queryConvexBookings(tenantSlug))
