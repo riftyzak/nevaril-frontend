@@ -38,9 +38,9 @@ test("owner admin booking detail renders Convex booking data", async ({ page }) 
   await resetE2E(page, { role: "owner" })
   await page.goto("/cs/app/barber/bookings/bk-1")
 
-  await expect(page.getByRole("heading", { name: "Anna Novakova" })).toBeVisible()
-  await expect(page.getByText("confirmed")).toBeVisible()
-  await expect(page.getByText("st-1")).toBeVisible()
+  await expect(page.locator("main")).toContainText("Anna Novakova")
+  await expect(page.locator("main")).toContainText("Stav: confirmed")
+  await expect(page.locator("main")).toContainText("Pracovník: st-1")
 })
 
 test("manage route loads booking by token from Convex", async ({ page }) => {
