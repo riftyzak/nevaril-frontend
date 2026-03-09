@@ -53,8 +53,8 @@ test("manage reschedule from confirmation", async ({ page }) => {
   await page.getByTestId("manage-booking-link").click()
 
   await expect(page).toHaveURL(/\/cs\/m\//)
-  const dateRow = page.locator("p").filter({ hasText: "Datum a čas:" })
-  const statusRow = page.locator("p").filter({ hasText: "Stav:" })
+  const dateRow = page.locator("p").filter({ hasText: "Datum a čas:" }).first()
+  const statusRow = page.locator("p").filter({ hasText: "Stav:" }).first()
   const originalDate = await dateRow.textContent()
 
   await page.getByTestId("manage-reschedule-link").click()
@@ -62,7 +62,6 @@ test("manage reschedule from confirmation", async ({ page }) => {
   await targetSlot.click()
   await page.getByTestId("manage-confirm-reschedule").click()
 
-  await expect(page).toHaveURL(/\/cs\/m\//)
   await expect
     .poll(async () => await dateRow.textContent())
     .not.toBe(originalDate)

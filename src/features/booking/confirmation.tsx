@@ -174,22 +174,29 @@ export function Confirmation({
       return result.data
     },
     onSuccess: async (updatedBooking) => {
+      const manageHref = localePath({ locale, path: `/m/${token}` })
       pushEvent("reschedule_booking", {
         bookingId: updatedBooking.id,
         from: bookingQuery.data?.startAt,
         to: updatedBooking.startAt,
       })
       setSubmitSuccess(t.rescheduleSuccess)
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.bookingToken(updatedBooking.tenantSlug, token ?? ""),
-      })
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.booking(updatedBooking.tenantSlug, updatedBooking.id),
-      })
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.bookings(updatedBooking.tenantSlug),
-      })
-      router.push(localePath({ locale, path: `/m/${token}` }))
+      void Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.bookingToken(updatedBooking.tenantSlug, token ?? ""),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.booking(updatedBooking.tenantSlug, updatedBooking.id),
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.bookings(updatedBooking.tenantSlug),
+        }),
+      ])
+      if (typeof window !== "undefined") {
+        window.location.assign(manageHref)
+        return
+      }
+      router.push(manageHref)
     },
     onError: (error) => {
       const code = (error as Error & { code?: string }).code
