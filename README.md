@@ -93,7 +93,10 @@ Rules:
 - Convex is the normal product runtime
 - mock is explicit fallback/dev mode only
 - there is no silent fallback-to-mock if Convex URL is missing
-- `AUTH_SOURCE` remains `mock` in M25
+- app auth is staged in M27:
+  - `AUTH_SOURCE=mock` / `NEXT_PUBLIC_AUTH_SOURCE=mock` stay the safe default
+  - `AUTH_SOURCE=convex` / `NEXT_PUBLIC_AUTH_SOURCE=convex` enable the seeded backend auth handoff
+  - there is no silent fallback from real auth to mock auth
 
 Primary Convex workflow:
 
@@ -140,6 +143,65 @@ Architecture reference:
 
 - [`docs/architecture/m25-convex-primary-runtime.md`](docs/architecture/m25-convex-primary-runtime.md)
 - [`docs/architecture/m26-e2e-bootstrap-hardening.md`](docs/architecture/m26-e2e-bootstrap-hardening.md)
+- [`docs/architecture/m27-real-auth-foundation.md`](docs/architecture/m27-real-auth-foundation.md)
+
+## Auth Modes
+
+M27 introduces the first backend-backed auth/session foundation behind explicit real-auth mode.
+
+Safe default:
+
+```bash
+AUTH_SOURCE=mock
+NEXT_PUBLIC_AUTH_SOURCE=mock
+```
+
+Real backend auth mode:
+
+```bash
+AUTH_SOURCE=convex
+NEXT_PUBLIC_AUTH_SOURCE=convex
+```
+
+Seeded Convex auth workflow:
+
+```bash
+npx convex dev --once
+npx convex run seed:seedBarberReadSlice
+```
+
+Then start the app in Convex app-data mode plus Convex auth mode and open:
+
+```text
+/cs/auth/sign-in?tenantSlug=barber
+```
+
+Seeded identities:
+
+- `martin.novak@barber.test` for owner access
+- `tomas.kral@barber.test` for staff access
+
+Focused real-auth verification:
+
+```bash
+APP_DATA_SOURCE=convex \
+NEXT_PUBLIC_APP_DATA_SOURCE=convex \
+AUTH_SOURCE=convex \
+NEXT_PUBLIC_AUTH_SOURCE=convex \
+NEXT_PUBLIC_CONVEX_URL=https://<deployment>.convex.cloud \
+CONVEX_URL=https://<deployment>.convex.cloud \
+npx playwright test tests/auth-convex.spec.js
+```
+
+Explicit mock-auth fallback/dev mode remains available:
+
+```bash
+APP_DATA_SOURCE=mock \
+NEXT_PUBLIC_APP_DATA_SOURCE=mock \
+AUTH_SOURCE=mock \
+NEXT_PUBLIC_AUTH_SOURCE=mock \
+npx playwright test tests/smoke.spec.js
+```
 
 ## Mock Fallback DB and Seed Governance
 
@@ -243,6 +305,7 @@ Primary Convex acceptance and fallback-mode commands are documented in:
 
 - [`docs/architecture/m25-convex-primary-runtime.md`](docs/architecture/m25-convex-primary-runtime.md)
 - [`docs/architecture/m26-e2e-bootstrap-hardening.md`](docs/architecture/m26-e2e-bootstrap-hardening.md)
+- [`docs/architecture/m27-real-auth-foundation.md`](docs/architecture/m27-real-auth-foundation.md)
 
 ## Runtime Wiring
 

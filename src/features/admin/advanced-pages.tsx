@@ -454,7 +454,7 @@ export function AnalyticsPanel({ tenantSlug }: AdvancedProps) {
 }
 
 interface PricingProps {
-  currentPlan: TenantPlan
+  currentPlan?: TenantPlan | null
 }
 
 const PLAN_ORDER: TenantPlan[] = ["starter", "lite", "business", "ultimate"]
@@ -478,7 +478,7 @@ export function PricingPanel({ currentPlan }: PricingProps) {
       </section>
       <section className="grid gap-4 lg:grid-cols-4">
         {PLAN_ORDER.map((plan) => {
-          const active = plan === currentPlan
+          const active = Boolean(currentPlan) && plan === currentPlan
           return (
             <div
               key={plan}

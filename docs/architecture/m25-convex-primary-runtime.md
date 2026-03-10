@@ -105,4 +105,4 @@ npx playwright test \
 
 - Normal app runtime now expects Convex configuration.
 - If Convex URL is missing, fix the config or explicitly force mock mode.
-- Do not set `AUTH_SOURCE=convex` in M25; auth remains on the mock adapter and mock session cookie flow.
+- Historical note: M25 kept auth on the mock adapter. Current backend-auth staging rules now live in `docs/architecture/m27-real-auth-foundation.md`.
