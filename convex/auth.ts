@@ -1,8 +1,51 @@
+import type {
+  GenericDataModel,
+  GenericDatabaseReader,
+  GenericDatabaseWriter,
+} from "convex/server"
 import { mutationGeneric, queryGeneric } from "convex/server"
 import { type GenericId, v } from "convex/values"
 
 import type { ConvexResolvedAuthSession, ConvexResolvedTenantMembership } from "../src/lib/app/convex-contracts"
-import type { DatabaseReader, DatabaseWriter } from "./_generated/server"
+
+type DatabaseReader = GenericDatabaseReader<GenericDataModel>
+type DatabaseWriter = GenericDatabaseWriter<GenericDataModel>
+
+interface AuthSessionRecord {
+  _id: GenericId<"authSessions">
+  userId: GenericId<"users">
+  sessionToken: string
+  activeTenantSlug: string | null
+  authMethod: ConvexResolvedAuthSession["authMethod"]
+  expiresAt: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface UserRecord {
+  _id: GenericId<"users">
+  primaryEmail: string
+  fullName: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface MembershipRecord {
+  _id: GenericId<"tenantMemberships">
+  tenantId: GenericId<"tenants">
+  userId: GenericId<"users">
+  role: "owner" | "staff"
+  staffId: string | null
+  status: "active" | "invited" | "disabled"
+  createdAt: string
+  updatedAt: string
+}
+
+interface TenantRecord {
+  _id: GenericId<"tenants">
+  slug: string
+  plan: ConvexResolvedTenantMembership["plan"]
+}
 
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000
 
@@ -22,10 +65,10 @@ async function resolveSessionRecord(
   db: DatabaseReader,
   sessionToken: string
 ) {
-  const session = await db
+  const session = (await db
     .query("authSessions")
     .withIndex("by_session_token", (query) => query.eq("sessionToken", sessionToken))
-    .unique()
+    .unique()) as unknown as AuthSessionRecord | null
 
   if (!session) {
     return null
@@ -35,7 +78,7 @@ async function resolveSessionRecord(
     return null
   }
 
-  const user = await db.get(session.userId as GenericId<"users">)
+  const user = (await db.get(session.userId as GenericId<"users">)) as unknown as UserRecord | null
   if (!user) {
     return null
   }
@@ -47,10 +90,10 @@ async function listResolvedMemberships(
   db: DatabaseReader | DatabaseWriter,
   userId: GenericId<"users">
 ): Promise<ConvexResolvedTenantMembership[]> {
-  const memberships = await db
+  const memberships = (await db
     .query("tenantMemberships")
     .withIndex("by_user_id", (query) => query.eq("userId", userId))
-    .collect()
+    .collect()) as unknown as MembershipRecord[]
 
   const resolved: ConvexResolvedTenantMembership[] = []
 
@@ -59,7 +102,7 @@ async function listResolvedMemberships(
       continue
     }
 
-    const tenant = await db.get(membership.tenantId as GenericId<"tenants">)
+    const tenant = (await db.get(membership.tenantId as GenericId<"tenants">)) as unknown as TenantRecord | null
     if (!tenant) {
       continue
     }
@@ -145,10 +188,10 @@ async function getSeededUserByEmail(
   db: DatabaseReader | DatabaseWriter,
   email: string
 ) {
-  return db
+  return (db
     .query("users")
     .withIndex("by_primary_email", (query) => query.eq("primaryEmail", email))
-    .unique()
+    .unique()) as unknown as Promise<UserRecord | null>
 }
 
 export const resolveSession = queryGeneric({
