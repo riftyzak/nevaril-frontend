@@ -1,28 +1,8 @@
 import { expect, test } from "@playwright/test"
+import { resetE2E } from "./helpers/reset-e2e"
+import { isConvexPrimaryMode } from "./helpers/runtime-mode"
 
-const appDataSource = process.env.NEXT_PUBLIC_APP_DATA_SOURCE ?? process.env.APP_DATA_SOURCE ?? "mock"
-const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL ?? process.env.CONVEX_URL ?? ""
-
-test.skip(
-  appDataSource === "convex" && !convexUrl,
-  "Convex reader mode requires NEXT_PUBLIC_CONVEX_URL or CONVEX_URL."
-)
-
-async function resetE2E(page, options = {}) {
-  const role = options.role ?? "owner"
-  const staff = options.staff ?? "st-1"
-  const tenant = options.tenant ?? "barber"
-
-  await page.goto(`/cs/t/${tenant}/book?__e2e=reset&__role=${role}&__staff=${staff}`)
-
-  await expect
-    .poll(async () => new URL(page.url()).searchParams.get("__e2e"))
-    .toBe(null)
-
-  await expect
-    .poll(async () => await page.evaluate(() => document.cookie))
-    .toContain("nevaril_mock_session=")
-}
+test.skip(!isConvexPrimaryMode, "Convex reader smoke runs only in Convex-primary mode.")
 
 test("public booking entry renders barber brand and services", async ({ page }) => {
   await resetE2E(page)
