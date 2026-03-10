@@ -25,6 +25,7 @@ import type { AdminNavItem } from "@/lib/auth/admin-nav"
 import { getModuleAccess } from "@/lib/auth/permissions"
 import type { MockSession, TenantPermissionSettings } from "@/lib/auth/types"
 import { type AppLocale } from "@/i18n/locales"
+import { isE2EBootstrapEnabled } from "@/lib/dev/e2e-bootstrap"
 import { isFeatureEnabled } from "@/lib/plans/gates"
 
 const navIcons = {
@@ -58,6 +59,7 @@ export async function AdminShell({
   tenantSettings: TenantPermissionSettings
 }>) {
   const t = await getTranslations({ locale, namespace: "shell.admin" })
+  const e2eBootstrapEnabled = isE2EBootstrapEnabled()
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -127,7 +129,7 @@ export async function AdminShell({
           <main className="flex-1 p-4 sm:p-6">{children}</main>
         </section>
       </div>
-      <DevMenu />
+      <DevMenu e2eBootstrapEnabled={e2eBootstrapEnabled} />
     </div>
   )
 }

@@ -15,7 +15,11 @@ import { useServices } from "@/lib/query/hooks/use-services"
 import { useStaff } from "@/lib/query/hooks/use-staff"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
 
-export function DevMenu() {
+export function DevMenu({
+  e2eBootstrapEnabled = false,
+}: Readonly<{
+  e2eBootstrapEnabled?: boolean
+}>) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -66,7 +70,7 @@ export function DevMenu() {
   }
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_E2E !== "1") return
+    if (!e2eBootstrapEnabled) return
     if (e2eAppliedRef.current) return
     if (searchParams.get("__e2e") !== "reset") return
 
@@ -92,7 +96,7 @@ export function DevMenu() {
       router.replace(query ? `${pathname}?${query}` : pathname)
       router.refresh()
     })
-  }, [pathname, queryClient, router, searchParams, tenantSlug])
+  }, [e2eBootstrapEnabled, pathname, queryClient, router, searchParams, tenantSlug])
 
   async function applyPlan() {
     if (!tenantConfig) return

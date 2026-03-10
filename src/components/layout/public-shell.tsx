@@ -7,6 +7,7 @@ import { PublicBrand } from "@/components/layout/public-brand"
 import { LocaleSwitcher } from "@/components/locale-switcher"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { type AppLocale } from "@/i18n/locales"
+import { isE2EBootstrapEnabled } from "@/lib/dev/e2e-bootstrap"
 import type { WidgetThemeOverrides } from "@/lib/theme/widget-theme"
 
 export async function PublicShell({
@@ -28,6 +29,7 @@ export async function PublicShell({
 }>) {
   const t = await getTranslations({ locale, namespace: "shell.public" })
   const effectiveBrandName = brandName ?? t("brandName")
+  const e2eBootstrapEnabled = isE2EBootstrapEnabled()
 
   return (
     <div
@@ -65,7 +67,7 @@ export async function PublicShell({
         </div>
       </header>
       <main className={`mx-auto w-full ${widgetMode ? "max-w-none px-3 py-3" : "max-w-6xl px-4 py-6 sm:px-6"}`}>{children}</main>
-      {!widgetMode ? <DevMenu /> : null}
+      {!widgetMode ? <DevMenu e2eBootstrapEnabled={e2eBootstrapEnabled} /> : null}
     </div>
   )
 }
