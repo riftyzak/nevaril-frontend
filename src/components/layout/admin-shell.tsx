@@ -23,7 +23,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { Badge } from "@/components/ui/badge"
 import type { AdminNavItem } from "@/lib/auth/admin-nav"
 import { getModuleAccess } from "@/lib/auth/permissions"
-import type { MockSession, TenantPermissionSettings } from "@/lib/auth/types"
+import type { AppSession, TenantPermissionSettings } from "@/lib/auth/types"
 import { type AppLocale } from "@/i18n/locales"
 import { isE2EBootstrapEnabled } from "@/lib/dev/e2e-bootstrap"
 import { isFeatureEnabled } from "@/lib/plans/gates"
@@ -55,7 +55,7 @@ export async function AdminShell({
   children: ReactNode
   navItems: AdminNavItem[]
   locale: AppLocale
-  session: MockSession
+  session: AppSession
   tenantSettings: TenantPermissionSettings
 }>) {
   const t = await getTranslations({ locale, namespace: "shell.admin" })

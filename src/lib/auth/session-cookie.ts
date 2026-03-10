@@ -1,5 +1,6 @@
 import type { SessionRole } from "@/lib/auth/types"
 
+export const AUTH_SESSION_COOKIE_NAME = "nevaril_auth_session"
 export const SESSION_COOKIE_NAME = "nevaril_mock_session"
 
 export interface SessionCookiePayload {

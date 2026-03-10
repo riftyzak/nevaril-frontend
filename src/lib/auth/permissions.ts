@@ -1,5 +1,5 @@
 import type {
-  MockSession,
+  AppSession,
   PermissionAbility,
   PermissionContext,
   PermissionModule,
@@ -18,7 +18,7 @@ function isOwnerOnlyModule(module: PermissionModule) {
   return module === "billing" || module === "notifications" || module === "roles" || module === "tenantSettings"
 }
 
-function matchesOwnScope(session: MockSession, context?: PermissionContext) {
+function matchesOwnScope(session: AppSession, context?: PermissionContext) {
   if (session.role !== "staff") return true
   if (!session.staffId) return false
   if (!context) return true
@@ -33,7 +33,7 @@ function matchesOwnScope(session: MockSession, context?: PermissionContext) {
 }
 
 export function getModuleAccess(
-  session: MockSession,
+  session: AppSession,
   module: PermissionModule,
   tenantSettings: TenantPermissionSettings
 ): ModuleAccess {
@@ -71,7 +71,7 @@ export function getModuleAccess(
 }
 
 export function can(
-  session: MockSession,
+  session: AppSession,
   module: PermissionModule,
   ability: PermissionAbility,
   context: PermissionContext | undefined,

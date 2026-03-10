@@ -5,7 +5,7 @@ import { can } from "@/lib/auth/permissions"
 import { requireTenantAccess } from "@/lib/auth/session"
 import type { AppLocale } from "@/i18n/locales"
 import type {
-  MockSession,
+  AppSession,
   PermissionAbility,
   PermissionContext,
   PermissionModule,
@@ -37,7 +37,7 @@ export async function getTenantPermissionSettings(
 }
 
 export async function requireRouteAccess(input: RequireAccessInput): Promise<{
-  session: MockSession
+  session: AppSession
   tenantSettings: TenantPermissionSettings
 }> {
   const { session } = await requireTenantAccess({
@@ -64,7 +64,7 @@ interface RequirePlanInput {
   locale: AppLocale
   tenantSlug: string
   feature: PlanFeature
-  session: MockSession
+  session: AppSession
 }
 
 export function requirePlanAccess(input: RequirePlanInput) {

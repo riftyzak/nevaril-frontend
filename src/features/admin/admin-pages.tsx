@@ -24,7 +24,7 @@ import {
 } from "@/lib/app/client"
 import type { Booking, Customer } from "@/lib/api/types"
 import { can } from "@/lib/auth/permissions"
-import type { MockSession, TenantPermissionSettings } from "@/lib/auth/types"
+import type { AppSession, TenantPermissionSettings } from "@/lib/auth/types"
 import { canModifyBooking } from "@/lib/booking/policy"
 import type { AppLocale } from "@/i18n/locales"
 import { useBooking } from "@/lib/query/hooks/use-booking"
@@ -38,16 +38,16 @@ import { AdminCalendarPanel } from "@/features/admin/calendar-panel"
 interface AdminBaseProps {
   locale: AppLocale
   tenantSlug: string
-  session: MockSession
+  session: AppSession
   tenantSettings: TenantPermissionSettings
   tz: string
 }
 
-function isOwnBooking(session: MockSession, booking: Booking) {
+function isOwnBooking(session: AppSession, booking: Booking) {
   return session.role === "owner" || booking.staffId === session.staffId
 }
 
-function filterBookingsByScope(bookings: Booking[], session: MockSession) {
+function filterBookingsByScope(bookings: Booking[], session: AppSession) {
   return session.role === "owner"
     ? bookings
     : bookings.filter((booking) => booking.staffId === session.staffId)
@@ -56,7 +56,7 @@ function filterBookingsByScope(bookings: Booking[], session: MockSession) {
 function filterCustomersByScope(
   customers: Customer[],
   bookings: Booking[],
-  session: MockSession,
+  session: AppSession,
   tenantSettings: TenantPermissionSettings
 ) {
   if (session.role === "owner") return customers

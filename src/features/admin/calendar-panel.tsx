@@ -32,7 +32,7 @@ import {
 } from "@/lib/app/client"
 import { canModifyBooking } from "@/lib/booking/policy"
 import type { Booking, CalendarEvent, Staff } from "@/lib/api/types"
-import type { MockSession } from "@/lib/auth/types"
+import type { AppSession } from "@/lib/auth/types"
 import type { AppLocale } from "@/i18n/locales"
 import { useTenantConfig } from "@/lib/query/hooks/use-tenant-config"
 import { queryKeys } from "@/lib/query/keys"
@@ -58,7 +58,7 @@ import {
 interface CalendarPanelProps {
   locale: AppLocale
   tenantSlug: string
-  session: MockSession
+  session: AppSession
   tz: string
 }
 
@@ -68,19 +68,19 @@ type SelectedItemRef =
 
 type CreateDialogMode = "booking" | CalendarEvent["type"]
 
-function filterScopedBookings(bookings: Booking[], session: MockSession) {
+function filterScopedBookings(bookings: Booking[], session: AppSession) {
   return session.role === "owner"
     ? bookings
     : bookings.filter((booking) => booking.staffId === session.staffId)
 }
 
-function filterScopedEvents(events: CalendarEvent[], session: MockSession) {
+function filterScopedEvents(events: CalendarEvent[], session: AppSession) {
   return session.role === "owner"
     ? events
     : events.filter((event) => event.staffId === session.staffId)
 }
 
-function getVisibleStaff(staff: Staff[], session: MockSession) {
+function getVisibleStaff(staff: Staff[], session: AppSession) {
   return session.role === "owner"
     ? staff
     : staff.filter((member) => member.id === session.staffId)

@@ -1,7 +1,12 @@
+import { cookies } from "next/headers"
+
 import type { AppSession } from "@/lib/auth/types"
 import { convexContracts } from "@/lib/app/convex-contracts"
+import type { ConvexResolvedAuthSession } from "@/lib/app/convex-contracts"
+import { queryConvexResolvedSession, revokeConvexSession } from "@/lib/auth/convex-auth-client"
 import { getAuthSource } from "@/lib/auth/source"
 import { mockAuthAdapter } from "@/lib/auth/mock-auth-adapter"
+import { AUTH_SESSION_COOKIE_NAME } from "@/lib/auth/session-cookie"
 
 export interface ResolveSessionInput {
   tenantSlug?: string
@@ -27,26 +32,94 @@ export interface AuthAdapter {
   beginOAuth(input: BeginOAuthInput): Promise<{ authorizationUrl: string }>
 }
 
-const convexAuthAdapter: AuthAdapter = {
-  resolveSession: async () => {
+function buildMissingConvexSessionError() {
+  return new Error(
+    "No backend auth session was found for AUTH_SOURCE=convex. Use the seeded sign-in handoff or switch explicitly to AUTH_SOURCE=mock for dev/e2e fallback."
+  )
+}
+
+function mapResolvedSessionToAppSession(
+  session: ConvexResolvedAuthSession,
+  requestedTenantSlug?: string
+): AppSession {
+  const activeTenantSlug = requestedTenantSlug ?? session.activeTenantSlug ?? session.memberships[0]?.tenantSlug
+  const activeMembership =
+    session.memberships.find((membership) => membership.tenantSlug === activeTenantSlug) ??
+    session.memberships[0]
+
+  if (!activeMembership) {
     throw new Error(
-      `Convex auth adapter is not implemented for ${convexContracts.auth.resolveSession.name}. Keep AUTH_SOURCE=mock.`
+      `Backend auth session '${session.sessionId}' has no active tenant memberships.`
     )
-  },
+  }
+
+  return {
+    sessionId: session.sessionId,
+    userId: session.user.id,
+    role: activeMembership.role,
+    tenantId: activeMembership.tenantId,
+    tenantSlug: activeMembership.tenantSlug,
+    activeTenantSlug: activeMembership.tenantSlug,
+    staffId: activeMembership.staffId,
+    plan: activeMembership.plan,
+    authMethod: session.authMethod,
+    memberships: session.memberships.map((membership) => ({
+      tenantId: membership.tenantId,
+      tenantSlug: membership.tenantSlug,
+      role: membership.role,
+      staffId: membership.staffId,
+    })),
+    identity: {
+      provider: session.authMethod,
+      email: session.user.primaryEmail,
+    },
+  }
+}
+
+async function resolveConvexSession(input?: ResolveSessionInput) {
+  const cookieStore = await cookies()
+  const sessionToken =
+    input?.sessionToken ?? cookieStore.get(AUTH_SESSION_COOKIE_NAME)?.value ?? null
+
+  if (!sessionToken) {
+    throw buildMissingConvexSessionError()
+  }
+
+  const session = await queryConvexResolvedSession({
+    sessionToken,
+    tenantSlug: input?.tenantSlug,
+  })
+
+  if (!session) {
+    throw new Error(
+      "Backend auth session is missing, invalid, or expired for AUTH_SOURCE=convex. Sign in again or switch explicitly to AUTH_SOURCE=mock for fallback/dev mode."
+    )
+  }
+
+  return mapResolvedSessionToAppSession(session, input?.tenantSlug)
+}
+
+const convexAuthAdapter: AuthAdapter = {
+  resolveSession: resolveConvexSession,
   signOut: async () => {
-    throw new Error("Convex auth adapter signOut is not implemented yet. Keep AUTH_SOURCE=mock.")
+    const cookieStore = await cookies()
+    const sessionToken = cookieStore.get(AUTH_SESSION_COOKIE_NAME)?.value ?? null
+    if (sessionToken) {
+      await revokeConvexSession(sessionToken)
+    }
+    cookieStore.delete(AUTH_SESSION_COOKIE_NAME)
   },
   beginMagicLink: async () => {
     throw new Error(
-      `Convex auth adapter is not implemented for ${convexContracts.auth.beginMagicLink.name}. Keep AUTH_SOURCE=mock.`
+      `Convex auth flow ${convexContracts.auth.beginMagicLink.name} is not implemented in M27. Use the seeded backend sign-in handoff instead.`
     )
   },
   completeMagicLink: async () => {
-    throw new Error("Convex auth adapter magic link completion is not implemented yet. Keep AUTH_SOURCE=mock.")
+    throw new Error("Convex auth magic-link completion is not implemented in M27.")
   },
   beginOAuth: async () => {
     throw new Error(
-      `Convex auth adapter is not implemented for ${convexContracts.auth.beginGoogleOAuth.name}. Keep AUTH_SOURCE=mock.`
+      `Convex auth flow ${convexContracts.auth.beginGoogleOAuth.name} is not implemented in M27. Use AUTH_SOURCE=mock or the seeded backend sign-in handoff.`
     )
   },
 }
