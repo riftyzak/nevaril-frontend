@@ -5,7 +5,7 @@ Frontend-first multi-tenant booking SaaS demo for small businesses and rentals.
 ## Stack
 
 - Next.js App Router + TypeScript + TailwindCSS + shadcn/ui
-- TanStack Query + local mock API
+- TanStack Query + app adapter boundary with Convex primary runtime
 - react-hook-form + zod
 - next-intl (`cs`, `sk`, `en`)
 - Recharts
@@ -17,6 +17,26 @@ Frontend-first multi-tenant booking SaaS demo for small businesses and rentals.
 ```bash
 npm install
 npm run dev
+```
+
+Normal runtime expects Convex:
+
+```bash
+APP_DATA_SOURCE=convex
+NEXT_PUBLIC_APP_DATA_SOURCE=convex
+NEXT_PUBLIC_CONVEX_URL=https://<deployment>.convex.cloud
+CONVEX_URL=https://<deployment>.convex.cloud
+AUTH_SOURCE=mock
+NEXT_PUBLIC_AUTH_SOURCE=mock
+```
+
+If Convex is not configured locally, use explicit fallback/dev mode instead of relying on any automatic downgrade:
+
+```bash
+APP_DATA_SOURCE=mock
+NEXT_PUBLIC_APP_DATA_SOURCE=mock
+AUTH_SOURCE=mock
+NEXT_PUBLIC_AUTH_SOURCE=mock
 ```
 
 Core scripts:
@@ -60,9 +80,61 @@ Supported external modes:
 
 `/` is redirected to default locale `/cs`.
 
-## Mock DB and Seed Governance
+## Runtime Modes
 
-Mock persistence is local-first and tenant-scoped:
+App-data runtime resolution:
+
+- `NEXT_PUBLIC_APP_DATA_SOURCE`
+- then `APP_DATA_SOURCE`
+- else default to `convex`
+
+Rules:
+
+- Convex is the normal product runtime
+- mock is explicit fallback/dev mode only
+- there is no silent fallback-to-mock if Convex URL is missing
+- `AUTH_SOURCE` remains `mock` in M25
+
+Primary Convex workflow:
+
+```bash
+npx convex dev --once
+npx convex run seed:seedBarberReadSlice
+```
+
+Focused acceptance in Convex-primary mode:
+
+```bash
+NEXT_PUBLIC_CONVEX_URL=https://<deployment>.convex.cloud \
+CONVEX_URL=https://<deployment>.convex.cloud \
+npx playwright test \
+  tests/bookings-create-convex.spec.js \
+  tests/bookings-update-convex.spec.js \
+  tests/bookings-convex.spec.js \
+  tests/admin-calendar-convex.spec.js \
+  tests/waitlist-convex.spec.js \
+  tests/tenant-settings-convex.spec.js \
+  tests/services-convex.spec.js
+```
+
+Explicit mock fallback/dev workflow:
+
+```bash
+APP_DATA_SOURCE=mock \
+NEXT_PUBLIC_APP_DATA_SOURCE=mock \
+npx playwright test \
+  tests/smoke.spec.js \
+  tests/admin-calendar.spec.js \
+  tests/tenant-settings.spec.js
+```
+
+Architecture reference:
+
+- [`docs/architecture/m25-convex-primary-runtime.md`](docs/architecture/m25-convex-primary-runtime.md)
+
+## Mock Fallback DB and Seed Governance
+
+Mock persistence is local-first, tenant-scoped, and used only in explicit fallback/dev mode:
 
 - Primary persistence: `localStorage`
 - Seed/version governance: `DB_VERSION` in [`src/lib/mock/seed.ts`](src/lib/mock/seed.ts)
@@ -132,7 +204,7 @@ Storybook stories are under `src/stories/` and include:
 
 ## Playwright Smoke Suite
 
-Smoke spec: [`tests/smoke.spec.js`](tests/smoke.spec.js)
+Mock fallback smoke spec: [`tests/smoke.spec.js`](tests/smoke.spec.js)
 
 Scenarios:
 
@@ -158,15 +230,19 @@ Example:
 
 This reset path is handled in DevMenu logic only when `NEXT_PUBLIC_E2E=1`.
 
-## Backend Wiring Direction
+Primary Convex acceptance and fallback-mode commands are documented in:
+
+- [`docs/architecture/m25-convex-primary-runtime.md`](docs/architecture/m25-convex-primary-runtime.md)
+
+## Runtime Wiring
 
 Mock API contracts live in:
 
 - [`src/lib/api/types.ts`](src/lib/api/types.ts)
 - [`src/lib/api/index.ts`](src/lib/api/index.ts)
 
-To wire a real backend later:
+Current runtime direction:
 
-1. Keep function signatures in `src/lib/api/index.ts`.
-2. Replace local storage implementation with network adapters.
-3. Preserve TanStack Query hooks and query keys to minimize UI churn.
+1. Convex is the default app runtime via the app adapter boundary.
+2. Mock adapter remains available only for explicit fallback/dev mode.
+3. Preserve TanStack Query hooks and query keys to keep UI churn low.
