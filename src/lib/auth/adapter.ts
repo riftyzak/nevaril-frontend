@@ -4,6 +4,7 @@ import type { AppSession } from "@/lib/auth/types"
 import { convexContracts } from "@/lib/app/convex-contracts"
 import type { ConvexResolvedAuthSession } from "@/lib/app/convex-contracts"
 import { queryConvexResolvedSession, revokeConvexSession } from "@/lib/auth/convex-auth-client"
+import { AuthSessionInvalidError, AuthSessionRequiredError } from "@/lib/auth/errors"
 import { getAuthSource } from "@/lib/auth/source"
 import { mockAuthAdapter } from "@/lib/auth/mock-auth-adapter"
 import { AUTH_SESSION_COOKIE_NAME } from "@/lib/auth/session-cookie"
@@ -33,7 +34,7 @@ export interface AuthAdapter {
 }
 
 function buildMissingConvexSessionError() {
-  return new Error(
+  return new AuthSessionRequiredError(
     "No backend auth session was found for AUTH_SOURCE=convex. Use the seeded sign-in handoff or switch explicitly to AUTH_SOURCE=mock for dev/e2e fallback."
   )
 }
@@ -91,7 +92,7 @@ async function resolveConvexSession(input?: ResolveSessionInput) {
   })
 
   if (!session) {
-    throw new Error(
+    throw new AuthSessionInvalidError(
       "Backend auth session is missing, invalid, or expired for AUTH_SOURCE=convex. Sign in again or switch explicitly to AUTH_SOURCE=mock for fallback/dev mode."
     )
   }

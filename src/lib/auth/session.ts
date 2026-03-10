@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation"
 
 import { getAuthAdapter } from "@/lib/auth/adapter"
+import { isRecoverableAuthSessionError } from "@/lib/auth/errors"
+import { getAuthSource } from "@/lib/auth/source"
 import type { AppSession, TenantMembership } from "@/lib/auth/types"
 import type { AppLocale } from "@/i18n/locales"
-import { localePath } from "@/lib/tenant/tenant-url"
+import { adminAppPath, localePath } from "@/lib/tenant/tenant-url"
 
 export async function resolveSession(input?: {
   tenantSlug?: string
@@ -27,10 +29,30 @@ export async function requireTenantAccess(input: {
   session: AppSession
   membership: TenantMembership
 }> {
-  const session = await requireAuthSession({
-    tenantSlug: input.tenantSlug,
-    sessionToken: input.sessionToken,
-  })
+  let session: AppSession
+
+  try {
+    session = await requireAuthSession({
+      tenantSlug: input.tenantSlug,
+      sessionToken: input.sessionToken,
+    })
+  } catch (error) {
+    if (
+      input.locale &&
+      getAuthSource() === "convex" &&
+      isRecoverableAuthSessionError(error)
+    ) {
+      const signInPath = localePath({
+        locale: input.locale,
+        path: `/auth/sign-in?tenantSlug=${encodeURIComponent(input.tenantSlug)}&next=${encodeURIComponent(
+          adminAppPath({ locale: input.locale, tenantSlug: input.tenantSlug })
+        )}`,
+      })
+      redirect(signInPath)
+    }
+
+    throw error
+  }
 
   const membership = session.memberships.find((item) => item.tenantSlug === input.tenantSlug)
 
