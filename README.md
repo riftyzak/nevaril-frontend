@@ -102,12 +102,20 @@ npx convex dev --once
 npx convex run seed:seedBarberReadSlice
 ```
 
+E2E bootstrap policy:
+
+- `E2E_BOOTSTRAP=1` is the preferred runtime flag for `?__e2e=reset`
+- `NEXT_PUBLIC_E2E=1` remains a compatibility alias, but build/start no longer depends on it
+- Convex-primary build/start can build normally and only needs `E2E_BOOTSTRAP=1` at `next start` time
+- explicit mock build/start must use `APP_DATA_SOURCE=mock` and `NEXT_PUBLIC_APP_DATA_SOURCE=mock` at both build and start time
+
 Focused acceptance in Convex-primary mode:
 
 ```bash
 NEXT_PUBLIC_CONVEX_URL=https://<deployment>.convex.cloud \
 CONVEX_URL=https://<deployment>.convex.cloud \
 npx playwright test \
+  tests/e2e-bootstrap.spec.js \
   tests/bookings-create-convex.spec.js \
   tests/bookings-update-convex.spec.js \
   tests/bookings-convex.spec.js \
@@ -131,6 +139,7 @@ npx playwright test \
 Architecture reference:
 
 - [`docs/architecture/m25-convex-primary-runtime.md`](docs/architecture/m25-convex-primary-runtime.md)
+- [`docs/architecture/m26-e2e-bootstrap-hardening.md`](docs/architecture/m26-e2e-bootstrap-hardening.md)
 
 ## Mock Fallback DB and Seed Governance
 
@@ -216,7 +225,7 @@ Scenarios:
 
 Deterministic test reset in test env:
 
-- Start app with `NEXT_PUBLIC_E2E=1` (configured in `playwright.config.js`)
+- Start app with `E2E_BOOTSTRAP=1`
 - Visit any public page with `?__e2e=reset`
 - Optional session overrides:
   - `__role=owner|staff`
@@ -228,11 +237,12 @@ Example:
 /cs/t/barber/book?__e2e=reset&__role=staff&__staff=st-1
 ```
 
-This reset path is handled in DevMenu logic only when `NEXT_PUBLIC_E2E=1`.
+This reset path is handled in `DevMenu` only when runtime E2E bootstrap is enabled.
 
 Primary Convex acceptance and fallback-mode commands are documented in:
 
 - [`docs/architecture/m25-convex-primary-runtime.md`](docs/architecture/m25-convex-primary-runtime.md)
+- [`docs/architecture/m26-e2e-bootstrap-hardening.md`](docs/architecture/m26-e2e-bootstrap-hardening.md)
 
 ## Runtime Wiring
 

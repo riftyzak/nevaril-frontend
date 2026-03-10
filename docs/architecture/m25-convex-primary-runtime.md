@@ -10,6 +10,8 @@ This milestone is intentionally narrow:
 
 Historical M16-M24 docs describe the rollout phase where `APP_DATA_SOURCE=mock` was the safe default. M25 supersedes that default policy for the current runtime.
 
+For current E2E bootstrap rules in `next dev` and `next build + next start`, see `docs/architecture/m26-e2e-bootstrap-hardening.md`.
+
 ## Runtime Policy
 
 App-data mode resolution now works like this:
