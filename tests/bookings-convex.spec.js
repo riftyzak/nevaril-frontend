@@ -10,8 +10,8 @@ test("owner admin bookings list renders Convex booking data", async ({ page }) =
 
   await expect(page.getByRole("link", { name: "Anna Novakova" })).toBeVisible()
   await expect(page.getByText("Marek Sramek")).toBeVisible()
-  await expect(page.getByText("confirmed")).toBeVisible()
-  await expect(page.getByText("rescheduled")).toBeVisible()
+  await expect(page.locator("main")).toContainText("confirmed")
+  await expect(page.locator("main")).toContainText("rescheduled")
 })
 
 test("owner admin booking detail renders Convex booking data", async ({ page }) => {
