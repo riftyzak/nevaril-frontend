@@ -1,9 +1,9 @@
-import type { Id } from "./_generated/dataModel"
-import { mutation } from "./_generated/server"
+import { mutationGeneric } from "convex/server"
+import type { GenericId } from "convex/values"
 
 const BASE_TIMESTAMP = "2026-01-10T10:00:00.000Z"
 
-export const seedBarberReadSlice = mutation({
+export const seedBarberReadSlice = mutationGeneric({
   args: {},
   handler: async (ctx) => {
     const tenantPayload = {
@@ -314,7 +314,7 @@ export const seedBarberReadSlice = mutation({
       },
     ]
 
-    const userIdsByEmail = new Map<string, Id<"users">>()
+    const userIdsByEmail = new Map<string, GenericId<"users">>()
 
     for (const user of desiredUsers) {
       const existing = await ctx.db

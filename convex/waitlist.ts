@@ -1,3 +1,4 @@
+import type { GenericDataModel, GenericMutationCtx } from "convex/server"
 import { mutationGeneric, queryGeneric } from "convex/server"
 import { type GenericId, v } from "convex/values"
 
@@ -9,8 +10,25 @@ import type {
   WaitlistEntry,
 } from "../src/lib/api/types"
 import { createBookingRecord } from "./bookings"
-import type { MutationCtx } from "./_generated/server"
 import { getTenantBySlug, mapWaitlistEntry } from "./_helpers"
+
+type MutationCtx = GenericMutationCtx<GenericDataModel>
+
+interface WaitlistEntryRecord {
+  _id: GenericId<"waitlistEntries">
+  entryId: string
+  serviceId: string
+  customerName: string
+  email: string
+  phone: string
+  note: string
+  preferredDate: string
+  preferredTimeLabel: string
+  status: WaitlistEntry["status"]
+  assignedBookingId: string | null
+  createdAt: string
+  updatedAt: string
+}
 
 function ok<T>(data: T): ApiResult<T> {
   return { ok: true, data }
@@ -71,10 +89,10 @@ async function getTenantWaitlistEntry(
   tenantId: GenericId<"tenants">,
   waitlistId: string
 ) {
-  const entries = await ctx.db
+  const entries = (await ctx.db
     .query("waitlistEntries")
     .withIndex("by_tenant_id_entry_id", (query) => query.eq("tenantId", tenantId))
-    .collect()
+    .collect()) as unknown as WaitlistEntryRecord[]
 
   return entries.find((entry) => entry.entryId === waitlistId) ?? null
 }
@@ -85,10 +103,10 @@ export const list = queryGeneric({
     const tenant = await getTenantBySlug(ctx.db, args.tenantSlug)
     if (!tenant) return []
 
-    const entries = await ctx.db
+    const entries = (await ctx.db
       .query("waitlistEntries")
       .withIndex("by_tenant_id_created_at", (query) => query.eq("tenantId", tenant._id))
-      .collect()
+      .collect()) as unknown as WaitlistEntryRecord[]
 
     return entries
       .sort((left, right) => right.createdAt.localeCompare(left.createdAt))

@@ -1,5 +1,6 @@
 import { addMinutes } from "date-fns"
 import { fromZonedTime } from "date-fns-tz"
+import type { GenericDataModel, GenericMutationCtx } from "convex/server"
 import { mutationGeneric, queryGeneric } from "convex/server"
 import { type GenericId, v } from "convex/values"
 
@@ -14,9 +15,45 @@ import type {
   UpdateBookingInput,
 } from "../src/lib/api/types"
 import { canModifyBooking } from "../src/lib/booking/policy"
-import type { Doc, Id } from "./_generated/dataModel"
-import type { MutationCtx } from "./_generated/server"
 import { getTenantById, getTenantBySlug, mapBooking } from "./_helpers"
+
+type MutationCtx = GenericMutationCtx<GenericDataModel>
+type Id<TableName extends string> = GenericId<TableName>
+
+interface TenantSettingsRecord {
+  _id: GenericId<"tenantSettings">
+  cancellationPolicyHours: number
+}
+
+interface BookingRecord {
+  _id: GenericId<"bookings">
+  tenantId: GenericId<"tenants">
+  bookingId: string
+  serviceId: string
+  serviceVariant: Booking["serviceVariant"]
+  staffId: string | null
+  customerId: string
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  customFieldValues: Booking["customFieldValues"]
+  startAt: string
+  endAt: string
+  timezone: string
+  status: Booking["status"]
+  bookingToken: string
+  manageToken: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface ServiceRecord {
+  serviceId: string
+}
+
+interface StaffProfileRecord {
+  staffId: string
+}
 
 const TZ_DEFAULT = "Europe/Prague"
 
@@ -184,23 +221,23 @@ async function getTenantSettings(
   ctx: MutationCtx,
   tenantId: Id<"tenants">
 ) {
-  return ctx.db
+  return (ctx.db
     .query("tenantSettings")
     .withIndex("by_tenant_id", (query) => query.eq("tenantId", tenantId))
-    .unique()
+    .unique()) as unknown as Promise<TenantSettingsRecord | null>
 }
 
 async function listTenantBookings(
   ctx: MutationCtx,
   tenantId: Id<"tenants">
 ) {
-  return ctx.db
+  return (ctx.db
     .query("bookings")
     .withIndex("by_tenant_id", (query) => query.eq("tenantId", tenantId))
-    .collect()
+    .collect()) as unknown as Promise<BookingRecord[]>
 }
 
-function toApiBooking(tenantSlug: string, booking: Doc<"bookings">): Booking {
+function toApiBooking(tenantSlug: string, booking: BookingRecord): Booking {
   return mapBooking(tenantSlug, booking)
 }
 
@@ -214,10 +251,10 @@ export async function createBookingRecord(
   }
 
   const tenantId = tenant._id as Id<"tenants">
-  const services = await ctx.db
+  const services = (await ctx.db
     .query("services")
     .withIndex("by_tenant_id", (query) => query.eq("tenantId", tenantId))
-    .collect()
+    .collect()) as unknown as ServiceRecord[]
   const service = services.find((item) => item.serviceId === args.serviceId) ?? null
   if (!service) {
     return fail(apiError("NOT_FOUND", `Service '${args.serviceId}' was not found in Convex`, 404))
@@ -232,10 +269,10 @@ export async function createBookingRecord(
   }
 
   if (args.staffId) {
-    const staffProfiles = await ctx.db
+    const staffProfiles = (await ctx.db
       .query("staffProfiles")
       .withIndex("by_tenant_id", (query) => query.eq("tenantId", tenantId))
-      .collect()
+      .collect()) as unknown as StaffProfileRecord[]
     const staff = staffProfiles.find((item) => item.staffId === args.staffId) ?? null
     if (!staff) {
       return fail(apiError("NOT_FOUND", `Staff '${args.staffId}' was not found in Convex`, 404))
@@ -244,10 +281,10 @@ export async function createBookingRecord(
 
   const startAt = new Date(args.startAt).toISOString()
   const endAt = computeEndAt(startAt, args.serviceVariant)
-  const bookings = await ctx.db
+  const bookings = (await ctx.db
     .query("bookings")
     .withIndex("by_tenant_id_start_at", (query) => query.eq("tenantId", tenantId))
-    .collect()
+    .collect()) as unknown as BookingRecord[]
 
   if (
     hasBookingConflict(bookings, {
@@ -419,10 +456,10 @@ export const list = queryGeneric({
     const tenant = await getTenantBySlug(ctx.db, args.tenantSlug)
     if (!tenant) return []
 
-    const bookings = await ctx.db
+    const bookings = (await ctx.db
       .query("bookings")
       .withIndex("by_tenant_id_start_at", (query) => query.eq("tenantId", tenant._id))
-      .collect()
+      .collect()) as unknown as BookingRecord[]
 
     return bookings.map((booking) => mapBooking(args.tenantSlug, booking))
   },
@@ -437,10 +474,10 @@ export const getById = queryGeneric({
     const tenant = await getTenantBySlug(ctx.db, args.tenantSlug)
     if (!tenant) return null
 
-    const bookings = await ctx.db
+    const bookings = (await ctx.db
       .query("bookings")
       .withIndex("by_tenant_id_booking_id", (query) => query.eq("tenantId", tenant._id))
-      .collect()
+      .collect()) as unknown as BookingRecord[]
     const booking = bookings.find((item) => item.bookingId === args.bookingId) ?? null
 
     return booking ? mapBooking(args.tenantSlug, booking) : null
@@ -453,16 +490,16 @@ export const getByToken = queryGeneric({
     tenantSlug: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const bookingByToken = await ctx.db
+    const bookingByToken = (await ctx.db
       .query("bookings")
       .withIndex("by_booking_token", (query) => query.eq("bookingToken", args.bookingToken))
-      .unique()
+      .unique()) as unknown as BookingRecord | null
     const booking =
       bookingByToken ??
-      (await ctx.db
+      ((await ctx.db
         .query("bookings")
         .withIndex("by_manage_token", (query) => query.eq("manageToken", args.bookingToken))
-        .unique())
+        .unique()) as unknown as BookingRecord | null)
     if (!booking) return null
 
     if (args.tenantSlug) {
@@ -486,26 +523,26 @@ export const getAvailability = queryGeneric({
     const tenant = await getTenantBySlug(ctx.db, args.tenantSlug)
     if (!tenant) return []
 
-    const services = await ctx.db
+    const services = (await ctx.db
       .query("services")
       .withIndex("by_tenant_id", (query) => query.eq("tenantId", tenant._id))
-      .collect()
+      .collect()) as unknown as ServiceRecord[]
     const service = services.find((item) => item.serviceId === args.serviceId) ?? null
     if (!service) return []
 
     if (args.staffId) {
-      const staffProfiles = await ctx.db
+      const staffProfiles = (await ctx.db
         .query("staffProfiles")
         .withIndex("by_tenant_id", (query) => query.eq("tenantId", tenant._id))
-        .collect()
+        .collect()) as unknown as StaffProfileRecord[]
       const staff = staffProfiles.find((item) => item.staffId === args.staffId) ?? null
       if (!staff) return []
     }
 
-    const bookings = await ctx.db
+    const bookings = (await ctx.db
       .query("bookings")
       .withIndex("by_tenant_id_start_at", (query) => query.eq("tenantId", tenant._id))
-      .collect()
+      .collect()) as unknown as BookingRecord[]
 
     return createAvailabilitySlots({
       tenantSlug: args.tenantSlug,

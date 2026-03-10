@@ -1,3 +1,8 @@
+import type {
+  GenericDataModel,
+  GenericMutationCtx,
+  GenericQueryCtx,
+} from "convex/server"
 import { mutationGeneric, queryGeneric } from "convex/server"
 import { type GenericId, v } from "convex/values"
 
@@ -10,7 +15,26 @@ import type {
   UpdateCalendarEventInput,
 } from "../src/lib/api/types"
 import { getTenantBySlug, mapCalendarEvent } from "./_helpers"
-import type { MutationCtx, QueryCtx } from "./_generated/server"
+
+type MutationCtx = GenericMutationCtx<GenericDataModel>
+type QueryCtx = GenericQueryCtx<GenericDataModel>
+
+interface StaffProfileRecord {
+  staffId: string
+}
+
+interface CalendarEventRecord {
+  _id: GenericId<"calendarEvents">
+  eventId: string
+  staffId: string | null
+  type: CalendarEvent["type"]
+  title: string
+  startAt: string
+  endAt: string
+  note?: string
+  createdAt: string
+  updatedAt: string
+}
 
 function ok<T>(data: T): ApiResult<T> {
   return { ok: true, data }
@@ -65,10 +89,10 @@ async function getTenantStaff(
   tenantId: GenericId<"tenants">,
   staffId: string
 ) {
-  const staffProfiles = await ctx.db
+  const staffProfiles = (await ctx.db
     .query("staffProfiles")
     .withIndex("by_tenant_id_staff_id", (query) => query.eq("tenantId", tenantId))
-    .collect()
+    .collect()) as unknown as StaffProfileRecord[]
 
   return staffProfiles.find((item) => item.staffId === staffId) ?? null
 }
@@ -78,10 +102,10 @@ async function getTenantEventById(
   tenantId: GenericId<"tenants">,
   eventId: string
 ) {
-  const calendarEvents = await ctx.db
+  const calendarEvents = (await ctx.db
     .query("calendarEvents")
     .withIndex("by_tenant_id_event_id", (query) => query.eq("tenantId", tenantId))
-    .collect()
+    .collect()) as unknown as CalendarEventRecord[]
 
   return calendarEvents.find((item) => item.eventId === eventId) ?? null
 }
@@ -128,14 +152,14 @@ export const list = queryGeneric({
     const staffId = args.staffId
 
     const indexedEvents = staffId
-      ? await ctx.db
+      ? ((await ctx.db
           .query("calendarEvents")
           .withIndex("by_tenant_id_staff_id_start_at", (query) => query.eq("tenantId", tenantId))
-          .collect()
-      : await ctx.db
+          .collect()) as unknown as CalendarEventRecord[])
+      : ((await ctx.db
           .query("calendarEvents")
           .withIndex("by_tenant_id_start_at", (query) => query.eq("tenantId", tenantId))
-          .collect()
+          .collect()) as unknown as CalendarEventRecord[])
 
     return indexedEvents
       .filter((event) => (staffId ? event.staffId === staffId : true))
