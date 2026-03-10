@@ -17,6 +17,38 @@ export default defineSchema({
     updatedAt: v.string(),
   }).index("by_slug", ["slug"]),
 
+  users: defineTable({
+    primaryEmail: v.string(),
+    fullName: v.string(),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+  }).index("by_primary_email", ["primaryEmail"]),
+
+  tenantMemberships: defineTable({
+    tenantId: v.id("tenants"),
+    userId: v.id("users"),
+    role: v.union(v.literal("owner"), v.literal("staff")),
+    staffId: v.union(v.string(), v.null()),
+    status: v.union(v.literal("active"), v.literal("invited"), v.literal("disabled")),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_tenant_id", ["tenantId"])
+    .index("by_tenant_id_user_id", ["tenantId", "userId"]),
+
+  authSessions: defineTable({
+    userId: v.id("users"),
+    sessionToken: v.string(),
+    activeTenantSlug: v.union(v.string(), v.null()),
+    authMethod: v.union(v.literal("magic_link"), v.literal("google_oauth"), v.literal("password")),
+    expiresAt: v.string(),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+  })
+    .index("by_session_token", ["sessionToken"])
+    .index("by_user_id", ["userId"]),
+
   tenantSettings: defineTable({
     tenantId: v.id("tenants"),
     logoUrl: v.optional(v.string()),

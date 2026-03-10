@@ -31,6 +31,7 @@ import type {
   Voucher,
   WaitlistEntry,
 } from "@/lib/api/types"
+import type { AuthMethod } from "@/lib/auth/types"
 
 type ConvexFunctionKind = "query" | "mutation"
 
@@ -104,6 +105,31 @@ export interface ConvexAuthSessionDoc {
   id: string
   userId: string
   activeTenantSlug: string | null
+  authMethod: Exclude<AuthMethod, "mock">
+  expiresAt: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ConvexResolvedTenantMembership {
+  id: string
+  tenantId: string
+  tenantSlug: string
+  role: "owner" | "staff"
+  staffId: string | null
+  status: "active" | "invited" | "disabled"
+  plan: TenantConfig["plan"]
+  createdAt: string
+  updatedAt: string
+}
+
+export interface ConvexResolvedAuthSession {
+  sessionId: string
+  sessionToken: string
+  user: ConvexUserDoc
+  activeTenantSlug: string | null
+  authMethod: Exclude<AuthMethod, "mock">
+  memberships: ConvexResolvedTenantMembership[]
   expiresAt: string
   createdAt: string
   updatedAt: string
@@ -295,8 +321,18 @@ export const convexContracts = {
     resolveSession: defineConvexQuery<
       "auth:resolveSession",
       { sessionToken: string | null; tenantSlug?: string },
-      ConvexAuthSessionDoc | null
+      ConvexResolvedAuthSession | null
     >("auth:resolveSession"),
+    createSeededSession: defineConvexMutation<
+      "auth:createSeededSession",
+      { email: string; tenantSlug?: string },
+      { sessionToken: string; session: ConvexResolvedAuthSession }
+    >("auth:createSeededSession"),
+    revokeSession: defineConvexMutation<
+      "auth:revokeSession",
+      { sessionToken: string },
+      { revoked: boolean }
+    >("auth:revokeSession"),
     beginMagicLink: defineConvexMutation<
       "auth:beginMagicLink",
       { email: string; tenantSlug?: string },

@@ -1,3 +1,4 @@
+import type { Id } from "./_generated/dataModel"
 import { mutation } from "./_generated/server"
 
 const BASE_TIMESTAMP = "2026-01-10T10:00:00.000Z"
@@ -295,6 +296,103 @@ export const seedBarberReadSlice = mutation({
         await ctx.db.patch(existing._id, payload)
       } else {
         await ctx.db.insert("waitlistEntries", payload)
+      }
+    }
+
+    const desiredUsers = [
+      {
+        primaryEmail: "martin.novak@barber.test",
+        fullName: "Martin Novak",
+        createdAt: BASE_TIMESTAMP,
+        updatedAt: BASE_TIMESTAMP,
+      },
+      {
+        primaryEmail: "tomas.kral@barber.test",
+        fullName: "Tomas Kral",
+        createdAt: BASE_TIMESTAMP,
+        updatedAt: BASE_TIMESTAMP,
+      },
+    ]
+
+    const userIdsByEmail = new Map<string, Id<"users">>()
+
+    for (const user of desiredUsers) {
+      const existing = await ctx.db
+        .query("users")
+        .withIndex("by_primary_email", (query) => query.eq("primaryEmail", user.primaryEmail))
+        .unique()
+
+      const payload = {
+        primaryEmail: user.primaryEmail,
+        fullName: user.fullName,
+        updatedAt: user.updatedAt,
+      }
+
+      const userId = existing
+        ? (await ctx.db.patch(existing._id, payload), existing._id)
+        : await ctx.db.insert("users", user)
+
+      userIdsByEmail.set(user.primaryEmail, userId)
+    }
+
+    const ownerUserId = userIdsByEmail.get("martin.novak@barber.test")
+    const staffUserId = userIdsByEmail.get("tomas.kral@barber.test")
+
+    if (!ownerUserId || !staffUserId) {
+      throw new Error("Seeded auth users could not be resolved before creating tenant memberships.")
+    }
+
+    const desiredMemberships = [
+      {
+        userId: ownerUserId,
+        role: "owner" as const,
+        staffId: "st-owner",
+        status: "active" as const,
+        createdAt: BASE_TIMESTAMP,
+        updatedAt: BASE_TIMESTAMP,
+      },
+      {
+        userId: staffUserId,
+        role: "staff" as const,
+        staffId: "st-1",
+        status: "active" as const,
+        createdAt: BASE_TIMESTAMP,
+        updatedAt: BASE_TIMESTAMP,
+      },
+    ]
+
+    const existingMemberships = await ctx.db
+      .query("tenantMemberships")
+      .withIndex("by_tenant_id", (query) => query.eq("tenantId", tenantId))
+      .collect()
+    const desiredMembershipUserIds = new Set(
+      desiredMemberships.map((membership) => membership.userId)
+    )
+
+    for (const membership of existingMemberships) {
+      if (!desiredMembershipUserIds.has(membership.userId)) {
+        await ctx.db.delete(membership._id)
+      }
+    }
+
+    for (const membership of desiredMemberships) {
+      const existing = existingMemberships.find((item) => item.userId === membership.userId)
+      const payload = { tenantId, ...membership }
+      if (existing) {
+        await ctx.db.patch(existing._id, payload)
+      } else {
+        await ctx.db.insert("tenantMemberships", payload)
+      }
+    }
+
+    for (const userId of desiredMembershipUserIds) {
+      const existingSessions = await ctx.db
+        .query("authSessions")
+        .withIndex("by_user_id", (query) => query.eq("userId", userId))
+        .collect()
+
+      for (const session of existingSessions) {
+        await ctx.db.delete(session._id)
       }
     }
 
