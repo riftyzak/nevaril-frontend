@@ -2,6 +2,7 @@ import { headers } from "next/headers"
 import { notFound } from "next/navigation"
 import type { ReactNode } from "react"
 
+import { assertAppRuntimeConfig } from "@/lib/app/runtime-config"
 import {
   isSupportedLocale,
   type TenantSource,
@@ -22,6 +23,8 @@ export default async function TenantLayout({
 
   const requestHeaders = await headers()
   const source = (requestHeaders.get("x-tenant-source") ?? "path") as TenantSource
+
+  assertAppRuntimeConfig()
 
   return (
     <TenantProvider value={{ tenantSlug, locale, source }}>
