@@ -135,6 +135,13 @@ export interface ConvexResolvedAuthSession {
   updatedAt: string
 }
 
+export interface ConvexMagicLinkStartResult {
+  requestedAt: string
+  expiresAt: string
+  verificationToken: string
+  deliveryMode: "dev_preview"
+}
+
 export const convexContracts = {
   tenants: {
     getBySlug: defineConvexQuery<"tenants:getBySlug", { tenantSlug: string }, ConvexTenantDoc>(
@@ -336,8 +343,13 @@ export const convexContracts = {
     beginMagicLink: defineConvexMutation<
       "auth:beginMagicLink",
       { email: string; tenantSlug?: string },
-      { requestedAt: string }
+      ConvexMagicLinkStartResult
     >("auth:beginMagicLink"),
+    completeMagicLink: defineConvexMutation<
+      "auth:completeMagicLink",
+      { token: string },
+      { sessionToken: string }
+    >("auth:completeMagicLink"),
     beginGoogleOAuth: defineConvexMutation<
       "auth:beginGoogleOAuth",
       { tenantSlug?: string; redirectTo?: string },

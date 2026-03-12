@@ -49,6 +49,19 @@ export default defineSchema({
     .index("by_session_token", ["sessionToken"])
     .index("by_user_id", ["userId"]),
 
+  authMagicLinks: defineTable({
+    userId: v.id("users"),
+    email: v.string(),
+    tenantSlug: v.union(v.string(), v.null()),
+    verificationToken: v.string(),
+    expiresAt: v.string(),
+    consumedAt: v.union(v.string(), v.null()),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+  })
+    .index("by_verification_token", ["verificationToken"])
+    .index("by_user_id", ["userId"]),
+
   tenantSettings: defineTable({
     tenantId: v.id("tenants"),
     logoUrl: v.optional(v.string()),

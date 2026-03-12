@@ -394,6 +394,15 @@ export const seedBarberReadSlice = mutationGeneric({
       for (const session of existingSessions) {
         await ctx.db.delete(session._id)
       }
+
+      const existingMagicLinks = await ctx.db
+        .query("authMagicLinks")
+        .withIndex("by_user_id", (query) => query.eq("userId", userId))
+        .collect()
+
+      for (const magicLink of existingMagicLinks) {
+        await ctx.db.delete(magicLink._id)
+      }
     }
 
     return { ok: true, tenantSlug: "barber" }

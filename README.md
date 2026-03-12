@@ -93,9 +93,9 @@ Rules:
 - Convex is the normal product runtime
 - mock is explicit fallback/dev mode only
 - there is no silent fallback-to-mock if Convex URL is missing
-- app auth is staged in M27:
+- app auth is staged through M28:
   - `AUTH_SOURCE=mock` / `NEXT_PUBLIC_AUTH_SOURCE=mock` stay the safe default
-  - `AUTH_SOURCE=convex` / `NEXT_PUBLIC_AUTH_SOURCE=convex` enable the seeded backend auth handoff
+  - `AUTH_SOURCE=convex` / `NEXT_PUBLIC_AUTH_SOURCE=convex` enable the Convex magic-link auth flow
   - there is no silent fallback from real auth to mock auth
 
 Primary Convex workflow:
@@ -144,10 +144,11 @@ Architecture reference:
 - [`docs/architecture/m25-convex-primary-runtime.md`](docs/architecture/m25-convex-primary-runtime.md)
 - [`docs/architecture/m26-e2e-bootstrap-hardening.md`](docs/architecture/m26-e2e-bootstrap-hardening.md)
 - [`docs/architecture/m27-real-auth-foundation.md`](docs/architecture/m27-real-auth-foundation.md)
+- [`docs/architecture/m28-dev-magic-link-auth.md`](docs/architecture/m28-dev-magic-link-auth.md)
 
 ## Auth Modes
 
-M27 introduces the first backend-backed auth/session foundation behind explicit real-auth mode.
+M28 keeps the backend-backed auth/session foundation from M27 and replaces the seeded sign-in chooser with a dev-complete magic-link flow.
 
 Safe default:
 
@@ -163,7 +164,7 @@ AUTH_SOURCE=convex
 NEXT_PUBLIC_AUTH_SOURCE=convex
 ```
 
-Seeded Convex auth workflow:
+Convex auth workflow:
 
 ```bash
 npx convex dev --once
@@ -176,10 +177,12 @@ Then start the app in Convex app-data mode plus Convex auth mode and open:
 /cs/auth/sign-in?tenantSlug=barber
 ```
 
-Seeded identities:
+Available seeded accounts for the current flow:
 
 - `martin.novak@barber.test` for owner access
 - `tomas.kral@barber.test` for staff access
+
+M28 returns an in-app preview link for local/dev/e2e instead of sending outbound email. The verification handoff completes at `/cs/auth/verify?token=...`.
 
 Focused real-auth verification:
 

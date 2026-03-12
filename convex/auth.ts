@@ -22,6 +22,18 @@ interface AuthSessionRecord {
   updatedAt: string
 }
 
+interface AuthMagicLinkRecord {
+  _id: GenericId<"authMagicLinks">
+  userId: GenericId<"users">
+  email: string
+  tenantSlug: string | null
+  verificationToken: string
+  expiresAt: string
+  consumedAt: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 interface UserRecord {
   _id: GenericId<"users">
   primaryEmail: string
@@ -48,6 +60,7 @@ interface TenantRecord {
 }
 
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000
+const MAGIC_LINK_TTL_MS = 15 * 60 * 1000
 
 function nowIso() {
   return new Date().toISOString()
@@ -57,8 +70,20 @@ function expiresAtIso() {
   return new Date(Date.now() + SESSION_TTL_MS).toISOString()
 }
 
+function magicLinkExpiresAtIso() {
+  return new Date(Date.now() + MAGIC_LINK_TTL_MS).toISOString()
+}
+
 function makeSessionToken() {
   return `sess_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`
+}
+
+function makeMagicLinkToken() {
+  return `mlink_${Date.now()}_${Math.random().toString(36).slice(2, 14)}`
+}
+
+function isExpired(timestamp: string) {
+  return new Date(timestamp).getTime() <= Date.now()
 }
 
 async function resolveSessionRecord(
@@ -84,6 +109,24 @@ async function resolveSessionRecord(
   }
 
   return { session, user }
+}
+
+async function resolveMagicLinkRecord(
+  db: DatabaseReader | DatabaseWriter,
+  verificationToken: string
+) {
+  const magicLink = (await db
+    .query("authMagicLinks")
+    .withIndex("by_verification_token", (query) =>
+      query.eq("verificationToken", verificationToken)
+    )
+    .unique()) as unknown as AuthMagicLinkRecord | null
+
+  if (!magicLink || magicLink.consumedAt || isExpired(magicLink.expiresAt)) {
+    return null
+  }
+
+  return magicLink
 }
 
 async function listResolvedMemberships(
@@ -291,10 +334,99 @@ export const beginMagicLink = mutationGeneric({
     email: v.string(),
     tenantSlug: v.optional(v.string()),
   },
-  handler: async () => {
-    throw new Error(
-      "Magic-link delivery is not implemented in M27. Use auth:createSeededSession for the seeded backend auth handoff."
-    )
+  handler: async (ctx, args) => {
+    const normalizedEmail = args.email.trim().toLowerCase()
+    const user = await getSeededUserByEmail(ctx.db, normalizedEmail)
+    if (!user) {
+      throw new Error("Magic-link sign-in is not available for this email.")
+    }
+
+    const memberships = await listResolvedMemberships(ctx.db, user._id as GenericId<"users">)
+    if (memberships.length === 0) {
+      throw new Error("Magic-link sign-in is not available for this user.")
+    }
+
+    if (
+      args.tenantSlug &&
+      !memberships.some((membership) => membership.tenantSlug === args.tenantSlug)
+    ) {
+      throw new Error("Magic-link sign-in is not available for this tenant.")
+    }
+
+    const existingLinks = await ctx.db
+      .query("authMagicLinks")
+      .withIndex("by_user_id", (query) => query.eq("userId", user._id))
+      .collect()
+
+    for (const existingLink of existingLinks) {
+      await ctx.db.delete(existingLink._id)
+    }
+
+    const requestedAt = nowIso()
+    const expiresAt = magicLinkExpiresAtIso()
+    const verificationToken = makeMagicLinkToken()
+
+    await ctx.db.insert("authMagicLinks", {
+      userId: user._id as GenericId<"users">,
+      email: normalizedEmail,
+      tenantSlug: args.tenantSlug ?? null,
+      verificationToken,
+      expiresAt,
+      consumedAt: null,
+      createdAt: requestedAt,
+      updatedAt: requestedAt,
+    })
+
+    return {
+      requestedAt,
+      expiresAt,
+      verificationToken,
+      deliveryMode: "dev_preview" as const,
+    }
+  },
+})
+
+export const completeMagicLink = mutationGeneric({
+  args: {
+    token: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const magicLink = await resolveMagicLinkRecord(ctx.db, args.token)
+    if (!magicLink) {
+      throw new Error("Magic link is invalid or expired.")
+    }
+
+    const memberships = await listResolvedMemberships(ctx.db, magicLink.userId)
+    if (memberships.length === 0) {
+      throw new Error("Magic-link sign-in is not available for this user.")
+    }
+
+    if (
+      magicLink.tenantSlug &&
+      !memberships.some((membership) => membership.tenantSlug === magicLink.tenantSlug)
+    ) {
+      throw new Error("Magic-link sign-in is not available for this tenant.")
+    }
+
+    const timestamp = nowIso()
+    const sessionToken = makeSessionToken()
+
+    await ctx.db.insert("authSessions", {
+      userId: magicLink.userId,
+      sessionToken,
+      activeTenantSlug: magicLink.tenantSlug ?? memberships[0]?.tenantSlug ?? null,
+      authMethod: "magic_link",
+      expiresAt: expiresAtIso(),
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    })
+
+    await ctx.db.patch(magicLink._id, {
+      consumedAt: timestamp,
+      updatedAt: timestamp,
+    })
+
+    return { sessionToken }
   },
 })
 
@@ -305,7 +437,7 @@ export const beginGoogleOAuth = mutationGeneric({
   },
   handler: async () => {
     throw new Error(
-      "Google OAuth is not implemented in M27. Use AUTH_SOURCE=mock or the seeded backend auth handoff."
+      "Google OAuth is not implemented in M28. Use AUTH_SOURCE=mock or the Convex magic-link flow."
     )
   },
 })

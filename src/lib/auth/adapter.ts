@@ -3,7 +3,12 @@ import { cookies } from "next/headers"
 import type { AppSession } from "@/lib/auth/types"
 import { convexContracts } from "@/lib/app/convex-contracts"
 import type { ConvexResolvedAuthSession } from "@/lib/app/convex-contracts"
-import { queryConvexResolvedSession, revokeConvexSession } from "@/lib/auth/convex-auth-client"
+import {
+  beginConvexMagicLink,
+  completeConvexMagicLink,
+  queryConvexResolvedSession,
+  revokeConvexSession,
+} from "@/lib/auth/convex-auth-client"
 import { AuthSessionInvalidError, AuthSessionRequiredError } from "@/lib/auth/errors"
 import { getAuthSource } from "@/lib/auth/source"
 import { mockAuthAdapter } from "@/lib/auth/mock-auth-adapter"
@@ -19,6 +24,13 @@ export interface BeginMagicLinkInput {
   tenantSlug?: string
 }
 
+export interface BeginMagicLinkResult {
+  requestedAt: string
+  expiresAt: string
+  verificationToken: string
+  deliveryMode: "dev_preview"
+}
+
 export interface BeginOAuthInput {
   provider: "google_oauth"
   tenantSlug?: string
@@ -28,14 +40,14 @@ export interface BeginOAuthInput {
 export interface AuthAdapter {
   resolveSession(input?: ResolveSessionInput): Promise<AppSession>
   signOut(): Promise<void>
-  beginMagicLink(input: BeginMagicLinkInput): Promise<{ requestedAt: string }>
+  beginMagicLink(input: BeginMagicLinkInput): Promise<BeginMagicLinkResult>
   completeMagicLink(input: { token: string }): Promise<{ sessionToken: string }>
   beginOAuth(input: BeginOAuthInput): Promise<{ authorizationUrl: string }>
 }
 
 function buildMissingConvexSessionError() {
   return new AuthSessionRequiredError(
-    "No backend auth session was found for AUTH_SOURCE=convex. Use the seeded sign-in handoff or switch explicitly to AUTH_SOURCE=mock for dev/e2e fallback."
+    "No backend auth session was found for AUTH_SOURCE=convex. Sign in with the Convex magic-link flow or switch explicitly to AUTH_SOURCE=mock for dev/e2e fallback."
   )
 }
 
@@ -110,17 +122,15 @@ const convexAuthAdapter: AuthAdapter = {
     }
     cookieStore.delete(AUTH_SESSION_COOKIE_NAME)
   },
-  beginMagicLink: async () => {
-    throw new Error(
-      `Convex auth flow ${convexContracts.auth.beginMagicLink.name} is not implemented in M27. Use the seeded backend sign-in handoff instead.`
-    )
+  beginMagicLink: async (input) => {
+    return beginConvexMagicLink(input)
   },
-  completeMagicLink: async () => {
-    throw new Error("Convex auth magic-link completion is not implemented in M27.")
+  completeMagicLink: async (input) => {
+    return completeConvexMagicLink(input.token)
   },
   beginOAuth: async () => {
     throw new Error(
-      `Convex auth flow ${convexContracts.auth.beginGoogleOAuth.name} is not implemented in M27. Use AUTH_SOURCE=mock or the seeded backend sign-in handoff.`
+      `Convex auth flow ${convexContracts.auth.beginGoogleOAuth.name} is not implemented in M28. Use AUTH_SOURCE=mock or the Convex magic-link flow.`
     )
   },
 }

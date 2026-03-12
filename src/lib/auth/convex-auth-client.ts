@@ -4,7 +4,10 @@ import { ConvexHttpClient } from "convex/browser"
 import { makeFunctionReference } from "convex/server"
 
 import { convexContracts } from "@/lib/app/convex-contracts"
-import type { ConvexResolvedAuthSession } from "@/lib/app/convex-contracts"
+import type {
+  ConvexMagicLinkStartResult,
+  ConvexResolvedAuthSession,
+} from "@/lib/app/convex-contracts"
 import { assertAppRuntimeConfig } from "@/lib/app/runtime-config"
 
 const resolveSessionRef = makeFunctionReference<
@@ -24,6 +27,18 @@ const revokeSessionRef = makeFunctionReference<
   { sessionToken: string },
   { revoked: boolean }
 >(convexContracts.auth.revokeSession.name)
+
+const beginMagicLinkRef = makeFunctionReference<
+  "mutation",
+  { email: string; tenantSlug?: string },
+  ConvexMagicLinkStartResult
+>(convexContracts.auth.beginMagicLink.name)
+
+const completeMagicLinkRef = makeFunctionReference<
+  "mutation",
+  { token: string },
+  { sessionToken: string }
+>(convexContracts.auth.completeMagicLink.name)
 
 const clientCache = new Map<string, ConvexHttpClient>()
 
@@ -51,6 +66,17 @@ export async function createConvexSeededSession(input: {
   tenantSlug?: string
 }) {
   return getConvexClient().mutation(createSeededSessionRef, input)
+}
+
+export async function beginConvexMagicLink(input: {
+  email: string
+  tenantSlug?: string
+}) {
+  return getConvexClient().mutation(beginMagicLinkRef, input)
+}
+
+export async function completeConvexMagicLink(token: string) {
+  return getConvexClient().mutation(completeMagicLinkRef, { token })
 }
 
 export async function revokeConvexSession(sessionToken: string) {

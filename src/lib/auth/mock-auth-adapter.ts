@@ -65,6 +65,9 @@ export const mockAuthAdapter: AuthAdapter = {
   signOut: async () => {},
   beginMagicLink: async () => ({
     requestedAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
+    verificationToken: "mock-preview-token",
+    deliveryMode: "dev_preview" as const,
   }),
   completeMagicLink: async () => {
     throw new Error("Magic link completion is not implemented in the mock auth adapter.")
