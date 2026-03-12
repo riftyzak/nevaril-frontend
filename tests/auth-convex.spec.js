@@ -17,15 +17,18 @@ async function requestMagicLink(page, email) {
   await page.getByTestId("auth-email").fill(email)
   await page.getByTestId("auth-request-submit").click()
   await expect(page.getByTestId("auth-requested-card")).toBeVisible()
+}
 
-  const href = await page.getByTestId("auth-preview-link").getAttribute("href")
-  expect(href).toBeTruthy()
-  return href
+async function getMagicLinkFromOutbox(page, email) {
+  const response = await page.request.get(`/api/e2e/auth/outbox?email=${encodeURIComponent(email)}`)
+  expect(response.ok()).toBe(true)
+  return await response.json()
 }
 
 async function signInAs(page, email) {
-  const href = await requestMagicLink(page, email)
-  await page.goto(href)
+  await requestMagicLink(page, email)
+  const message = await getMagicLinkFromOutbox(page, email)
+  await page.goto(message.verifyUrl)
 }
 
 test("owner magic-link flow resolves backend session and keeps owner routes accessible", async ({
@@ -68,6 +71,20 @@ test("invalid magic-link token shows the verify error screen and does not create
 
   const cookies = await page.context().cookies()
   expect(cookies.some((cookie) => cookie.name === AUTH_SESSION_COOKIE_NAME)).toBe(false)
+})
+
+test("repeat request inside cooldown keeps the previous email active", async ({ page }) => {
+  await requestMagicLink(page, OWNER_EMAIL)
+  const firstMessage = await getMagicLinkFromOutbox(page, OWNER_EMAIL)
+
+  await requestMagicLink(page, OWNER_EMAIL)
+  await expect(page.getByTestId("auth-requested-card")).toContainText("Email already sent")
+
+  const secondMessage = await getMagicLinkFromOutbox(page, OWNER_EMAIL)
+  expect(secondMessage.verifyUrl).toBe(firstMessage.verifyUrl)
+
+  await page.goto(secondMessage.verifyUrl)
+  await expect(page).toHaveURL("/cs/app/barber")
 })
 
 test("sign-out clears Convex auth session and protected routes redirect back to sign-in", async ({
