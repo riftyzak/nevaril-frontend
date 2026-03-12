@@ -27,8 +27,9 @@ interface AuthMagicLinkRecord {
   userId: GenericId<"users">
   email: string
   tenantSlug: string | null
-  verificationToken: string
+  tokenHash: string
   expiresAt: string
+  lastSentAt: string
   consumedAt: string | null
   createdAt: string
   updatedAt: string
@@ -61,6 +62,7 @@ interface TenantRecord {
 
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000
 const MAGIC_LINK_TTL_MS = 15 * 60 * 1000
+const MAGIC_LINK_RESEND_COOLDOWN_MS = 60 * 1000
 
 function nowIso() {
   return new Date().toISOString()
@@ -82,8 +84,19 @@ function makeMagicLinkToken() {
   return `mlink_${Date.now()}_${Math.random().toString(36).slice(2, 14)}`
 }
 
+async function hashMagicLinkToken(token: string) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token))
+  return Array.from(new Uint8Array(digest))
+    .map((value) => value.toString(16).padStart(2, "0"))
+    .join("")
+}
+
 function isExpired(timestamp: string) {
   return new Date(timestamp).getTime() <= Date.now()
+}
+
+function addCooldown(timestamp: string) {
+  return new Date(new Date(timestamp).getTime() + MAGIC_LINK_RESEND_COOLDOWN_MS).toISOString()
 }
 
 async function resolveSessionRecord(
@@ -115,10 +128,11 @@ async function resolveMagicLinkRecord(
   db: DatabaseReader | DatabaseWriter,
   verificationToken: string
 ) {
+  const tokenHash = await hashMagicLinkToken(verificationToken)
   const magicLink = (await db
     .query("authMagicLinks")
-    .withIndex("by_verification_token", (query) =>
-      query.eq("verificationToken", verificationToken)
+    .withIndex("by_token_hash", (query) =>
+      query.eq("tokenHash", tokenHash)
     )
     .unique()) as unknown as AuthMagicLinkRecord | null
 
@@ -127,6 +141,28 @@ async function resolveMagicLinkRecord(
   }
 
   return magicLink
+}
+
+function matchesTenantScope(magicLink: AuthMagicLinkRecord, tenantSlug?: string) {
+  return magicLink.tenantSlug === (tenantSlug ?? null)
+}
+
+async function listActiveMagicLinks(
+  db: DatabaseReader | DatabaseWriter,
+  userId: GenericId<"users">,
+  tenantSlug?: string
+) {
+  const magicLinks = (await db
+    .query("authMagicLinks")
+    .withIndex("by_user_id", (query) => query.eq("userId", userId))
+    .collect()) as unknown as AuthMagicLinkRecord[]
+
+  return magicLinks.filter(
+    (magicLink) =>
+      matchesTenantScope(magicLink, tenantSlug) &&
+      !magicLink.consumedAt &&
+      !isExpired(magicLink.expiresAt)
+  )
 }
 
 async function listResolvedMemberships(
@@ -353,10 +389,24 @@ export const beginMagicLink = mutationGeneric({
       throw new Error("Magic-link sign-in is not available for this tenant.")
     }
 
-    const existingLinks = await ctx.db
-      .query("authMagicLinks")
-      .withIndex("by_user_id", (query) => query.eq("userId", user._id))
-      .collect()
+    const existingLinks = await listActiveMagicLinks(
+      ctx.db,
+      user._id as GenericId<"users">,
+      args.tenantSlug
+    )
+
+    const activeMagicLink = existingLinks[0]
+    if (activeMagicLink) {
+      const cooldownEndsAt = addCooldown(activeMagicLink.lastSentAt)
+      if (!isExpired(cooldownEndsAt)) {
+        return {
+          requestedAt: activeMagicLink.lastSentAt,
+          expiresAt: activeMagicLink.expiresAt,
+          cooldownEndsAt,
+          sendStatus: "cooldown_active" as const,
+        }
+      }
+    }
 
     for (const existingLink of existingLinks) {
       await ctx.db.delete(existingLink._id)
@@ -365,13 +415,15 @@ export const beginMagicLink = mutationGeneric({
     const requestedAt = nowIso()
     const expiresAt = magicLinkExpiresAtIso()
     const verificationToken = makeMagicLinkToken()
+    const tokenHash = await hashMagicLinkToken(verificationToken)
 
     await ctx.db.insert("authMagicLinks", {
       userId: user._id as GenericId<"users">,
       email: normalizedEmail,
       tenantSlug: args.tenantSlug ?? null,
-      verificationToken,
+      tokenHash,
       expiresAt,
+      lastSentAt: requestedAt,
       consumedAt: null,
       createdAt: requestedAt,
       updatedAt: requestedAt,
@@ -380,8 +432,9 @@ export const beginMagicLink = mutationGeneric({
     return {
       requestedAt,
       expiresAt,
+      cooldownEndsAt: addCooldown(requestedAt),
       verificationToken,
-      deliveryMode: "dev_preview" as const,
+      sendStatus: "send_now" as const,
     }
   },
 })

@@ -1,4 +1,4 @@
-import Link from "next/link"
+import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
@@ -15,8 +15,9 @@ interface SignInSearchParams {
   next?: string
   requested?: string
   email?: string
-  token?: string
   expiresAt?: string
+  cooldownEndsAt?: string
+  deliveryMode?: string
   error?: string
 }
 
@@ -56,8 +57,9 @@ function buildSignInPath(input: {
   next?: string
   requested?: string
   email?: string
-  token?: string
   expiresAt?: string
+  cooldownEndsAt?: string
+  deliveryMode?: string
   error?: string
 }) {
   return buildLocalizedPath({
@@ -68,26 +70,10 @@ function buildSignInPath(input: {
       next: input.next,
       requested: input.requested,
       email: input.email,
-      token: input.token,
       expiresAt: input.expiresAt,
+      cooldownEndsAt: input.cooldownEndsAt,
+      deliveryMode: input.deliveryMode,
       error: input.error,
-    },
-  })
-}
-
-function buildVerificationPath(input: {
-  locale: AppLocale
-  token: string
-  tenantSlug?: string
-  next?: string
-}) {
-  return buildLocalizedPath({
-    locale: input.locale,
-    path: "/auth/verify",
-    query: {
-      token: input.token,
-      tenantSlug: input.tenantSlug,
-      next: input.next,
     },
   })
 }
@@ -102,7 +88,7 @@ function getErrorCopy(errorCode?: string) {
     case "request-failed":
       return {
         title: "Could not create sign-in link",
-        description: "This email is not eligible for the current Convex auth flow, or the tenant does not match.",
+        description: "We could not send a sign-in email for this request. Check the address or try again shortly.",
       }
     case "verify-invalid":
       return {
@@ -119,6 +105,32 @@ function getErrorCopy(errorCode?: string) {
   }
 }
 
+function getDeliveryCopy(deliveryMode?: string) {
+  if (deliveryMode === "email_cooldown") {
+    return {
+      title: "Email already sent",
+      description: "A recent sign-in email is still active. Wait for the cooldown window to pass before requesting another link.",
+    }
+  }
+
+  return {
+    title: "Check your email",
+    description: "If the address is eligible for Convex auth, a sign-in link has been sent.",
+  }
+}
+
+async function getRequestOrigin() {
+  const headerStore = await headers()
+  const host = headerStore.get("x-forwarded-host") ?? headerStore.get("host")
+  const protocol = headerStore.get("x-forwarded-proto") ?? "http"
+
+  if (!host) {
+    throw new Error("The current request host could not be resolved for magic-link delivery.")
+  }
+
+  return `${protocol}://${host}`
+}
+
 export default async function AuthSignInPage({
   params,
   searchParams,
@@ -132,22 +144,15 @@ export default async function AuthSignInPage({
     next,
     requested,
     email,
-    token,
     expiresAt,
+    cooldownEndsAt,
+    deliveryMode,
     error,
   } = await searchParams
   const authSource = getAuthSource()
   const nextPath = resolveNextPath(locale, tenantSlug, next)
   const errorCopy = getErrorCopy(error)
-  const verificationPath =
-    requested === "1" && token
-      ? buildVerificationPath({
-          locale,
-          token,
-          tenantSlug,
-          next: nextPath,
-        })
-      : null
+  const deliveryCopy = requested === "1" ? getDeliveryCopy(deliveryMode) : null
 
   async function requestMagicLink(formData: FormData) {
     "use server"
@@ -170,9 +175,13 @@ export default async function AuthSignInPage({
     }
 
     try {
+      const origin = await getRequestOrigin()
       const result = await getAuthAdapter().beginMagicLink({
         email: formEmail,
         tenantSlug: requestedTenantSlug,
+        locale,
+        next: redirectTo,
+        origin,
       })
 
       redirect(
@@ -182,8 +191,9 @@ export default async function AuthSignInPage({
           next: redirectTo,
           requested: "1",
           email: formEmail,
-          token: result.verificationToken,
           expiresAt: result.expiresAt,
+          cooldownEndsAt: result.cooldownEndsAt,
+          deliveryMode: result.deliveryMode,
         })
       )
     } catch {
@@ -220,7 +230,7 @@ export default async function AuthSignInPage({
         <CardHeader>
           <CardTitle>Email sign-in</CardTitle>
           <CardDescription>
-            Request a Convex-backed magic link for an existing account. M28 exposes the verification link directly for local/dev/e2e use.
+            Request a Convex-backed magic link for an existing account. M29 sends the verification link by email instead of exposing it in the UI.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -234,32 +244,24 @@ export default async function AuthSignInPage({
             </div>
           ) : null}
 
-          {verificationPath ? (
+          {requested === "1" && deliveryCopy ? (
             <div
               data-testid="auth-requested-card"
               className="grid gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-emerald-950"
             >
               <div>
-                <p className="text-sm font-medium">Magic link ready</p>
+                <p className="text-sm font-medium">{deliveryCopy.title}</p>
                 <p className="text-xs text-emerald-900/80">
                   {email ? `Requested for ${email}. ` : ""}
-                  Open the preview link below to complete sign-in.
+                  {deliveryCopy.description}
                 </p>
                 {expiresAt ? (
                   <p className="text-xs text-emerald-900/80">Expires at {expiresAt}</p>
                 ) : null}
+                {cooldownEndsAt ? (
+                  <p className="text-xs text-emerald-900/80">You can request another link after {cooldownEndsAt}</p>
+                ) : null}
               </div>
-              <Button asChild className="justify-self-start">
-                <Link href={verificationPath} data-testid="auth-preview-link">
-                  Open preview link
-                </Link>
-              </Button>
-              <p
-                data-testid="auth-preview-path"
-                className="overflow-x-auto rounded-md bg-white/70 px-3 py-2 font-mono text-xs"
-              >
-                {verificationPath}
-              </p>
             </div>
           ) : null}
 

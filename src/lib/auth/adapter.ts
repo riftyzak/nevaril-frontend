@@ -1,5 +1,6 @@
 import { cookies } from "next/headers"
 
+import type { AppLocale } from "@/i18n/locales"
 import type { AppSession } from "@/lib/auth/types"
 import { convexContracts } from "@/lib/app/convex-contracts"
 import type { ConvexResolvedAuthSession } from "@/lib/app/convex-contracts"
@@ -10,9 +11,14 @@ import {
   revokeConvexSession,
 } from "@/lib/auth/convex-auth-client"
 import { AuthSessionInvalidError, AuthSessionRequiredError } from "@/lib/auth/errors"
+import {
+  sendMagicLinkEmail,
+  type MagicLinkEmailDeliveryMode,
+} from "@/lib/auth/magic-link-email"
 import { getAuthSource } from "@/lib/auth/source"
 import { mockAuthAdapter } from "@/lib/auth/mock-auth-adapter"
 import { AUTH_SESSION_COOKIE_NAME } from "@/lib/auth/session-cookie"
+import { localePath } from "@/lib/tenant/tenant-url"
 
 export interface ResolveSessionInput {
   tenantSlug?: string
@@ -22,13 +28,16 @@ export interface ResolveSessionInput {
 export interface BeginMagicLinkInput {
   email: string
   tenantSlug?: string
+  locale: AppLocale
+  next?: string
+  origin: string
 }
 
 export interface BeginMagicLinkResult {
   requestedAt: string
   expiresAt: string
-  verificationToken: string
-  deliveryMode: "dev_preview"
+  cooldownEndsAt: string
+  deliveryMode: MagicLinkEmailDeliveryMode
 }
 
 export interface BeginOAuthInput {
@@ -49,6 +58,27 @@ function buildMissingConvexSessionError() {
   return new AuthSessionRequiredError(
     "No backend auth session was found for AUTH_SOURCE=convex. Sign in with the Convex magic-link flow or switch explicitly to AUTH_SOURCE=mock for dev/e2e fallback."
   )
+}
+
+function buildMagicLinkVerifyUrl(input: {
+  origin: string
+  locale: AppLocale
+  token: string
+  tenantSlug?: string
+  next?: string
+}) {
+  const params = new URLSearchParams({ token: input.token })
+  if (input.tenantSlug) {
+    params.set("tenantSlug", input.tenantSlug)
+  }
+  if (input.next) {
+    params.set("next", input.next)
+  }
+
+  return `${input.origin}${localePath({
+    locale: input.locale,
+    path: "/auth/verify",
+  })}?${params.toString()}`
 }
 
 function mapResolvedSessionToAppSession(
@@ -123,7 +153,41 @@ const convexAuthAdapter: AuthAdapter = {
     cookieStore.delete(AUTH_SESSION_COOKIE_NAME)
   },
   beginMagicLink: async (input) => {
-    return beginConvexMagicLink(input)
+    const result = await beginConvexMagicLink({
+      email: input.email,
+      tenantSlug: input.tenantSlug,
+    })
+
+    if (result.sendStatus === "cooldown_active" || !result.verificationToken) {
+      return {
+        requestedAt: result.requestedAt,
+        expiresAt: result.expiresAt,
+        cooldownEndsAt: result.cooldownEndsAt,
+        deliveryMode: "email_cooldown",
+      }
+    }
+
+    const verifyUrl = buildMagicLinkVerifyUrl({
+      origin: input.origin,
+      locale: input.locale,
+      token: result.verificationToken,
+      tenantSlug: input.tenantSlug,
+      next: input.next,
+    })
+
+    const delivery = await sendMagicLinkEmail({
+      email: input.email,
+      tenantSlug: input.tenantSlug,
+      verifyUrl,
+      expiresAt: result.expiresAt,
+    })
+
+    return {
+      requestedAt: result.requestedAt,
+      expiresAt: result.expiresAt,
+      cooldownEndsAt: result.cooldownEndsAt,
+      deliveryMode: delivery.deliveryMode,
+    }
   },
   completeMagicLink: async (input) => {
     return completeConvexMagicLink(input.token)

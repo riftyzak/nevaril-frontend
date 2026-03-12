@@ -138,8 +138,9 @@ export interface ConvexResolvedAuthSession {
 export interface ConvexMagicLinkStartResult {
   requestedAt: string
   expiresAt: string
-  verificationToken: string
-  deliveryMode: "dev_preview"
+  cooldownEndsAt: string
+  verificationToken?: string
+  sendStatus: "send_now" | "cooldown_active"
 }
 
 export const convexContracts = {

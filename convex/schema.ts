@@ -53,13 +53,14 @@ export default defineSchema({
     userId: v.id("users"),
     email: v.string(),
     tenantSlug: v.union(v.string(), v.null()),
-    verificationToken: v.string(),
+    tokenHash: v.string(),
     expiresAt: v.string(),
+    lastSentAt: v.string(),
     consumedAt: v.union(v.string(), v.null()),
     createdAt: v.string(),
     updatedAt: v.string(),
   })
-    .index("by_verification_token", ["verificationToken"])
+    .index("by_token_hash", ["tokenHash"])
     .index("by_user_id", ["userId"]),
 
   tenantSettings: defineTable({
