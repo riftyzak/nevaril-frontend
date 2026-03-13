@@ -24,7 +24,7 @@ function resolveNextPath(locale: AppLocale, tenantSlug?: string, next?: string) 
 
 function buildVerifyErrorPath(input: {
   locale: AppLocale
-  code: "verify-invalid" | "verify-disabled"
+  code: "verify-invalid" | "verify-disabled" | "verify-expired" | "verify-used"
   tenantSlug?: string
   next?: string
 }) {
@@ -39,6 +39,22 @@ function buildVerifyErrorPath(input: {
   }
 
   return `${localePath({ locale: input.locale, path: "/auth/verify/error" })}?${params.toString()}`
+}
+
+function getVerifyErrorCode(error: unknown) {
+  if (!(error instanceof Error)) {
+    return "verify-invalid" as const
+  }
+
+  if (error.message.includes("expired")) {
+    return "verify-expired" as const
+  }
+
+  if (error.message.includes("already been used")) {
+    return "verify-used" as const
+  }
+
+  return "verify-invalid" as const
 }
 
 export async function GET(
@@ -94,12 +110,13 @@ export async function GET(
     return NextResponse.redirect(
       new URL(resolveNextPath(locale, tenantSlug, next), url)
     )
-  } catch {
+  } catch (error) {
+    const code = getVerifyErrorCode(error)
     return NextResponse.redirect(
       new URL(
         buildVerifyErrorPath({
           locale,
-          code: "verify-invalid",
+          code,
           tenantSlug,
           next,
         }),

@@ -40,6 +40,22 @@ function getVerifyErrorCopy(code?: string) {
     }
   }
 
+  if (code === "verify-expired") {
+    return {
+      title: "Magic link expired",
+      description:
+        "This sign-in link expired before it was used. Request a fresh magic link and try again.",
+    }
+  }
+
+  if (code === "verify-used") {
+    return {
+      title: "Magic link already used",
+      description:
+        "This sign-in link has already been consumed. Request a new magic link to continue.",
+    }
+  }
+
   return {
     title: "Magic link is no longer valid",
     description:

@@ -93,7 +93,7 @@ Rules:
 - Convex is the normal product runtime
 - mock is explicit fallback/dev mode only
 - there is no silent fallback-to-mock if Convex URL is missing
-- app auth is staged through M28:
+- app auth is staged through M29:
   - `AUTH_SOURCE=mock` / `NEXT_PUBLIC_AUTH_SOURCE=mock` stay the safe default
   - `AUTH_SOURCE=convex` / `NEXT_PUBLIC_AUTH_SOURCE=convex` enable the Convex magic-link auth flow
   - there is no silent fallback from real auth to mock auth
@@ -145,10 +145,11 @@ Architecture reference:
 - [`docs/architecture/m26-e2e-bootstrap-hardening.md`](docs/architecture/m26-e2e-bootstrap-hardening.md)
 - [`docs/architecture/m27-real-auth-foundation.md`](docs/architecture/m27-real-auth-foundation.md)
 - [`docs/architecture/m28-dev-magic-link-auth.md`](docs/architecture/m28-dev-magic-link-auth.md)
+- [`docs/architecture/m29-resend-magic-link-delivery.md`](docs/architecture/m29-resend-magic-link-delivery.md)
 
 ## Auth Modes
 
-M28 keeps the backend-backed auth/session foundation from M27 and replaces the seeded sign-in chooser with a dev-complete magic-link flow.
+M29 keeps the backend-backed auth/session foundation from M27 and replaces the M28 preview-link delivery with real email sending.
 
 Safe default:
 
@@ -182,7 +183,7 @@ Available seeded accounts for the current flow:
 - `martin.novak@barber.test` for owner access
 - `tomas.kral@barber.test` for staff access
 
-M28 returns an in-app preview link for local/dev/e2e instead of sending outbound email. The verification handoff completes at `/cs/auth/verify?token=...`.
+M29 sends the sign-in link by email. Use `AUTH_EMAIL_PROVIDER=memory` for local/e2e verification or `AUTH_EMAIL_PROVIDER=resend` with `AUTH_EMAIL_FROM` and `RESEND_API_KEY` for outbound delivery. The verification handoff completes at `/cs/auth/verify?token=...`.
 
 Focused real-auth verification:
 

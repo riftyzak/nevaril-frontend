@@ -136,10 +136,6 @@ async function resolveMagicLinkRecord(
     )
     .unique()) as unknown as AuthMagicLinkRecord | null
 
-  if (!magicLink || magicLink.consumedAt || isExpired(magicLink.expiresAt)) {
-    return null
-  }
-
   return magicLink
 }
 
@@ -446,7 +442,15 @@ export const completeMagicLink = mutationGeneric({
   handler: async (ctx, args) => {
     const magicLink = await resolveMagicLinkRecord(ctx.db, args.token)
     if (!magicLink) {
-      throw new Error("Magic link is invalid or expired.")
+      throw new Error("Magic link is invalid.")
+    }
+
+    if (magicLink.consumedAt) {
+      throw new Error("Magic link has already been used.")
+    }
+
+    if (isExpired(magicLink.expiresAt)) {
+      throw new Error("Magic link has expired.")
     }
 
     const memberships = await listResolvedMemberships(ctx.db, magicLink.userId)
