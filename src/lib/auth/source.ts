@@ -1,8 +1,14 @@
+import { assertAuthRuntimeConfig, getResolvedAuthSource } from "@/lib/auth/runtime-config"
+
 export type AuthSource = "mock" | "convex"
 
-export const DEFAULT_AUTH_SOURCE: AuthSource = "mock"
+export const DEFAULT_AUTH_SOURCE: AuthSource = "convex"
 
 export function getAuthSource(): AuthSource {
-  const envValue = process.env.NEXT_PUBLIC_AUTH_SOURCE ?? process.env.AUTH_SOURCE
-  return envValue === "convex" ? "convex" : DEFAULT_AUTH_SOURCE
+  const source = getResolvedAuthSource()
+  if (source === "convex") {
+    assertAuthRuntimeConfig()
+  }
+
+  return source
 }

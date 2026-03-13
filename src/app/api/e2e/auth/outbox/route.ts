@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { getLatestMagicLinkEmail } from "@/lib/auth/magic-link-email"
+import { getResolvedAuthEmailProvider } from "@/lib/auth/runtime-config"
 import { isE2EBootstrapEnabled } from "@/lib/dev/e2e-bootstrap"
 
 export async function GET(request: NextRequest) {
-  if (!isE2EBootstrapEnabled() || process.env.AUTH_EMAIL_PROVIDER !== "memory") {
+  if (!isE2EBootstrapEnabled() || getResolvedAuthEmailProvider() !== "memory") {
     return NextResponse.json({ error: "Not found." }, { status: 404 })
   }
 

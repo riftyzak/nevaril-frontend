@@ -1,5 +1,7 @@
 import "server-only"
 
+import { assertAuthRuntimeConfig, getResolvedAuthEmailProvider } from "@/lib/auth/runtime-config"
+
 export type AuthEmailProvider = "resend" | "memory"
 export type MagicLinkEmailDeliveryMode = "email_sent" | "email_captured" | "email_cooldown"
 
@@ -23,37 +25,12 @@ declare global {
   var __nevarilMagicLinkOutbox: MagicLinkEmailRecord[] | undefined
 }
 
-function resolveAuthEmailProvider(): AuthEmailProvider {
-  const configuredProvider = process.env.AUTH_EMAIL_PROVIDER ?? "resend"
-  if (configuredProvider === "resend" || configuredProvider === "memory") {
-    return configuredProvider
-  }
-
-  throw new Error(
-    `Invalid AUTH_EMAIL_PROVIDER=${configuredProvider}. Expected "resend" or "memory".`
-  )
-}
-
 function getAuthEmailFromAddress() {
-  const fromAddress = process.env.AUTH_EMAIL_FROM
-  if (!fromAddress) {
-    throw new Error(
-      "AUTH_EMAIL_FROM is required for Convex magic-link email delivery."
-    )
-  }
-
-  return fromAddress
+  return assertAuthRuntimeConfig().emailFrom ?? ""
 }
 
 function getResendApiKey() {
-  const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) {
-    throw new Error(
-      "RESEND_API_KEY is required when AUTH_EMAIL_PROVIDER=resend."
-    )
-  }
-
-  return apiKey
+  return process.env.RESEND_API_KEY ?? ""
 }
 
 function buildMagicLinkEmailContent(input: SendMagicLinkEmailInput) {
@@ -94,7 +71,8 @@ export function getLatestMagicLinkEmail(email?: string) {
 export async function sendMagicLinkEmail(input: SendMagicLinkEmailInput): Promise<{
   deliveryMode: Exclude<MagicLinkEmailDeliveryMode, "email_cooldown">
 }> {
-  const provider = resolveAuthEmailProvider()
+  assertAuthRuntimeConfig()
+  const provider = getResolvedAuthEmailProvider()
   const { subject, html, text } = buildMagicLinkEmailContent(input)
   const sentAt = new Date().toISOString()
 

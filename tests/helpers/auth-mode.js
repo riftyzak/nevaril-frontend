@@ -21,7 +21,7 @@ function resolveAuthSource() {
     )
   }
 
-  return publicValue ?? serverValue ?? "mock"
+  return publicValue ?? serverValue ?? "convex"
 }
 
 export const authSource = resolveAuthSource()
