@@ -194,7 +194,7 @@ const convexAuthAdapter: AuthAdapter = {
   },
   beginOAuth: async () => {
     throw new Error(
-      `Convex auth flow ${convexContracts.auth.beginGoogleOAuth.name} is not implemented in M28. Use AUTH_SOURCE=mock or the Convex magic-link flow.`
+      `Convex auth flow ${convexContracts.auth.beginGoogleOAuth.name} is not implemented in M30. Use AUTH_SOURCE=mock or the Convex magic-link flow.`
     )
   },
 }

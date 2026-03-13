@@ -26,8 +26,11 @@ APP_DATA_SOURCE=convex
 NEXT_PUBLIC_APP_DATA_SOURCE=convex
 NEXT_PUBLIC_CONVEX_URL=https://<deployment>.convex.cloud
 CONVEX_URL=https://<deployment>.convex.cloud
-AUTH_SOURCE=mock
-NEXT_PUBLIC_AUTH_SOURCE=mock
+AUTH_SOURCE=convex
+NEXT_PUBLIC_AUTH_SOURCE=convex
+AUTH_EMAIL_PROVIDER=resend
+AUTH_EMAIL_FROM=sender@example.com
+RESEND_API_KEY=re_xxx
 ```
 
 If Convex is not configured locally, use explicit fallback/dev mode instead of relying on any automatic downgrade:
@@ -93,9 +96,9 @@ Rules:
 - Convex is the normal product runtime
 - mock is explicit fallback/dev mode only
 - there is no silent fallback-to-mock if Convex URL is missing
-- app auth is staged through M29:
-  - `AUTH_SOURCE=mock` / `NEXT_PUBLIC_AUTH_SOURCE=mock` stay the safe default
-  - `AUTH_SOURCE=convex` / `NEXT_PUBLIC_AUTH_SOURCE=convex` enable the Convex magic-link auth flow
+- auth now defaults to Convex in M30:
+  - `AUTH_SOURCE=convex` / `NEXT_PUBLIC_AUTH_SOURCE=convex` are the normal runtime
+  - `AUTH_SOURCE=mock` / `NEXT_PUBLIC_AUTH_SOURCE=mock` are explicit fallback/dev/e2e mode only
   - there is no silent fallback from real auth to mock auth
 
 Primary Convex workflow:
@@ -146,23 +149,29 @@ Architecture reference:
 - [`docs/architecture/m27-real-auth-foundation.md`](docs/architecture/m27-real-auth-foundation.md)
 - [`docs/architecture/m28-dev-magic-link-auth.md`](docs/architecture/m28-dev-magic-link-auth.md)
 - [`docs/architecture/m29-resend-magic-link-delivery.md`](docs/architecture/m29-resend-magic-link-delivery.md)
+- [`docs/architecture/m30-convex-auth-default-rollout.md`](docs/architecture/m30-convex-auth-default-rollout.md)
 
 ## Auth Modes
 
-M29 keeps the backend-backed auth/session foundation from M27 and replaces the M28 preview-link delivery with real email sending.
+M30 makes the backend-backed Convex magic-link flow the default runtime auth mode.
 
-Safe default:
-
-```bash
-AUTH_SOURCE=mock
-NEXT_PUBLIC_AUTH_SOURCE=mock
-```
-
-Real backend auth mode:
+Default Convex auth mode:
 
 ```bash
 AUTH_SOURCE=convex
 NEXT_PUBLIC_AUTH_SOURCE=convex
+AUTH_EMAIL_PROVIDER=resend
+AUTH_EMAIL_FROM=sender@example.com
+RESEND_API_KEY=re_xxx
+```
+
+Local/e2e Convex auth mode:
+
+```bash
+AUTH_SOURCE=convex
+NEXT_PUBLIC_AUTH_SOURCE=convex
+AUTH_EMAIL_PROVIDER=memory
+AUTH_EMAIL_FROM=test@nevaril.local
 ```
 
 Convex auth workflow:
@@ -183,7 +192,7 @@ Available seeded accounts for the current flow:
 - `martin.novak@barber.test` for owner access
 - `tomas.kral@barber.test` for staff access
 
-M29 sends the sign-in link by email. Use `AUTH_EMAIL_PROVIDER=memory` for local/e2e verification or `AUTH_EMAIL_PROVIDER=resend` with `AUTH_EMAIL_FROM` and `RESEND_API_KEY` for outbound delivery. The verification handoff completes at `/cs/auth/verify?token=...`.
+Convex auth sends the sign-in link by email. Use `AUTH_EMAIL_PROVIDER=resend` with `AUTH_EMAIL_FROM` and `RESEND_API_KEY` for outbound delivery. Use `AUTH_EMAIL_PROVIDER=memory` only for local/e2e verification. The verification handoff completes at `/cs/auth/verify?token=...`.
 
 Focused real-auth verification:
 
@@ -192,6 +201,8 @@ APP_DATA_SOURCE=convex \
 NEXT_PUBLIC_APP_DATA_SOURCE=convex \
 AUTH_SOURCE=convex \
 NEXT_PUBLIC_AUTH_SOURCE=convex \
+AUTH_EMAIL_PROVIDER=memory \
+AUTH_EMAIL_FROM=test@nevaril.local \
 NEXT_PUBLIC_CONVEX_URL=https://<deployment>.convex.cloud \
 CONVEX_URL=https://<deployment>.convex.cloud \
 npx playwright test tests/auth-convex.spec.js
