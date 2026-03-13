@@ -20,7 +20,6 @@ export interface MagicLinkEmailRecord {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var __nevarilMagicLinkOutbox: MagicLinkEmailRecord[] | undefined
 }
 
